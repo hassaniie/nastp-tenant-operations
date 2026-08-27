@@ -16,8 +16,8 @@ import { Textarea } from '../components/ui/form';
 import { Timeline, RatingStars, type TimelineItem } from '../components/common';
 import { PriorityBadge, ServiceStatusBadge, CATEGORY_ICON } from '../components/status';
 import { SERVICE_STATUS } from '../lib/meta';
-import { SERVICE_CATEGORY_LABEL } from '../data/catalog';
-import { simulation } from '../data/live';
+import { SERVICE_CATEGORY_LABEL, departmentById } from '../data/catalog';
+import { simulation, useLive } from '../data/live';
 import { useSession } from '../store/session';
 import { ago, fmtDateTime } from '../lib/utils';
 import type { ServiceRequest, ServiceStatus } from '../data/types';
@@ -52,6 +52,10 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
     meta: ago(e.ts),
   }));
 
+  // The assignee is a reference now, so the name is resolved from the roster
+  // rather than carried on the request as a frozen string.
+  const assigneeName = useLive((w) => w.technicians.find((t) => t.id === r.technicianId)?.name);
+
   const postComment = () => {
     if (!comment.trim()) return;
     simulation.addRequestComment(r.id, { author: actor, authorRole: mode, body: comment.trim() });
@@ -85,8 +89,8 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
             { label: 'Location', value: r.location ?? '—' },
             { label: 'Created', value: fmtDateTime(r.createdAt) },
             { label: 'Due', value: r.dueAt ? fmtDateTime(r.dueAt) : '—' },
-            { label: 'Assigned team', value: r.assignedTeam ?? 'Unassigned' },
-            { label: 'Assignee', value: r.assignedTo ?? '—' },
+            { label: 'Department', value: departmentById(r.departmentId)?.name ?? 'Unrouted' },
+            { label: 'Assignee', value: assigneeName ?? 'Unassigned' },
           ]} />
 
           {r.attachments.length > 0 && (

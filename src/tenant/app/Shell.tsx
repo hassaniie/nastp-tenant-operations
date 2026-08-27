@@ -20,6 +20,7 @@ import { Tooltip, TooltipProvider } from '../components/ui/overlay';
 import { Toaster } from '../components/ui/toast';
 import { NotificationBell } from './NotificationBell';
 import { ExperienceSwitcher } from './ExperienceSwitcher';
+import { UserMenu } from './UserMenu';
 import { CommandPalette } from './CommandPalette';
 
 type Badges = { alerts: number; overstaying: number; openRequests: number; notifications: number };
@@ -139,7 +140,7 @@ function Rail({ groups, badges, activeId, collapsed, onToggle, onNavigate, mobil
 }
 
 function TopBar({ onOpenMobileNav }: { onOpenMobileNav: () => void }) {
-  const { experience, tenantId, prefs, setPrefs, setPaletteOpen, admin } = useSession();
+  const { experience, tenantId, prefs, setPrefs, setPaletteOpen } = useSession();
   const location = useLocation();
   const groups = experience === 'admin' ? ADMIN_NAV : PORTAL_NAV;
   const match = matchNav(groups, location.pathname);
@@ -178,15 +179,9 @@ function TopBar({ onOpenMobileNav }: { onOpenMobileNav: () => void }) {
         <div className="mx-1 hidden h-6 w-px bg-border sm:block" />
         <ExperienceSwitcher />
 
-        {experience === 'admin' && (
-          <div className="ml-1 hidden items-center gap-2 border-l border-border pl-3 lg:flex">
-            <div className="text-right">
-              <p className="text-[12px] font-medium leading-tight text-foreground">{admin.name}</p>
-              <p className="text-[11px] leading-tight text-subtle">{admin.role}</p>
-            </div>
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#6366f1] to-[#312e81] text-[11px] font-semibold text-white">AR</span>
-          </div>
-        )}
+        <div className="ml-1 hidden border-l border-border pl-2 lg:block">
+          <UserMenu />
+        </div>
       </div>
     </header>
   );

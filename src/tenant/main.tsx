@@ -2,7 +2,12 @@ import { StrictMode, Suspense, lazy, useEffect, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AdminShell, PortalShell } from './app/Shell';
+import { TechShell } from './app/TechShell';
+import { RequireExperience, RedirectIfSignedIn } from './app/Guard';
 import { SessionProvider, useSession } from './store/session';
+import { AuthProvider, useAuth } from './store/auth';
+import { homeFor } from './data/auth';
+import { AdminLogin, PortalLogin, TechLogin } from './routes/auth/Login';
 import { LoadingState } from './components/ui/data';
 import { AdminVisitorList } from './routes/admin/visitors/List';
 import { PortalVisitorList } from './routes/portal/visitors/List';
@@ -55,6 +60,8 @@ const AdminSettings = lazy(() => import('./routes/admin/Settings'));
 const Buildings = lazy(() => import('./routes/admin/Buildings'));
 const AdminUsers = lazy(() => import('./routes/admin/Users'));
 const Organization = lazy(() => import('./routes/portal/Organization'));
+const TechJobs = lazy(() => import('./routes/tech/Jobs'));
+const NotFound = lazy(() => import('./routes/NotFound'));
 
 const L = ({ children }: { children: ReactNode }) => <Suspense fallback={<LoadingState label="Loading…" />}>{children}</Suspense>;
 
@@ -63,20 +70,43 @@ const L = ({ children }: { children: ReactNode }) => <Suspense fallback={<Loadin
 function AdminLayout() {
   const { enterAdmin } = useSession();
   useEffect(() => { enterAdmin(); }, [enterAdmin]);
-  return <AdminShell />;
+  return <RequireExperience experience="admin"><AdminShell /></RequireExperience>;
 }
+
+/** The portal's tenant comes from the session, never from the URL — that is
+ *  what keeps one tenant out of another's data. */
 function PortalLayout() {
   const { experience, enterPortal, tenantId } = useSession();
-  useEffect(() => { if (experience !== 'portal') enterPortal(tenantId); }, [experience, enterPortal, tenantId]);
-  return <PortalShell />;
+  const { session } = useAuth();
+  const scoped = session?.tenantId ?? tenantId;
+  useEffect(() => {
+    if (experience !== 'portal' || tenantId !== scoped) enterPortal(scoped);
+  }, [experience, enterPortal, tenantId, scoped]);
+  return <RequireExperience experience="portal"><PortalShell /></RequireExperience>;
+}
+
+function TechLayout() {
+  return <RequireExperience experience="tech"><TechShell /></RequireExperience>;
+}
+
+/** The root sends a signed-in person home and everyone else to a door. */
+function RootRedirect() {
+  const { session } = useAuth();
+  return <Navigate to={session ? homeFor(session.experience) : '/admin/login'} replace />;
 }
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <SessionProvider>
+      <AuthProvider>
       <HashRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/admin" replace />} />
+          <Route path="/" element={<RootRedirect />} />
+
+          {/* ------------------------------------------------ the doors */}
+          <Route path="/admin/login" element={<RedirectIfSignedIn><AdminLogin /></RedirectIfSignedIn>} />
+          <Route path="/portal/login" element={<RedirectIfSignedIn><PortalLogin /></RedirectIfSignedIn>} />
+          <Route path="/tech/login" element={<RedirectIfSignedIn><TechLogin /></RedirectIfSignedIn>} />
 
           {/* -------------------------------------------------- Admin */}
           <Route element={<AdminLayout />}>
@@ -141,9 +171,15 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/portal/organization" element={<L><Organization /></L>} />
           </Route>
 
-          <Route path="*" element={<Navigate to="/admin" replace />} />
+          {/* ------------------------------------------- Technician */}
+          <Route element={<TechLayout />}>
+            <Route path="/tech" element={<L><TechJobs /></L>} />
+          </Route>
+
+          <Route path="*" element={<L><NotFound /></L>} />
         </Routes>
       </HashRouter>
+      </AuthProvider>
     </SessionProvider>
   </StrictMode>,
 );

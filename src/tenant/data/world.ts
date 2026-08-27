@@ -14,10 +14,14 @@
 
 import { chance, float, int, mulberry32, pick, shuffle, type Rng } from '../lib/rng';
 import {
-  BUILDING_SEEDS, DESIGNATIONS, FIRST_NAMES, LAST_NAMES, METER_MODELS, ORG_SEEDS,
+  BUILDING_SEEDS, DEPARTMENTS, departmentForCategory, DESIGNATIONS, FIRST_NAMES, LAST_NAMES, METER_MODELS, ORG_SEEDS,
   SERVICE_TITLES, VISITOR_COMPANIES, VISITOR_PURPOSES,
 } from './catalog';
 import type {
+  TechnicianAvailability,
+  Technician,
+  Department,
+  AdminUser,
   ActivityEvent, ActivityKind, AlertKind, AlertRule, AppNotification, Building, EnergyAlert,
   Floor, Invoice, Meter, MeterReading, OfficeSpace, PeakWindow, ServiceCategory, ServiceRequest,
   ServiceStatus, Tariff, Tenant, TenantStatus, TenantUser, Visitor, VisitorSchedule, VisitorStatus,
@@ -43,6 +47,10 @@ export interface World {
   tenants: Tenant[];
   tenantById: Record<string, Tenant>;
   users: TenantUser[];
+  /** The people who operate the park, as opposed to the people who rent it. */
+  admins: AdminUser[];
+  departments: Department[];
+  technicians: Technician[];
   meters: Meter[];
   meterById: Record<string, Meter>;
   tariffs: Tariff[];
@@ -638,33 +646,62 @@ const STATUS_FLOW: ServiceStatus[] = [
   'submitted', 'acknowledged', 'assigned', 'in_progress', 'waiting_tenant', 'resolved', 'confirmed', 'closed',
 ];
 
-function buildRequests(rng: Rng, tenants: Tenant[]): ServiceRequest[] {
+
+/** Departments load their first hands hardest — a flat spread left every
+ *  technician with about one job and nothing for workload to mean. */
+function weightedTech(rng: Rng, roster: Technician[]): Technician {
+  const r = rng();
+  if (roster.length === 1 || r < 0.45) return roster[0];
+  if (roster.length === 2 || r < 0.78) return roster[1];
+  return roster[int(rng, 2, roster.length - 1)];
+}
+
+function buildRequests(rng: Rng, tenants: Tenant[], technicians: Technician[]): ServiceRequest[] {
   const requests: ServiceRequest[] = [];
   const active = tenants.filter((t) => t.status === 'active' || t.status === 'suspended');
   let ref = 4800;
-  const teams: Record<string, string> = {
-    hvac: 'Mechanical Team', electrical: 'Electrical Team', lighting: 'Electrical Team',
-    plumbing: 'Plumbing Team', internet: 'IT & Networks', cleaning: 'Housekeeping',
-    security: 'Security Ops', access_control: 'Security Ops', elevator: 'Vertical Transport',
-    fire_safety: 'Safety Team', parking: 'Facilities', building_maintenance: 'Facilities', other: 'Facilities',
-  };
+  // Assignees are drawn from the department that owns the category, so a
+  // technician's queue is real and their workload adds up. Previously each
+  // request invented a name, which meant nobody ever appeared twice.
+  const byDepartment = new Map<string, Technician[]>();
+  for (const t of technicians) {
+    const list = byDepartment.get(t.departmentId) ?? [];
+    list.push(t);
+    byDepartment.set(t.departmentId, list);
+  }
 
   for (const tenant of active) {
-    const count = int(rng, 2, 7);
+    const count = int(rng, 4, 11);
     for (let i = 0; i < count; i++) {
       const seed = pick(rng, SERVICE_TITLES);
       const category = seed.category as ServiceCategory;
+      // Routing is a lookup: the category owns the department, always.
+      const department = departmentForCategory(category);
+      const roster = byDepartment.get(department.id) ?? [];
       const priority = pick(rng, ['low', 'medium', 'medium', 'high', 'high', 'critical'] as const);
-      const createdAt = NOW - int(rng, 1, 30) * DAY - int(rng, 0, 20) * HOUR;
 
       // Where in the flow this ticket sits.
       const stage = int(rng, 0, STATUS_FLOW.length - 1);
       let status = STATUS_FLOW[stage];
+
+      // Age follows status, not the other way round. Dating every request 1–30
+      // days back put all of them past an SLA measured in hours, so every open
+      // job rendered overdue and the flag meant nothing. Work still in flight
+      // is recent; only a minority has been left to run over.
+      const settled = stage >= STATUS_FLOW.indexOf('resolved');
+      const overrunning = !settled && chance(rng, 0.3);
+      const createdAt = settled
+        ? NOW - int(rng, 4, 30) * DAY - int(rng, 0, 20) * HOUR
+        : overrunning
+          ? NOW - int(rng, 3, 9) * DAY - int(rng, 0, 20) * HOUR
+          : NOW - int(rng, 0, 30) * HOUR;
       if (chance(rng, 0.07)) status = 'reopened';
       if (chance(rng, 0.05)) status = 'cancelled';
 
       const office = tenant.officeIds[0];
-      const assigned = stage >= 2 && status !== 'cancelled';
+      // A triage-only department is deliberately unstaffed, so nothing there
+      // can be assigned — the request must be re-categorised first.
+      const assigned = stage >= 2 && status !== 'cancelled' && roster.length > 0;
       const timeline = STATUS_FLOW.slice(0, Math.max(1, stage + 1)).map((s, si) => ({
         ts: createdAt + si * int(rng, 2, 20) * HOUR,
         status: s,
@@ -683,7 +720,7 @@ function buildRequests(rng: Rng, tenants: Tenant[]): ServiceRequest[] {
       if (assigned) {
         comments.push({
           id: `c-${ref}-1`, author: 'NASTP Operations', authorRole: 'admin' as const,
-          body: `Acknowledged and assigned to ${teams[category]}. A technician will attend shortly.`,
+          body: `Acknowledged and assigned to ${department.name}. A technician will attend shortly.`,
           ts: createdAt + int(rng, 1, 8) * HOUR,
         });
       }
@@ -708,8 +745,8 @@ function buildRequests(rng: Rng, tenants: Tenant[]): ServiceRequest[] {
         officeId: office,
         location: `${office}`,
         createdBy: tenant.primaryContact.name,
-        assignedTo: assigned ? fullName(rng) : undefined,
-        assignedTeam: assigned ? teams[category] : undefined,
+        departmentId: department.id,
+        technicianId: assigned ? weightedTech(rng, roster).id : undefined,
         createdAt,
         updatedAt,
         resolvedAt,
@@ -813,6 +850,65 @@ function buildNotifications(rng: Rng, alerts: EnergyAlert[], requests: ServiceRe
 
 /* ============================================================ assembly */
 
+
+/* ---------------------------------------------------------- the workforce */
+
+/**
+ * NASTP's own staff: the administrators who run the control plane, and the
+ * technicians who actually fix things, two to four per department.
+ *
+ * Seeded rather than generated per request. Before this existed, every service
+ * request invented an assignee name out of thin air, so the same technician
+ * never appeared twice and nobody had a workload.
+ */
+function buildWorkforce(rng: Rng): { admins: AdminUser[]; technicians: Technician[] } {
+  const admins: AdminUser[] = [
+    { id: 'adm-raza', name: 'A. Raza', email: 'a.raza@nastp.pk', role: 'super_admin', title: 'NASTP Administrator', org: 'NASTP Operations', status: 'active', avatarSeed: 11 },
+    { id: 'adm-shah', name: 'Sana Shah', email: 's.shah@nastp.pk', role: 'operations', title: 'Operations Manager', org: 'NASTP Operations', status: 'active', avatarSeed: 27 },
+    { id: 'adm-iqbal', name: 'Danish Iqbal', email: 'd.iqbal@nastp.pk', role: 'read_only', title: 'Facilities Analyst', org: 'NASTP Operations', status: 'active', avatarSeed: 43 },
+  ];
+
+  // Shifts are real times so availability reads as a rota, not a flag.
+  const shifts = [
+    { start: '08:00', end: '16:00' },
+    { start: '14:00', end: '22:00' },
+    { start: '22:00', end: '06:00' },
+  ];
+
+  const technicians: Technician[] = [];
+  const used = new Set<string>();
+  for (const dept of DEPARTMENTS) {
+    // General Services is triage-only, so it is deliberately unstaffed: a
+    // request sitting there needs re-categorising, not a technician.
+    if (dept.triageOnly) continue;
+
+    const headcount = int(rng, 2, 4);
+    for (let i = 0; i < headcount; i++) {
+      let name = fullName(rng);
+      let guard = 0;
+      while (used.has(name) && guard++ < 40) name = fullName(rng);
+      used.add(name);
+
+      const slug = name.toLowerCase().replace(/[^a-z]+/g, '.');
+      const availability: TechnicianAvailability =
+        chance(rng, 0.08) ? 'on_leave' : chance(rng, 0.25) ? 'off_shift' : 'on_shift';
+
+      technicians.push({
+        id: `tec-${dept.id.replace('dept-', '')}-${i + 1}`,
+        name,
+        email: `${slug}@nastp.pk`,
+        phone: `+92 3${int(rng, 10, 49)} ${int(rng, 1000000, 9999999)}`,
+        departmentId: dept.id,
+        availability,
+        shift: pick(rng, shifts),
+        status: 'active',
+        avatarSeed: int(rng, 1, 999),
+      });
+    }
+  }
+  return { admins, technicians };
+}
+
 export function createWorld(seed = 20260821): World {
   const rng = mulberry32(seed);
   const { buildings, floors, meters: mainMeters } = buildPhysical(rng);
@@ -832,7 +928,8 @@ export function createWorld(seed = 20260821): World {
   }
 
   const { visitors, schedules } = buildVisitors(rng, tenants);
-  const requests = buildRequests(rng, tenants);
+  const { admins, technicians } = buildWorkforce(rng);
+  const requests = buildRequests(rng, tenants, technicians);
   const alerts = buildAlerts(rng, tenants, meters);
   const activity = buildActivity(rng, tenants, requests, visitors);
   const notifications = buildNotifications(rng, alerts, requests, visitors);
@@ -850,6 +947,9 @@ export function createWorld(seed = 20260821): World {
     tenants,
     tenantById: index(tenants),
     users,
+    admins,
+    departments: DEPARTMENTS,
+    technicians,
     meters,
     meterById: index(meters),
     tariffs,

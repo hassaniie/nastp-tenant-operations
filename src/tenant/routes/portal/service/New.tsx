@@ -13,6 +13,7 @@ import { Field, Input, Textarea, SimpleSelect } from '../../../components/ui/for
 import { CATEGORY_ICON } from '../../../components/status';
 import { SERVICE_CATEGORY_LABEL } from '../../../data/catalog';
 import { useSession } from '../../../store/session';
+import { departmentForCategory } from '../../../data/catalog';
 import { simulation, useLive } from '../../../data/live';
 import type { ServiceAttachment, ServiceCategory, ServicePriority } from '../../../data/types';
 
@@ -48,6 +49,8 @@ export default function NewRequest() {
     const req = simulation.submitRequest({
       tenantId, title: f.title.trim(), description: f.description.trim(), category: f.category, priority: f.priority,
       officeId: f.officeId || undefined, location: office?.code, createdBy: tenant.primaryContact.name, attachments,
+      // The category owns the department — the tenant never chooses one.
+      departmentId: departmentForCategory(f.category).id,
     });
     toast({ title: 'Request submitted', description: `${req.reference} has been sent to the NASTP service team.`, variant: 'success', action: { label: 'View', onClick: () => navigate(`/portal/service?open=${req.id}`) } });
     navigate('/portal/service');

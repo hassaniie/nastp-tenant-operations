@@ -418,8 +418,11 @@ export interface ServiceRequest {
   officeId?: string;
   location?: string;
   createdBy: string;
-  assignedTo?: string;
-  assignedTeam?: string;
+  /** Derived from `category` at creation and always present — routing is a
+   *  lookup, so a request is never department-less. */
+  departmentId: string;
+  /** Set once an admin dispatches it to a named person. */
+  technicianId?: string;
   createdAt: number;
   updatedAt: number;
   resolvedAt?: number;
@@ -544,4 +547,108 @@ export interface TenantPortalSnapshot {
   openRequests: number;
   inProgressRequests: number;
   waitingRequests: number;
+}
+
+/* ======================================================= identity & access */
+
+/**
+ * The three experiences a person can hold a session for. A session grants one
+ * of these and only one — the guard checks the experience, not merely that a
+ * session exists, so an admin credential cannot walk into the portal shell.
+ */
+export type Experience = 'admin' | 'portal' | 'tech';
+
+export type AdminRole = 'super_admin' | 'operations' | 'read_only';
+
+export interface AdminUser {
+  id: string;
+  name: string;
+  email: string;
+  role: AdminRole;
+  title: string;
+  org: string;
+  status: 'active' | 'disabled';
+  avatarSeed: number;
+}
+
+/** One per ServiceCategory. Routing is a lookup, never a rules engine. */
+export interface Department {
+  id: string;
+  name: string;
+  category: ServiceCategory;
+  /** General Services exists to catch `other`; it must be re-categorised
+   *  before anyone can be assigned, so it is never a dispatch target. */
+  triageOnly?: boolean;
+}
+
+export type TechnicianAvailability = 'on_shift' | 'off_shift' | 'on_leave';
+
+export interface Technician {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  departmentId: string;
+  availability: TechnicianAvailability;
+  /** Local times, "08:00" — what makes availability legible rather than a flag. */
+  shift: { start: string; end: string };
+  status: 'active' | 'disabled';
+  avatarSeed: number;
+}
+
+/**
+ * A sign-in credential.
+ *
+ * `digest` is a non-cryptographic stand-in so the *shape* of the system is
+ * honest — nothing anywhere compares a plaintext password. It is emphatically
+ * not security: a real deployment hashes server-side with argon2 or bcrypt and
+ * never ships a credential table to the browser at all.
+ */
+export interface Credential {
+  email: string;
+  digest: string;
+  experience: Experience;
+  /** AdminUser.id | TenantUser.id | Technician.id */
+  subjectId: string;
+}
+
+export interface AuthSession {
+  experience: Experience;
+  subjectId: string;
+  /** Present for portal sessions, and for an admin while impersonating. */
+  tenantId?: string;
+  issuedAt: number;
+  lastSeenAt: number;
+  impersonating?: { tenantId: string; byAdminId: string; startedAt: number };
+}
+
+export type SignInFailure =
+  | 'bad_credentials'
+  | 'wrong_door'
+  | 'user_disabled'
+  | 'tenant_suspended'
+  | 'tenant_expired'
+  | 'tenant_archived'
+  | 'locked_out';
+
+export type AuthEventKind =
+  | 'signin'
+  | 'signout'
+  | 'signin_failed'
+  | 'lockout'
+  | 'reset_requested'
+  | 'reset_completed'
+  | 'invite_accepted'
+  | 'impersonation_start'
+  | 'impersonation_end';
+
+export interface AuthEvent {
+  id: string;
+  ts: number;
+  kind: AuthEventKind;
+  email: string;
+  experience: Experience;
+  subjectId?: string;
+  /** Why a sign-in was refused, or which tenant was impersonated. */
+  detail?: string;
 }

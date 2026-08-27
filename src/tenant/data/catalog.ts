@@ -7,7 +7,7 @@
  * never "Company XYZ".
  */
 
-import type { OrganizationType } from './types';
+import type { Department, OrganizationType, ServiceCategory } from './types';
 
 /* ------------------------------------------------------------ organisations */
 
@@ -180,6 +180,38 @@ export const SERVICE_TITLES: Array<{ category: string; title: string }> = [
   { category: 'parking', title: 'Reserved parking bay occupied by another vehicle' },
   { category: 'building_maintenance', title: 'Ceiling tile damaged by water seepage' },
   { category: 'security', title: 'Request CCTV footage for incident review' },
+  { category: 'hvac', title: 'Air handling unit running loud overnight' },
+  { category: 'hvac', title: 'Server room running warm after hours' },
+  { category: 'hvac', title: 'Thermostat unresponsive in the meeting suite' },
+  { category: 'electrical', title: 'Breaker tripping on the lab bench circuit' },
+  { category: 'electrical', title: 'UPS alarm sounding in the comms room' },
+  { category: 'electrical', title: 'Socket loose at the workstation cluster' },
+  { category: 'lighting', title: 'Corridor sensor leaving the hallway dark' },
+  { category: 'lighting', title: 'Task lighting failed over the drawing tables' },
+  { category: 'lighting', title: 'Car park floodlight out on the east approach' },
+  { category: 'plumbing', title: 'Slow drain in the second floor washroom' },
+  { category: 'plumbing', title: 'Water cooler leaking near the pantry' },
+  { category: 'plumbing', title: 'No hot water in the changing rooms' },
+  { category: 'internet', title: 'Wi-Fi dropping in the north meeting rooms' },
+  { category: 'internet', title: 'Patch port dead at desk row four' },
+  { category: 'internet', title: 'Video calls stuttering from the annexe' },
+  { category: 'cleaning', title: 'Spillage in the ground floor lobby' },
+  { category: 'cleaning', title: 'Waste not collected from the loading bay' },
+  { category: 'security', title: 'CCTV camera offline at the rear entrance' },
+  { category: 'security', title: 'Perimeter gate left unsecured overnight' },
+  { category: 'access_control', title: 'Access card not opening the lab door' },
+  { category: 'access_control', title: 'Reader beeping but not releasing the turnstile' },
+  { category: 'elevator', title: 'Lift doors closing too quickly' },
+  { category: 'elevator', title: 'Lift stopping short of the third floor' },
+  { category: 'fire_safety', title: 'Extinguisher past its inspection date' },
+  { category: 'fire_safety', title: 'Emergency exit sign not illuminated' },
+  { category: 'parking', title: 'Barrier arm not lifting for registered vehicles' },
+  { category: 'parking', title: 'Bay markings worn away in the visitor area' },
+  { category: 'building_maintenance', title: 'Ceiling tile stained after the weekend rain' },
+  { category: 'building_maintenance', title: 'Door closer failing on the stairwell' },
+  { category: 'building_maintenance', title: 'Window blind mechanism jammed' },
+  { category: 'other', title: 'Signage still showing the previous occupant' },
+  { category: 'other', title: 'Request to relocate desks before the audit' },
 ];
 
 /* --------------------------------------------------------- meter models */
@@ -188,3 +220,38 @@ export const METER_MODELS = [
   'Schneider PM5560', 'Siemens PAC4200', 'ABB M4M', 'Socomec Diris A40',
   'Schneider PM2230', 'Lovato DMG900',
 ];
+
+/* ------------------------------------------------------------ departments */
+
+/**
+ * One department per service category — a strict 1:1, so routing a request is
+ * a lookup rather than a rules engine. Two entries carry meaning beyond the
+ * name: General Services is triage-only, and Parking Operations may one day
+ * belong to the parking product rather than this one.
+ */
+export const DEPARTMENTS: Department[] = [
+  { id: 'dept-hvac', name: 'HVAC', category: 'hvac' },
+  { id: 'dept-electrical', name: 'Electrical', category: 'electrical' },
+  { id: 'dept-lighting', name: 'Lighting', category: 'lighting' },
+  { id: 'dept-plumbing', name: 'Plumbing', category: 'plumbing' },
+  { id: 'dept-networking', name: 'Networking', category: 'internet' },
+  { id: 'dept-housekeeping', name: 'Housekeeping', category: 'cleaning' },
+  { id: 'dept-security', name: 'Security', category: 'security' },
+  { id: 'dept-access', name: 'Access Control', category: 'access_control' },
+  { id: 'dept-vertical', name: 'Vertical Transport', category: 'elevator' },
+  { id: 'dept-fire', name: 'Fire Safety', category: 'fire_safety' },
+  { id: 'dept-parking', name: 'Parking Operations', category: 'parking' },
+  { id: 'dept-maintenance', name: 'Building Maintenance', category: 'building_maintenance' },
+  { id: 'dept-general', name: 'General Services', category: 'other', triageOnly: true },
+];
+
+const DEPT_BY_CATEGORY: Record<string, Department> = Object.fromEntries(
+  DEPARTMENTS.map((d) => [d.category, d]),
+);
+
+/** The single source of truth for "which department owns this?". */
+export const departmentForCategory = (category: ServiceCategory): Department =>
+  DEPT_BY_CATEGORY[category] ?? DEPT_BY_CATEGORY.other;
+
+export const departmentById = (id: string): Department | undefined =>
+  DEPARTMENTS.find((d) => d.id === id);
