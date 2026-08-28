@@ -8,7 +8,7 @@
  */
 
 import {
-  Activity as ActivityIcon, ArrowLeft, Building2, Gauge, Mail, Phone, Store, UserRound, Wrench, Zap,
+  Activity as ActivityIcon, ArrowLeft, Building2, ChevronDown, Gauge, Link as LinkIcon, Mail, Phone, Store, UserRound, Wrench, Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -18,12 +18,13 @@ import { Breadcrumb, KeyValue, MetricValue, Timeline } from '../../components/co
 import { Button, IconBox, ProgressBar, Separator, StatusBadge, TenantMark } from '../../components/ui/primitives';
 import { TabBar } from '../../components/ui/tabs';
 import { DataTable, DefList, LoadingState, ErrorState, type Column } from '../../components/ui/data';
-import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from '../../components/ui/overlay';
+import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger, Dialog, DialogContent, DialogHeader, DialogBody } from '../../components/ui/overlay';
 import { TrendChart } from '../../components/charts';
 import {
   TenantStatusBadge, MeterStatusBadge, PriorityBadge, ServiceStatusBadge, VisitorStatusBadge, AlertLevelBadge,
 } from '../../components/status';
 import { adminApi } from '../../data/api';
+import { createInvite } from '../../data/auth';
 import { simulation, useLive } from '../../data/live';
 import { alertLevelForTenant } from '../../data/selectors';
 import { useAsync } from '../../hooks/useAsync';
@@ -35,7 +36,6 @@ import { ago, area, currency, energy, fmtDate, fmtDateFull, fmtTime, num } from 
 import type {
   Meter, OfficeSpace, ServiceRequest, TenantStatus, TenantUser, Visitor,
 } from '../../data/types';
-import { ChevronDown } from 'lucide-react';
 
 type Tab = 'overview' | 'spaces' | 'energy' | 'visitors' | 'service' | 'users' | 'configuration' | 'activity';
 
@@ -335,16 +335,67 @@ function ServiceTab({ requests, loading }: { requests: ServiceRequest[]; loading
 /* ---------------------------------------------------------------- Users */
 
 function Users({ users, loading }: { users: TenantUser[]; loading: boolean }) {
+  const { toast } = useSession();
+  const [linkFor, setLinkFor] = useState<{ user: TenantUser; url: string } | null>(null);
+
+  // A fresh token every click, so a resend cannot be satisfied by a link
+  // already handed out once — the same reasoning as any real invite system.
+  const invite = (u: TenantUser) => {
+    const t = createInvite(u.id, u.email);
+    const url = `${location.origin}${location.pathname}#/invite/${t.token}`;
+    setLinkFor({ user: u, url });
+  };
+
+  const copy = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      toast({ title: 'Link copied', variant: 'success' });
+    } catch {
+      toast({ title: 'Could not copy — select and copy the link manually', variant: 'warning' });
+    }
+  };
+
   const columns: Column<TenantUser>[] = [
     { key: 'name', header: 'User', cell: (u) => <div><p className="font-medium text-foreground">{u.name}</p><p className="text-[11px] text-subtle">{u.email}</p></div>, sortValue: (u) => u.name },
     { key: 'role', header: 'Role', cell: (u) => <StatusBadge tone={u.role === 'primary' ? 'primary' : 'neutral'} size="sm" dot={false}>{USER_ROLE[u.role]}</StatusBadge>, sortValue: (u) => u.role },
     { key: 'status', header: 'Status', cell: (u) => <StatusBadge tone={u.status === 'active' ? 'success' : u.status === 'invited' ? 'info' : 'neutral'} size="sm">{u.status}</StatusBadge> },
     { key: 'last', header: 'Last active', cell: (u) => <span className="text-subtle">{u.lastActiveAt ? ago(u.lastActiveAt) : '—'}</span>, hideBelow: 'md' },
+    {
+      key: 'invite',
+      header: '',
+      cell: (u) =>
+        u.status === 'invited' ? (
+          <Button variant="ghost" size="xs" onClick={() => invite(u)}>
+            <LinkIcon className="h-3.5 w-3.5" />
+            Invite link
+          </Button>
+        ) : null,
+    },
   ];
   return (
     <Card>
       <CardHeader title="Portal Users" subtitle={`${users.length} users`} icon={<IconBox icon={UserRound} tone="primary" size="sm" />} />
       <DataTable rows={users} columns={columns} rowKey={(u) => u.id} loading={loading} emptyTitle="No portal users" emptyDescription="Configure a primary user to enable portal access." />
+
+      <Dialog open={Boolean(linkFor)} onOpenChange={(open) => !open && setLinkFor(null)}>
+        <DialogContent className="max-w-[480px]">
+          <DialogHeader
+            title="Invitation link"
+            description={linkFor ? `For ${linkFor.user.name} · valid 7 days` : undefined}
+            icon={<IconBox icon={LinkIcon} tone="primary" size="sm" />}
+          />
+          <DialogBody className="flex flex-col gap-3">
+            <p className="text-[12px] text-muted">
+              There is no mail server in this build, so the link is generated here instead of sent.
+              Share it with the tenant to let them set a password and activate the account.
+            </p>
+            <div className="flex items-center gap-2 rounded-lg border border-border bg-surface-inset px-3 py-2">
+              <code className="flex-1 truncate text-[11.5px] text-muted">{linkFor?.url}</code>
+              <Button variant="secondary" size="xs" onClick={() => linkFor && copy(linkFor.url)}>Copy</Button>
+            </div>
+          </DialogBody>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

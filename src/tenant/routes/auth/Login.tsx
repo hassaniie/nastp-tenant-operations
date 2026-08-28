@@ -10,7 +10,7 @@
  * unopenable. It states plainly that these are seeded accounts.
  */
 
-import { useMemo, useState, type FormEvent, type ReactNode } from 'react';
+import { useState, type FormEvent, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Building2, ShieldCheck, Wrench, type LucideIcon } from 'lucide-react';
 import { Button, IconBox } from '../../components/ui/primitives';
@@ -71,7 +71,8 @@ const DOOR_LABEL: Record<Experience, string> = {
 
 function LoginScreen({ door }: { door: Experience }) {
   const config = DOORS[door];
-  const { signIn } = useAuth();
+  const { signIn, takeIdleSignOut } = useAuth();
+  const [idleSignOut] = useState(takeIdleSignOut);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -104,7 +105,10 @@ function LoginScreen({ door }: { door: Experience }) {
       .map((u) => ({ email: u.email, label: w.tenantById[u.tenantId]?.name ?? 'Tenant' }));
   });
 
-  const lockedMs = useMemo(() => (email ? lockoutRemainingMs(email) : 0), [email]);
+  // Recomputed on every submit, not just when the email changes — a failed
+  // attempt can cross the lockout threshold without the email field moving,
+  // and the lock message has to reflect that on the very submit that caused it.
+  const [lockedMs, setLockedMs] = useState(0);
 
   function submit(e: FormEvent) {
     e.preventDefault();
@@ -113,6 +117,7 @@ function LoginScreen({ door }: { door: Experience }) {
 
     const result = signIn(email, password, door);
     setBusy(false);
+    setLockedMs(lockoutRemainingMs(email));
 
     // No navigation here on purpose — `RedirectIfSignedIn` sends the person on
     // once the session has committed, which is what keeps a deep link intact.
@@ -146,6 +151,12 @@ function LoginScreen({ door }: { door: Experience }) {
           </div>
         </div>
 
+        {idleSignOut && (
+          <p className="rounded-[10px] border border-info/25 bg-info-dim px-3 py-2 text-center text-[12px] text-info">
+            You were signed out after a period of inactivity. Sign in again to continue.
+          </p>
+        )}
+
         <Card className="p-5">
           <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
             <Field label="Email">
@@ -155,12 +166,21 @@ function LoginScreen({ door }: { door: Experience }) {
                 autoFocus
                 value={email}
                 invalid={Boolean(error)}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => { setEmail(e.target.value); setLockedMs(lockoutRemainingMs(e.target.value)); }}
                 placeholder="you@example.com"
               />
             </Field>
 
-            <Field label="Password">
+            <Field
+              label={
+                <span className="flex items-center justify-between gap-2">
+                  Password
+                  <Link to={`/reset?door=${door}`} className="text-[12px] font-normal text-primary underline underline-offset-2">
+                    Forgot password?
+                  </Link>
+                </span>
+              }
+            >
               <Input
                 type="password"
                 autoComplete="current-password"
@@ -177,7 +197,7 @@ function LoginScreen({ door }: { door: Experience }) {
               </p>
             )}
 
-            {lockedMs > 0 && !error && (
+            {lockedMs > 0 && (
               <p className="text-[12px] text-warning">
                 Locked for another {Math.ceil(lockedMs / 60000)} minute{Math.ceil(lockedMs / 60000) === 1 ? '' : 's'}.
               </p>

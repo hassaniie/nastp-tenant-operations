@@ -9,7 +9,7 @@
  */
 
 import type {
-  AlertLevel, AlertSeverity, PaymentStatus, ServicePriority, ServiceStatus, TenantStatus,
+  AdminRole, AlertLevel, AlertSeverity, PaymentStatus, ServicePriority, ServiceStatus, TenantStatus,
   TenantUserRole, VisitorStatus,
 } from '../data/types';
 
@@ -106,6 +106,12 @@ export const USER_ROLE: Record<TenantUserRole, string> = {
   finance_user: 'Finance User',
   receptionist: 'Receptionist',
   standard_user: 'Standard User',
+};
+
+export const ADMIN_ROLE: Record<AdminRole, StatusMeta> = {
+  super_admin: { label: 'Super Admin', tone: 'primary', description: 'Full access, including administrator accounts.' },
+  operations: { label: 'Operations', tone: 'info', description: 'Runs day-to-day operations across every tenant.' },
+  read_only: { label: 'Read-only', tone: 'neutral', description: 'Can view every workspace, cannot change anything.' },
 };
 
 export const ALERT_KIND_LABEL: Record<string, string> = {

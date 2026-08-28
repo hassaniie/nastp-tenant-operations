@@ -22,6 +22,7 @@ import { NotificationBell } from './NotificationBell';
 import { ExperienceSwitcher } from './ExperienceSwitcher';
 import { UserMenu } from './UserMenu';
 import { CommandPalette } from './CommandPalette';
+import { IdleMonitor } from './IdleMonitor';
 
 type Badges = { alerts: number; overstaying: number; openRequests: number; notifications: number };
 
@@ -229,6 +230,7 @@ export function Shell({ experience }: { experience: 'admin' | 'portal' }) {
 
         <CommandPalette />
         <Toaster />
+        <IdleMonitor />
       </div>
     </TooltipProvider>
   );

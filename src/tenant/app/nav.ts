@@ -8,7 +8,7 @@
 
 import {
   AlarmClock, BadgePercent, BarChart3, Bell, Building2, CalendarClock, DoorOpen, FileBarChart,
-  Gauge, History, LayoutDashboard, Settings, UserPlus, UserRound, Users,
+  Gauge, History, LayoutDashboard, Settings, ShieldCheck, UserPlus, UserRound, Users,
   Wallet, Wrench, Zap, type LucideIcon,
 } from 'lucide-react';
 
@@ -81,6 +81,7 @@ export const ADMIN_NAV: NavGroup[] = [
       { id: 'notifications', label: 'Notifications', path: '/admin/notifications', icon: Bell, badge: 'notifications' },
       { id: 'admin-buildings', label: 'Buildings & Spaces', path: '/admin/settings/buildings', icon: Building2 },
       { id: 'admin-users', label: 'Users', path: '/admin/settings/users', icon: Users },
+      { id: 'admin-security', label: 'Security', path: '/admin/settings/security', icon: ShieldCheck },
       { id: 'admin-settings', label: 'Settings', path: '/admin/settings', icon: Settings, end: true },
     ],
   },

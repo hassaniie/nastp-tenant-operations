@@ -457,6 +457,7 @@ export type ActivityKind =
   | 'office_added'
   | 'meter_assigned'
   | 'user_invited'
+  | 'user_activated'
   | 'alert_triggered'
   | 'visitor_scheduled'
   | 'visitor_checked_in'
@@ -626,10 +627,24 @@ export type SignInFailure =
   | 'bad_credentials'
   | 'wrong_door'
   | 'user_disabled'
+  | 'not_activated'
   | 'tenant_suspended'
   | 'tenant_expired'
   | 'tenant_archived'
   | 'locked_out';
+
+/** A single-use link generated in place of an email. Both invite and reset
+ *  share this shape — an invite simply ends by activating the account. */
+export interface AuthToken {
+  token: string;
+  subjectId: string;
+  experience: Experience;
+  email: string;
+  kind: 'invite' | 'reset';
+  createdAt: number;
+  expiresAt: number;
+  usedAt?: number;
+}
 
 export type AuthEventKind =
   | 'signin'

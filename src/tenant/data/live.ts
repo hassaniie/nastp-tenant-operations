@@ -306,6 +306,16 @@ class Simulation {
     if (a) a.status = 'resolved';
     this.emit();
   }
+
+  /** Invite accepted, or an admin re-enabling a disabled account. */
+  activateUser(userId: string) {
+    const u = this.world.users.find((x) => x.id === userId);
+    if (!u) return;
+    u.status = 'active';
+    u.lastActiveAt = Date.now();
+    this.activity('user_activated', u.tenantId, 'Portal user activated', u.name, u.name, 'tenant');
+    this.emit();
+  }
 }
 
 export const simulation = new Simulation();

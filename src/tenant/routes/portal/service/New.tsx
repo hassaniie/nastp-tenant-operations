@@ -4,7 +4,7 @@
  * genuinely needed is required.
  */
 
-import { FilePlus2, Paperclip, X } from 'lucide-react';
+import { FilePlus2, Paperclip, RotateCcw, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardBody, CardHeader } from '../../../components/ui/card';
@@ -15,6 +15,7 @@ import { SERVICE_CATEGORY_LABEL } from '../../../data/catalog';
 import { useSession } from '../../../store/session';
 import { departmentForCategory } from '../../../data/catalog';
 import { simulation, useLive } from '../../../data/live';
+import { useDraft } from '../../../hooks/useDraft';
 import type { ServiceAttachment, ServiceCategory, ServicePriority } from '../../../data/types';
 
 const CATEGORIES = Object.entries(SERVICE_CATEGORY_LABEL).map(([value, label]) => ({ value: value as ServiceCategory, label }));
@@ -30,10 +31,17 @@ export default function NewRequest() {
   const offices = useLive((w) => w.offices.filter((o) => o.tenantId === tenantId));
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const [f, setF] = useState({ title: '', description: '', category: 'hvac' as ServiceCategory, priority: 'medium' as ServicePriority, officeId: offices[0]?.id ?? '' });
+  // A part-completed request survives an idle sign-out: the session ends and
+  // the redirect to the door goes ahead, but what was typed here is still
+  // here on return, restored from the same sessionStorage entry rather than
+  // lost along with the session that timed out.
+  const [f, setF, clearDraft] = useDraft('new-service-request', {
+    title: '', description: '', category: 'hvac' as ServiceCategory, priority: 'medium' as ServicePriority, officeId: offices[0]?.id ?? '',
+  });
   const [attachments, setAttachments] = useState<ServiceAttachment[]>([]);
   const set = (p: Partial<typeof f>) => setF((prev) => ({ ...prev, ...p }));
   const valid = f.title.trim() && f.description.trim();
+  const hasDraft = Boolean(f.title.trim() || f.description.trim());
 
   const onFiles = (files: FileList | null) => {
     if (!files) return;
@@ -53,14 +61,33 @@ export default function NewRequest() {
       departmentId: departmentForCategory(f.category).id,
     });
     toast({ title: 'Request submitted', description: `${req.reference} has been sent to the NASTP service team.`, variant: 'success', action: { label: 'View', onClick: () => navigate(`/portal/service?open=${req.id}`) } });
+    clearDraft();
     navigate('/portal/service');
+  };
+
+  const discard = () => {
+    setF({ title: '', description: '', category: 'hvac', priority: 'medium', officeId: offices[0]?.id ?? '' });
+    setAttachments([]);
+    clearDraft();
   };
 
   const CatIcon = CATEGORY_ICON[f.category];
 
   return (
     <Card>
-      <CardHeader title="New Service Request" subtitle="Raise a request with the NASTP service team" icon={<IconBox icon={FilePlus2} tone="service" size="sm" />} />
+      <CardHeader
+        title="New Service Request"
+        subtitle="Raise a request with the NASTP service team"
+        icon={<IconBox icon={FilePlus2} tone="service" size="sm" />}
+        actions={
+          hasDraft ? (
+            <Button variant="ghost" size="xs" onClick={discard}>
+              <RotateCcw className="h-3.5 w-3.5" />
+              Discard draft
+            </Button>
+          ) : undefined
+        }
+      />
       <CardBody className="flex flex-col gap-5">
         <Field label="Title" required><Input value={f.title} onChange={(e) => set({ title: e.target.value })} placeholder="Brief summary of the issue" /></Field>
         <Field label="Description" required hint="Describe the issue, when it started, and where"><Textarea rows={4} value={f.description} onChange={(e) => set({ description: e.target.value })} placeholder="Provide as much detail as you can…" /></Field>

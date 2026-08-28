@@ -13,6 +13,7 @@ import { Tooltip, TooltipProvider } from '../components/ui/overlay';
 import { Toaster } from '../components/ui/toast';
 import { useSession } from '../store/session';
 import { UserMenu } from './UserMenu';
+import { IdleMonitor } from './IdleMonitor';
 
 export function TechShell() {
   const { prefs, setPrefs } = useSession();
@@ -50,6 +51,7 @@ export function TechShell() {
         </main>
 
         <Toaster />
+        <IdleMonitor />
       </div>
     </TooltipProvider>
   );

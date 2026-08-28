@@ -22,12 +22,16 @@ import type { AuthSession, Experience } from '../data/types';
 
 const SESSION_KEY = 'nastp-tenant-ops.session';
 const INTENDED_KEY = 'nastp-tenant-ops.intended';
+const IDLE_FLAG_KEY = 'nastp-tenant-ops.idle-signout';
 
 interface AuthValue {
   session: AuthSession | null;
   /** Display identity behind the session, resolved from whichever roster it points at. */
   subject: { name: string; email: string; title: string } | undefined;
   signIn: (email: string, password: string, door: Experience) => SignInResult;
+  /** Adopts an already-validated session — used by invite acceptance, which
+   *  has already proven identity by way of the token itself. */
+  adoptSession: (session: AuthSession) => void;
   signOut: () => void;
   /** Admin support tool: see a tenant's portal without their password. */
   startImpersonation: (tenantId: string) => void;
@@ -35,6 +39,13 @@ interface AuthValue {
   /** The path a guard stashed before redirecting to a door. Consumed once. */
   takeIntended: () => string | null;
   setIntended: (path: string) => void;
+  /** Set by idle expiry, read once by the door to show why the session ended.
+   *  A router `navigate(..., { state })` was tried first here and proved
+   *  unreliable specifically for a redirect fired from a timer rather than a
+   *  click — this reuses the same persisted-flag approach as `intended`,
+   *  which is already proven to survive this exact redirect. */
+  markIdleSignOut: () => void;
+  takeIdleSignOut: () => boolean;
 }
 
 const AuthContext = createContext<AuthValue | null>(null);
@@ -67,6 +78,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (result.ok) setSession(result.session);
     return result;
   }, []);
+
+  const adoptSession = useCallback((next: AuthSession) => setSession(next), []);
 
   const signOut = useCallback(() => {
     setSession((current) => {
@@ -115,11 +128,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const markIdleSignOut = useCallback(() => {
+    try {
+      localStorage.setItem(IDLE_FLAG_KEY, '1');
+    } catch {
+      /* the door simply won't explain why — not fatal */
+    }
+  }, []);
+
+  const takeIdleSignOut = useCallback(() => {
+    try {
+      const flag = localStorage.getItem(IDLE_FLAG_KEY);
+      localStorage.removeItem(IDLE_FLAG_KEY);
+      return flag === '1';
+    } catch {
+      return false;
+    }
+  }, []);
+
   const subject = useMemo(() => (session ? subjectFor(session) : undefined), [session]);
 
   const value = useMemo<AuthValue>(
-    () => ({ session, subject, signIn, signOut, startImpersonation, endImpersonation, takeIntended, setIntended }),
-    [session, subject, signIn, signOut, startImpersonation, endImpersonation, takeIntended, setIntended],
+    () => ({
+      session, subject, signIn, adoptSession, signOut, startImpersonation, endImpersonation,
+      takeIntended, setIntended, markIdleSignOut, takeIdleSignOut,
+    }),
+    [
+      session, subject, signIn, adoptSession, signOut, startImpersonation, endImpersonation,
+      takeIntended, setIntended, markIdleSignOut, takeIdleSignOut,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

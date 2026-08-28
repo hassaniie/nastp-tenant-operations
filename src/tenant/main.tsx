@@ -8,6 +8,8 @@ import { SessionProvider, useSession } from './store/session';
 import { AuthProvider, useAuth } from './store/auth';
 import { homeFor } from './data/auth';
 import { AdminLogin, PortalLogin, TechLogin } from './routes/auth/Login';
+import AcceptInvite from './routes/auth/AcceptInvite';
+import { RequestReset, CompleteReset } from './routes/auth/ResetPassword';
 import { LoadingState } from './components/ui/data';
 import { AdminVisitorList } from './routes/admin/visitors/List';
 import { PortalVisitorList } from './routes/portal/visitors/List';
@@ -59,6 +61,7 @@ const Reports = lazy(() => import('./routes/admin/Reports'));
 const AdminSettings = lazy(() => import('./routes/admin/Settings'));
 const Buildings = lazy(() => import('./routes/admin/Buildings'));
 const AdminUsers = lazy(() => import('./routes/admin/Users'));
+const AdminSecurity = lazy(() => import('./routes/admin/Security'));
 const Organization = lazy(() => import('./routes/portal/Organization'));
 const TechJobs = lazy(() => import('./routes/tech/Jobs'));
 const NotFound = lazy(() => import('./routes/NotFound'));
@@ -107,6 +110,9 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/admin/login" element={<RedirectIfSignedIn><AdminLogin /></RedirectIfSignedIn>} />
           <Route path="/portal/login" element={<RedirectIfSignedIn><PortalLogin /></RedirectIfSignedIn>} />
           <Route path="/tech/login" element={<RedirectIfSignedIn><TechLogin /></RedirectIfSignedIn>} />
+          <Route path="/invite/:token" element={<L><AcceptInvite /></L>} />
+          <Route path="/reset" element={<L><RequestReset /></L>} />
+          <Route path="/reset/:token" element={<L><CompleteReset /></L>} />
 
           {/* -------------------------------------------------- Admin */}
           <Route element={<AdminLayout />}>
@@ -138,6 +144,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/admin/settings" element={<L><AdminSettings /></L>} />
             <Route path="/admin/settings/buildings" element={<L><Buildings /></L>} />
             <Route path="/admin/settings/users" element={<L><AdminUsers /></L>} />
+            <Route path="/admin/settings/security" element={<L><AdminSecurity /></L>} />
           </Route>
 
           {/* -------------------------------------------------- Portal */}

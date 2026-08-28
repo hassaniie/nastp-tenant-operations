@@ -18,7 +18,7 @@
 
 import { simulation } from './live';
 import type {
-  AuthEvent, AuthEventKind, AuthSession, Credential, Experience, SignInFailure,
+  AuthEvent, AuthEventKind, AuthSession, AuthToken, Credential, Experience, SignInFailure,
 } from './types';
 
 /** Every seeded account uses this. Shown on the sign-in screens on purpose —
@@ -37,24 +37,55 @@ function digest(input: string): string {
 
 const normalise = (email: string) => email.trim().toLowerCase();
 
+/**
+ * Password overrides and single-use tokens exist to be picked up from a
+ * different browser tab than the one that created them — that is the entire
+ * point of a link. `localStorage` is what makes that true within one browser
+ * (a real deployment holds both server-side, reachable from any device at
+ * all). The failure counters and the audit log below stay plain in-memory
+ * on purpose — they are documented, elsewhere, as this session's own.
+ */
+function loadMap<V>(key: string): Map<string, V> {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? new Map(JSON.parse(raw) as [string, V][]) : new Map();
+  } catch {
+    return new Map();
+  }
+}
+function saveMap<V>(key: string, map: Map<string, V>) {
+  try {
+    localStorage.setItem(key, JSON.stringify([...map]));
+  } catch {
+    /* best effort — the demo still works within this tab either way */
+  }
+}
+
 /* ------------------------------------------------------------ credentials */
 
 /**
  * Built from the live world on every lookup rather than cached, so a tenant
  * onboarded during the session can sign in immediately.
  */
+/** A password an invite or reset actually set, keyed by subjectId. Everyone
+ *  else authenticates with `DEMO_PASSWORD` — that is what makes the seeded
+ *  roster usable without a mail server. */
+const OVERRIDES_KEY = 'nastp-tenant-ops.password-overrides';
+const passwordOverrides = loadMap<string>(OVERRIDES_KEY);
+
 function credentials(): Credential[] {
   const w = simulation.getState();
   const out: Credential[] = [];
+  const pw = (subjectId: string) => digest(passwordOverrides.get(subjectId) ?? DEMO_PASSWORD);
 
   for (const a of w.admins) {
-    out.push({ email: normalise(a.email), digest: digest(DEMO_PASSWORD), experience: 'admin', subjectId: a.id });
+    out.push({ email: normalise(a.email), digest: pw(a.id), experience: 'admin', subjectId: a.id });
   }
   for (const u of w.users) {
-    out.push({ email: normalise(u.email), digest: digest(DEMO_PASSWORD), experience: 'portal', subjectId: u.id });
+    out.push({ email: normalise(u.email), digest: pw(u.id), experience: 'portal', subjectId: u.id });
   }
   for (const t of w.technicians) {
-    out.push({ email: normalise(t.email), digest: digest(DEMO_PASSWORD), experience: 'tech', subjectId: t.id });
+    out.push({ email: normalise(t.email), digest: pw(t.id), experience: 'tech', subjectId: t.id });
   }
   return out;
 }
@@ -179,6 +210,13 @@ export function signIn(email: string, password: string, door: Experience): SignI
       record('signin_failed', key, door, match.subjectId, 'account disabled');
       return { ok: false, reason: 'user_disabled' };
     }
+    if (user.status === 'invited') {
+      // The demo password matches an invited account too — otherwise there
+      // would be no way to test what "invited" looks like — but signing in
+      // still is not accepting the invitation. Activation is the only door.
+      record('signin_failed', key, door, match.subjectId, 'not yet activated');
+      return { ok: false, reason: 'not_activated' };
+    }
     const tenant = w.tenantById[user.tenantId];
     const blocked: Partial<Record<string, SignInFailure>> = {
       suspended: 'tenant_suspended',
@@ -214,6 +252,115 @@ export function noteImpersonationStart(session: AuthSession, tenantId: string) {
 
 export function noteImpersonationEnd(session: AuthSession, tenantId: string) {
   record('impersonation_end', emailFor(session) ?? '—', 'admin', session.subjectId, tenantId);
+}
+
+/* -------------------------------------------------------- invite & reset */
+
+/**
+ * Single-use links, in place of the email that would carry them in a real
+ * deployment. Both invite and reset are the same shape — an invite just ends
+ * by activating the account instead of merely changing its password.
+ */
+const TOKENS_KEY = 'nastp-tenant-ops.auth-tokens';
+const tokens = loadMap<AuthToken>(TOKENS_KEY);
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+const INVITE_TTL_MS = 7 * DAY_MS;
+const RESET_TTL_MS = 60 * 60 * 1000;
+
+function makeToken(len = 24): string {
+  const alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let out = '';
+  for (let i = 0; i < len; i++) out += alphabet[Math.floor(Math.random() * alphabet.length)];
+  return out;
+}
+
+/** Called on activation and from "Resend invite" — a fresh token each time,
+ *  so a resend cannot be satisfied by a link already handed out once. */
+export function createInvite(subjectId: string, email: string): AuthToken {
+  const t: AuthToken = {
+    token: makeToken(), subjectId, experience: 'portal', email: normalise(email),
+    kind: 'invite', createdAt: Date.now(), expiresAt: Date.now() + INVITE_TTL_MS,
+  };
+  tokens.set(t.token, t);
+  saveMap(TOKENS_KEY, tokens);
+  return t;
+}
+
+/** Silent regardless of outcome — the caller must not learn from this call
+ *  alone whether the address matched an account. */
+export function requestPasswordReset(email: string, door: Experience): AuthToken | undefined {
+  const key = normalise(email);
+  record('reset_requested', key, door);
+  const match = credentials().find((c) => c.email === key && c.experience === door);
+  if (!match) return undefined;
+
+  const t: AuthToken = {
+    token: makeToken(), subjectId: match.subjectId, experience: door, email: key,
+    kind: 'reset', createdAt: Date.now(), expiresAt: Date.now() + RESET_TTL_MS,
+  };
+  tokens.set(t.token, t);
+  saveMap(TOKENS_KEY, tokens);
+  return t;
+}
+
+export type TokenLookup =
+  | { ok: true; token: AuthToken }
+  | { ok: false; reason: 'not_found' | 'expired' | 'used' };
+
+export function lookupToken(raw: string): TokenLookup {
+  const t = tokens.get(raw);
+  if (!t) return { ok: false, reason: 'not_found' };
+  if (t.usedAt) return { ok: false, reason: 'used' };
+  if (Date.now() > t.expiresAt) return { ok: false, reason: 'expired' };
+  return { ok: true, token: t };
+}
+
+export type AcceptInviteResult =
+  | { ok: true; session: AuthSession }
+  | { ok: false; reason: 'not_found' | 'expired' | 'used' };
+
+/** Accepting an invite: set the password, activate the account, sign in. */
+export function acceptInvite(raw: string, password: string): AcceptInviteResult {
+  const found = lookupToken(raw);
+  if (!found.ok) return found;
+  const t = found.token;
+  if (t.kind !== 'invite') return { ok: false, reason: 'not_found' };
+
+  passwordOverrides.set(t.subjectId, password);
+  saveMap(OVERRIDES_KEY, passwordOverrides);
+  simulation.activateUser(t.subjectId);
+  t.usedAt = Date.now();
+  saveMap(TOKENS_KEY, tokens);
+  record('invite_accepted', t.email, t.experience, t.subjectId);
+
+  const now = Date.now();
+  const w = simulation.getState();
+  const user = w.users.find((u) => u.id === t.subjectId);
+  failures.delete(t.email);
+  record('signin', t.email, t.experience, t.subjectId);
+  return { ok: true, session: { experience: t.experience, subjectId: t.subjectId, issuedAt: now, lastSeenAt: now, tenantId: user?.tenantId } };
+}
+
+/** Completing a reset: set the password, clear any lock, but do not sign in —
+ *  a reset proves you control the link, not that this is a trusted device. */
+export type CompleteResetResult =
+  | { ok: true }
+  | { ok: false; reason: 'not_found' | 'expired' | 'used' };
+
+export function completeReset(raw: string, password: string): CompleteResetResult {
+  const found = lookupToken(raw);
+  if (!found.ok) return found;
+  const t = found.token;
+  if (t.kind !== 'reset') return { ok: false, reason: 'not_found' };
+
+  passwordOverrides.set(t.subjectId, password);
+  saveMap(OVERRIDES_KEY, passwordOverrides);
+  t.usedAt = Date.now();
+  saveMap(TOKENS_KEY, tokens);
+  clearLockout(t.email);
+  record('reset_completed', t.email, t.experience, t.subjectId);
+  return { ok: true };
 }
 
 /* ------------------------------------------------------------- resolution */
@@ -255,6 +402,7 @@ export const SIGN_IN_MESSAGE: Record<SignInFailure, string> = {
   bad_credentials: 'That email and password do not match. Check both and try again.',
   wrong_door: 'That account signs in at a different door.',
   user_disabled: 'This account has been disabled. Contact NASTP operations to restore it.',
+  not_activated: 'This account has not been activated yet. Use your invitation link to set a password.',
   tenant_suspended: 'Your organisation’s access is suspended. Contact NASTP operations.',
   tenant_expired: 'Your organisation’s tenancy has expired. Contact NASTP operations.',
   tenant_archived: 'This account is no longer active.',
