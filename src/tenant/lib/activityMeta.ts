@@ -1,5 +1,5 @@
 import {
-  Building2, DoorOpen, FilePlus2, Gauge, PlugZap, ReceiptText, ShieldOff, UserCheck, UserPlus, Wrench,
+  Building2, DoorOpen, FilePlus2, Gauge, PlugZap, ReceiptText, ShieldOff, UserCheck, UserCog, UserPlus, Wrench,
   type LucideIcon,
 } from 'lucide-react';
 import type { ActivityKind } from '../data/types';
@@ -18,6 +18,7 @@ export const ACTIVITY_ICON: Record<ActivityKind, LucideIcon> = {
   visitor_checked_out: DoorOpen,
   request_submitted: FilePlus2,
   request_updated: Wrench,
+  request_assigned: UserCog,
   request_resolved: Wrench,
   invoice_issued: ReceiptText,
 };

@@ -18,6 +18,7 @@ import { Field, Input } from '../../components/ui/form';
 import { Card } from '../../components/ui/card';
 import { useAuth } from '../../store/auth';
 import { DEMO_PASSWORD, SIGN_IN_MESSAGE, doorFor, lockoutRemainingMs } from '../../data/auth';
+import { technicianOpenLoad } from '../../data/catalog';
 import { useLive } from '../../data/live';
 import type { Experience } from '../../data/types';
 import type { Tone } from '../../lib/meta';
@@ -85,18 +86,12 @@ function LoginScreen({ door }: { door: Experience }) {
     if (door === 'tech') {
       // Ordered by open workload so the door opens on someone with a queue
       // rather than whoever happens to be first in the roster.
-      const open = new Map<string, number>();
-      for (const r of w.requests) {
-        if (!r.technicianId) continue;
-        if (!['assigned', 'in_progress', 'waiting_tenant', 'reopened'].includes(r.status)) continue;
-        open.set(r.technicianId, (open.get(r.technicianId) ?? 0) + 1);
-      }
       return [...w.technicians]
-        .sort((a, b) => (open.get(b.id) ?? 0) - (open.get(a.id) ?? 0))
+        .sort((a, b) => technicianOpenLoad(w.requests, b.id) - technicianOpenLoad(w.requests, a.id))
         .slice(0, 3)
         .map((t) => ({
           email: t.email,
-          label: `${w.departments.find((d) => d.id === t.departmentId)?.name ?? 'Technician'} · ${open.get(t.id) ?? 0} open`,
+          label: `${w.departments.find((d) => d.id === t.departmentId)?.name ?? 'Technician'} · ${technicianOpenLoad(w.requests, t.id)} open`,
         }));
     }
     return w.users

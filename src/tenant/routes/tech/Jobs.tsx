@@ -19,12 +19,11 @@ import { EmptyState } from '../../components/ui/data';
 import { PriorityBadge, ServiceStatusBadge, CATEGORY_ICON } from '../../components/status';
 import { useLive } from '../../data/live';
 import { useAuth } from '../../store/auth';
-import { departmentById, SERVICE_CATEGORY_LABEL } from '../../data/catalog';
+import { departmentById, OPEN_TECH_STATUSES, SERVICE_CATEGORY_LABEL } from '../../data/catalog';
 import { ago, fmtDateTime, num } from '../../lib/utils';
 import type { ServicePriority, ServiceRequest } from '../../data/types';
 
 const PRIORITY_RANK: Record<ServicePriority, number> = { critical: 0, high: 1, medium: 2, low: 3 };
-const ACTIVE = new Set(['assigned', 'in_progress', 'waiting_tenant', 'reopened']);
 
 export default function TechJobs() {
   const { session } = useAuth();
@@ -36,7 +35,7 @@ export default function TechJobs() {
     return {
       me,
       department: me ? departmentById(me.departmentId) : undefined,
-      active: mine.filter((r) => ACTIVE.has(r.status)),
+      active: mine.filter((r) => OPEN_TECH_STATUSES.has(r.status)),
       resolved: mine.filter((r) => r.status === 'resolved' || r.status === 'confirmed' || r.status === 'closed'),
       tenantName: (id: string) => w.tenantById[id]?.name ?? 'Unknown tenant',
     };

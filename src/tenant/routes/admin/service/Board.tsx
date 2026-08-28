@@ -18,7 +18,11 @@ import type { ServiceRequest, ServiceStatus } from '../../../data/types';
 
 export default function Board() {
   const [params, setParams] = useSearchParams();
-  const requests = useLive((w) => w.requests.map((r) => ({ ...r, tenantName: w.tenantById[r.tenantId]?.name ?? '—' })));
+  const requests = useLive((w) => w.requests.map((r) => ({
+    ...r,
+    tenantName: w.tenantById[r.tenantId]?.name ?? '—',
+    technicianName: w.technicians.find((t) => t.id === r.technicianId)?.name,
+  })));
   const openId = params.get('open');
   const open = openId ? requests.find((r) => r.id === openId) ?? null : null;
 
@@ -61,6 +65,15 @@ export default function Board() {
                             <span className="truncate">{r.tenantName}</span>
                             <span className={cn('tnum', overdue && 'text-critical')}>{overdue ? 'overdue' : ago(r.updatedAt)}</span>
                           </div>
+                          {(r.technicianName || r.status === 'acknowledged') && (
+                            <div className="flex items-center gap-1.5 text-[11px]">
+                              {r.technicianName ? (
+                                <span className="truncate text-muted">{r.technicianName}</span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 text-warning"><span className="h-1.5 w-1.5 rounded-full bg-warning" />Unassigned</span>
+                              )}
+                            </div>
+                          )}
                         </button>
                       );
                     })

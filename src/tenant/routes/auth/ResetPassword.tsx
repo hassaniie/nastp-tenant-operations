@@ -10,13 +10,12 @@
  */
 
 import { useState, type FormEvent } from 'react';
-import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { CheckCircle2, KeyRound, Mail, MailWarning, ShieldCheck } from 'lucide-react';
 import { Button, IconBox } from '../../components/ui/primitives';
 import { Field, Input } from '../../components/ui/form';
 import { Card } from '../../components/ui/card';
-import { useAuth } from '../../store/auth';
-import { completeReset, doorFor, homeFor, lookupToken, requestPasswordReset } from '../../data/auth';
+import { completeReset, doorFor, lookupToken, requestPasswordReset } from '../../data/auth';
 import type { Experience } from '../../data/types';
 
 const DOOR_LABEL: Record<Experience, string> = { admin: 'Administrator', portal: 'Tenant user', tech: 'Technician' };
@@ -114,7 +113,6 @@ const REASON_COPY: Record<'not_found' | 'expired' | 'used', { title: string; bod
 export function CompleteReset() {
   const { token = '' } = useParams();
   const navigate = useNavigate();
-  const { session } = useAuth();
 
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -124,8 +122,10 @@ export function CompleteReset() {
 
   const found = lookupToken(token);
 
-  if (session) return <Navigate to={homeFor(session.experience)} replace />;
-
+  // No session guard here on purpose: completing a reset never signs anyone
+  // in (that's the whole point — proving control of a link isn't the same as
+  // this being a trusted device), so whatever else is signed in on this
+  // browser is irrelevant to whether this token can be used.
   if (!found.ok && !done) {
     const copy = REASON_COPY[found.reason];
     return (

@@ -464,6 +464,7 @@ export type ActivityKind =
   | 'visitor_checked_out'
   | 'request_submitted'
   | 'request_updated'
+  | 'request_assigned'
   | 'request_resolved'
   | 'invoice_issued';
 

@@ -7,7 +7,7 @@
  * never "Company XYZ".
  */
 
-import type { Department, OrganizationType, ServiceCategory } from './types';
+import type { Department, OrganizationType, ServiceCategory, ServiceRequest, ServiceStatus } from './types';
 
 /* ------------------------------------------------------------ organisations */
 
@@ -255,3 +255,16 @@ export const departmentForCategory = (category: ServiceCategory): Department =>
 
 export const departmentById = (id: string): Department | undefined =>
   DEPARTMENTS.find((d) => d.id === id);
+
+/** A request still on a technician's plate — the one definition of "open work",
+ *  used everywhere a queue or a workload count is shown (the tech's own queue,
+ *  the demo account list, the assignment picker) so they never drift apart. */
+export const OPEN_TECH_STATUSES: ReadonlySet<ServiceStatus> = new Set([
+  'assigned', 'in_progress', 'waiting_tenant', 'reopened',
+]);
+
+export function technicianOpenLoad(requests: ServiceRequest[], technicianId: string): number {
+  let n = 0;
+  for (const r of requests) if (r.technicianId === technicianId && OPEN_TECH_STATUSES.has(r.status)) n++;
+  return n;
+}

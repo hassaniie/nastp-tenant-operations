@@ -17,8 +17,9 @@
 
 import { useMemo, useSyncExternalStore } from 'react';
 import { createWorld, NOW, HOUR, type World } from './world';
+import { departmentById, departmentForCategory, SERVICE_CATEGORY_LABEL } from './catalog';
 import type {
-  ActivityEvent, ActivityKind, AppNotification, ServiceComment, ServiceRequest, ServiceStatus,
+  ActivityEvent, ActivityKind, AppNotification, ServiceCategory, ServiceComment, ServiceRequest, ServiceStatus,
   Tenant, TenantStatus, Visitor, VisitorStatus,
 } from './types';
 
@@ -238,6 +239,59 @@ class Simulation {
     const r = this.world.requests.find((x) => x.id === id);
     if (!r) return;
     r.rating = { score, feedback, ratedAt: Date.now() };
+    this.emit();
+  }
+
+  /**
+   * Dispatch or re-dispatch — the admin always names the person, the system
+   * only ever surfaces who's available and how loaded they are. The first
+   * assignment out of `acknowledged` advances the status; naming someone
+   * different while the job is already assigned/in progress/waiting on the
+   * tenant is a reassignment, which does not change the status but does
+   * require a reason so the change of hands is explained, not just logged.
+   */
+  assignTechnician(id: string, technicianId: string, by: string, reason?: string) {
+    const r = this.world.requests.find((x) => x.id === id);
+    const tech = this.world.technicians.find((t) => t.id === technicianId);
+    if (!r || !tech) return;
+    const previous = r.technicianId ? this.world.technicians.find((t) => t.id === r.technicianId) : undefined;
+    const isReassignment = Boolean(previous) && previous!.id !== tech.id;
+
+    r.technicianId = tech.id;
+    r.updatedAt = Date.now();
+    if (r.status === 'acknowledged') r.status = 'assigned';
+
+    const note = isReassignment
+      ? `Reassigned from ${previous!.name} to ${tech.name}${reason ? ` — ${reason}` : ''}`
+      : `Assigned to ${tech.name}`;
+    r.timeline.push({ ts: Date.now(), status: r.status, by, note });
+    this.activity('request_assigned', r.tenantId, isReassignment ? 'Request reassigned' : 'Request assigned', `${r.reference} → ${tech.name}`, by, 'service');
+    this.emit();
+  }
+
+  /**
+   * Re-categorising re-routes to whatever department now owns the category —
+   * routing is a lookup, never a rules engine — and unassigns: the technician
+   * who had it may have no standing in the new department at all. A job past
+   * `acknowledged` drops back to it, since it now needs a fresh look from
+   * whoever actually owns it.
+   */
+  overrideCategory(id: string, category: ServiceCategory, by: string, reason: string) {
+    const r = this.world.requests.find((x) => x.id === id);
+    if (!r) return;
+    const fromDept = departmentById(r.departmentId);
+    const toDept = departmentForCategory(category);
+
+    r.category = category;
+    r.departmentId = toDept.id;
+    r.technicianId = undefined;
+    r.updatedAt = Date.now();
+    if (['assigned', 'in_progress', 'waiting_tenant', 'reopened'].includes(r.status)) r.status = 'acknowledged';
+
+    const rerouted = fromDept && fromDept.id !== toDept.id;
+    const note = `Re-categorised to ${SERVICE_CATEGORY_LABEL[category]}${rerouted ? ` — routed to ${toDept.name} (was ${fromDept.name})` : ''}. ${reason}`;
+    r.timeline.push({ ts: Date.now(), status: r.status, by, note });
+    this.activity('request_updated', r.tenantId, 'Request re-categorised', `${r.reference} → ${toDept.name}`, by, 'service');
     this.emit();
   }
 

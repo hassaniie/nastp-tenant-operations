@@ -14,7 +14,7 @@ import { SearchInput, SimpleSelect } from '../../../components/ui/form';
 import { DataTable, type Column } from '../../../components/ui/data';
 import { PriorityBadge, ServiceStatusBadge, CATEGORY_ICON } from '../../../components/status';
 import { ServiceRequestDrawer } from '../../serviceShared';
-import { SERVICE_CATEGORY_LABEL } from '../../../data/catalog';
+import { SERVICE_CATEGORY_LABEL, departmentById } from '../../../data/catalog';
 import { useLive } from '../../../data/live';
 import { NOW } from '../../../data/world';
 import { ago, duration, num } from '../../../lib/utils';
@@ -41,7 +41,12 @@ export default function Requests() {
 
   const data = useLive((w) => ({
     tenants: w.tenants.filter((t) => t.status === 'active' || t.status === 'suspended'),
-    requests: w.requests.map((r) => ({ ...r, tenantName: w.tenantById[r.tenantId]?.name ?? '—' })),
+    requests: w.requests.map((r) => ({
+      ...r,
+      tenantName: w.tenantById[r.tenantId]?.name ?? '—',
+      departmentName: departmentById(r.departmentId)?.name,
+      technicianName: w.technicians.find((t) => t.id === r.technicianId)?.name,
+    })),
   }));
 
   const openId = params.get('open');
@@ -68,6 +73,24 @@ export default function Requests() {
     { key: 'title', header: 'Request', cell: (r) => { const Icon = CATEGORY_ICON[r.category]; return <div className="flex items-center gap-2.5"><Icon className="h-4 w-4 shrink-0 text-service" /><div className="min-w-0"><p className="truncate font-medium text-foreground">{r.title}</p><p className="truncate text-[11px] text-subtle">{r.tenantName}</p></div></div>; }, sortValue: (r) => r.title },
     { key: 'priority', header: 'Priority', cell: (r) => <PriorityBadge priority={r.priority} size="sm" />, sortValue: (r) => ({ critical: 0, high: 1, medium: 2, low: 3 } as Record<ServicePriority, number>)[r.priority], hideBelow: 'sm' },
     { key: 'status', header: 'Status', cell: (r) => <ServiceStatusBadge status={r.status} size="sm" /> },
+    {
+      key: 'assignee',
+      header: 'Assigned to',
+      cell: (r) => r.technicianName ? (
+        <div className="min-w-0">
+          <p className="truncate text-foreground">{r.technicianName}</p>
+          <p className="truncate text-[11px] text-subtle">{r.departmentName}</p>
+        </div>
+      ) : r.status === 'acknowledged' ? (
+        <span className="inline-flex items-center gap-1.5 text-[12px] text-warning">
+          <span className="h-1.5 w-1.5 rounded-full bg-warning" />Unassigned
+        </span>
+      ) : (
+        <span className="text-subtle">—</span>
+      ),
+      sortValue: (r) => r.technicianName ?? '',
+      hideBelow: 'lg',
+    },
     { key: 'due', header: 'Due', cell: (r) => r.dueAt && r.dueAt < NOW && isOpen(r.status) ? <span className="text-critical">Overdue</span> : <span className="tnum text-subtle">{r.dueAt ? ago(r.dueAt) : '—'}</span>, hideBelow: 'lg' },
     { key: 'updated', header: 'Updated', cell: (r) => <span className="tnum text-subtle">{ago(r.updatedAt)}</span>, sortValue: (r) => r.updatedAt, hideBelow: 'xl' },
   ];

@@ -34,7 +34,14 @@ export default function AcceptInvite() {
 
   const found = lookupToken(token);
 
-  if (session) return <Navigate to={homeFor(session.experience)} replace />;
+  // Skip the screen only if this exact account already holds a live session
+  // here — accepting again would be redundant. A session for someone else
+  // (a different portal user, or the admin who generated the link, in the
+  // same browser) does not preempt this: accepting replaces it, the same as
+  // signing out of one account and into another would.
+  if (session && found.ok && session.experience === found.token.experience && session.subjectId === found.token.subjectId) {
+    return <Navigate to={homeFor(session.experience)} replace />;
+  }
 
   if (!found.ok) {
     const copy = REASON_COPY[found.reason === 'not_found' ? 'not_found' : found.reason];
