@@ -6,10 +6,10 @@
  */
 
 import {
-  Check, CheckCheck, MessageSquarePlus, Paperclip, PencilLine, RotateCcw, Send, ThumbsUp, UserCog,
+  Camera, Check, CheckCheck, CheckCircle2, MessageSquarePlus, Paperclip, PencilLine, RotateCcw, Send, ThumbsUp, UserCog,
 } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
-import { Button, IconBox, Avatar } from '../components/ui/primitives';
+import { Button, IconBox, Avatar, StatusBadge } from '../components/ui/primitives';
 import {
   Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTrigger,
   Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader,
@@ -50,10 +50,22 @@ const ADMIN_NEXT: Partial<Record<ServiceStatus, Array<{ to: ServiceStatus; label
   reopened: [{ to: 'in_progress', label: 'Resume' }],
 };
 
-export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenantName }: { request: ServiceRequest | null; open: boolean; onOpenChange: (o: boolean) => void; mode: 'admin' | 'tenant'; tenantName?: string }) {
+/** The technician's own transitions. Resolving is deliberately not a
+ *  one-click entry here — it always goes through `ResolveDialog`, which
+ *  requires a closing note, so it's handled separately in the footer. */
+const TECH_NEXT: Partial<Record<ServiceStatus, Array<{ to: ServiceStatus; label: string }>>> = {
+  assigned: [{ to: 'in_progress', label: 'Start work' }],
+  in_progress: [{ to: 'waiting_tenant', label: 'Wait for tenant' }],
+  waiting_tenant: [{ to: 'in_progress', label: 'Resume' }],
+  reopened: [{ to: 'in_progress', label: 'Resume' }],
+};
+const TECH_RESOLVABLE: ReadonlySet<ServiceStatus> = new Set(['in_progress', 'waiting_tenant', 'reopened']);
+
+export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenantName }: { request: ServiceRequest | null; open: boolean; onOpenChange: (o: boolean) => void; mode: 'admin' | 'tenant' | 'tech'; tenantName?: string }) {
   const { toast } = useSession();
   const { subject } = useAuth();
   const [comment, setComment] = useState('');
+  const [visibleToTenant, setVisibleToTenant] = useState(true);
   const [rating, setRating] = useState(0);
   // The assignee is a reference now, so it's resolved from the roster rather
   // than carried on the request as a frozen string. Called unconditionally,
@@ -62,8 +74,10 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
   const assignee = useLive((w) => w.technicians.find((t) => t.id === request?.technicianId));
   if (!request) return null;
   const r = request;
-  // The signed-in admin, not a fixed name — several admins share this drawer.
-  const actor = mode === 'admin' ? (subject?.name ?? 'NASTP Admin') : r.createdBy;
+  // The signed-in person, not a fixed name — several admins (and every
+  // technician) share this same drawer.
+  const actor = mode === 'tenant' ? r.createdBy : (subject?.name ?? (mode === 'admin' ? 'NASTP Admin' : 'Technician'));
+  const staff = mode === 'admin' || mode === 'tech';
   const Icon = CATEGORY_ICON[r.category];
   const department = departmentById(r.departmentId);
 
@@ -75,10 +89,33 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
     meta: ago(e.ts),
   }));
 
+  // A tenant never sees an internal note — that's the whole point of one.
+  const visibleComments = mode === 'tenant' ? r.comments.filter((c) => !c.internal) : r.comments;
+
   const postComment = () => {
     if (!comment.trim()) return;
-    simulation.addRequestComment(r.id, { author: actor, authorRole: mode, body: comment.trim() });
+    simulation.addRequestComment(r.id, {
+      author: actor,
+      authorRole: mode,
+      body: comment.trim(),
+      // Only staff ever get the choice — a tenant's own comment is always
+      // theirs to read back, so there's nothing to toggle.
+      internal: staff ? !visibleToTenant : false,
+    });
     setComment('');
+  };
+
+  const addPhoto = (file: File) => {
+    simulation.addAttachment(r.id, {
+      name: file.name,
+      kind: file.type.startsWith('image/') ? 'image' : 'document',
+      sizeKb: Math.max(1, Math.round(file.size / 1024)),
+    });
+  };
+
+  const resolve = (note: string) => {
+    simulation.transitionRequest(r.id, 'resolved', actor, note);
+    toast({ title: 'Request resolved', description: `${r.reference} is now resolved.`, variant: 'success' });
   };
 
   const transition = (to: ServiceStatus, label: string) => {
@@ -120,7 +157,7 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
             { label: 'Created', value: fmtDateTime(r.createdAt) },
             { label: 'Due', value: r.dueAt ? fmtDateTime(r.dueAt) : '—' },
             // Admin gets the actionable versions of these two below instead.
-            ...(mode === 'tenant' ? [
+            ...(mode !== 'admin' ? [
               { label: 'Department', value: department?.name ?? 'Unrouted' },
               { label: 'Assignee', value: assignee?.name ?? 'Unassigned' },
             ] : []),
@@ -162,16 +199,34 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
             </div>
           )}
 
-          {r.attachments.length > 0 && (
+          {(r.attachments.length > 0 || staff) && (
             <div>
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle">Attachments</p>
-              <div className="flex flex-wrap gap-2">
-                {r.attachments.map((a) => (
-                  <span key={a.id} className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-inset px-2.5 py-1.5 text-[12px] text-muted">
-                    <Paperclip className="h-3.5 w-3.5" />{a.name} <span className="text-subtle">· {Math.round(a.sizeKb)} KB</span>
-                  </span>
-                ))}
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle">Attachments</p>
+                {staff && (
+                  <label className="flex cursor-pointer items-center gap-1 text-[11px] font-medium text-primary underline underline-offset-2">
+                    <Camera className="h-3.5 w-3.5" />
+                    Add photo
+                    <input
+                      type="file"
+                      accept="image/*,.pdf,.doc,.docx,.txt"
+                      className="hidden"
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) addPhoto(f); e.target.value = ''; }}
+                    />
+                  </label>
+                )}
               </div>
+              {r.attachments.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {r.attachments.map((a) => (
+                    <span key={a.id} className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-inset px-2.5 py-1.5 text-[12px] text-muted">
+                      <Paperclip className="h-3.5 w-3.5" />{a.name} <span className="text-subtle">· {Math.round(a.sizeKb)} KB</span>
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-[12px] text-subtle">No attachments yet.</p>
+              )}
             </div>
           )}
 
@@ -183,13 +238,17 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
           <div>
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle">Comments</p>
             <div className="flex flex-col gap-3">
-              {r.comments.map((c) => (
+              {visibleComments.length === 0 && <p className="text-[12px] text-subtle">No comments yet.</p>}
+              {visibleComments.map((c) => (
                 <div key={c.id} className="flex gap-2.5">
                   <Avatar name={c.author} seed={c.author.length} size={28} />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="text-[12px] font-medium text-foreground">{c.author}</span>
-                      <span className="rounded bg-surface-inset px-1.5 py-0.5 text-[11px] text-subtle">{c.authorRole === 'admin' ? 'NASTP' : c.authorRole === 'tenant' ? 'Tenant' : 'System'}</span>
+                      <span className="rounded bg-surface-inset px-1.5 py-0.5 text-[11px] text-subtle">
+                        {c.authorRole === 'admin' ? 'NASTP' : c.authorRole === 'tech' ? 'Technician' : c.authorRole === 'tenant' ? 'Tenant' : 'System'}
+                      </span>
+                      {c.internal && <StatusBadge tone="warning" size="sm" dot={false}>Internal</StatusBadge>}
                       <span className="text-[11px] text-subtle">{ago(c.ts)}</span>
                     </div>
                     <p className="mt-0.5 text-[13px] leading-relaxed text-muted">{c.body}</p>
@@ -197,9 +256,41 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
                 </div>
               ))}
             </div>
-            <div className="mt-3 flex items-end gap-2">
-              <Textarea rows={2} value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Add a comment…" className="flex-1" />
-              <Button variant="secondary" size="sm" disabled={!comment.trim()} onClick={postComment}><Send className="h-3.5 w-3.5" /></Button>
+            <div className="mt-3 flex flex-col gap-2">
+              {staff && (
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setVisibleToTenant(true)}
+                    className={cn(
+                      'rounded-full border px-1 py-1 transition-all',
+                      visibleToTenant ? 'border-success/40 bg-success-dim' : 'border-border bg-surface-inset opacity-60 hover:opacity-100',
+                    )}
+                  >
+                    <StatusBadge tone="success" size="sm" dot>Visible to tenant</StatusBadge>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setVisibleToTenant(false)}
+                    className={cn(
+                      'rounded-full border px-1 py-1 transition-all',
+                      !visibleToTenant ? 'border-warning/40 bg-warning-dim' : 'border-border bg-surface-inset opacity-60 hover:opacity-100',
+                    )}
+                  >
+                    <StatusBadge tone="warning" size="sm" dot>Internal note</StatusBadge>
+                  </button>
+                </div>
+              )}
+              <div className="flex items-end gap-2">
+                <Textarea
+                  rows={2}
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder={staff && !visibleToTenant ? 'Internal note — not shown to the tenant…' : 'Add a comment…'}
+                  className="flex-1"
+                />
+                <Button variant="secondary" size="sm" disabled={!comment.trim()} onClick={postComment}><Send className="h-3.5 w-3.5" /></Button>
+              </div>
             </div>
           </div>
 
@@ -232,6 +323,24 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
                 : 'No further action.'}
             </span>
           ))}
+          {mode === 'tech' && (
+            <>
+              {TECH_NEXT[r.status]?.map((t) => (
+                <Button key={t.to} variant="secondary" size="sm" onClick={() => transition(t.to, t.label)}>{t.label}</Button>
+              ))}
+              {TECH_RESOLVABLE.has(r.status) && (
+                <ResolveDialog
+                  onResolve={resolve}
+                  trigger={<Button variant="success" size="sm"><CheckCircle2 className="h-4 w-4" />Resolve</Button>}
+                />
+              )}
+              {!TECH_NEXT[r.status]?.length && !TECH_RESOLVABLE.has(r.status) && (
+                <span className="text-[12px] text-subtle">
+                  {r.status === 'submitted' || r.status === 'acknowledged' ? 'Not yet dispatched to you.' : 'No further action.'}
+                </span>
+              )}
+            </>
+          )}
           {mode === 'tenant' && r.status === 'resolved' && (
             <>
               <Button variant="ghost" size="sm" onClick={reopen}><RotateCcw className="h-4 w-4" />Reopen</Button>
@@ -366,6 +475,40 @@ function CategoryOverrideDialog({ current, onSubmit, trigger }: { current: Servi
         <DialogFooter>
           <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
           <Button variant="primary" disabled={!canSubmit} onClick={submit}>Re-route</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/** Resolving always asks what was actually done — a status change with no
+ *  explanation leaves the tenant (and the record) with nothing to go on. */
+function ResolveDialog({ onResolve, trigger }: { onResolve: (note: string) => void; trigger: ReactNode }) {
+  const [open, setOpen] = useState(false);
+  const [note, setNote] = useState('');
+
+  const canSubmit = note.trim().length > 0;
+  const submit = () => {
+    if (!canSubmit) return;
+    onResolve(note.trim());
+    setOpen(false);
+    setNote('');
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogContent size="sm">
+        <DialogHeader
+          title="Resolve request"
+          description="Describe what was done — this is what the tenant will see."
+        />
+        <DialogBody>
+          <Textarea rows={4} value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. Replaced the faulty ballast and tested the fixture." autoFocus />
+        </DialogBody>
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+          <Button variant="success" disabled={!canSubmit} onClick={submit}><CheckCircle2 className="h-4 w-4" />Resolve</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

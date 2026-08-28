@@ -19,7 +19,7 @@ import { useMemo, useSyncExternalStore } from 'react';
 import { createWorld, NOW, HOUR, type World } from './world';
 import { departmentById, departmentForCategory, SERVICE_CATEGORY_LABEL } from './catalog';
 import type {
-  ActivityEvent, ActivityKind, AppNotification, ServiceCategory, ServiceComment, ServiceRequest, ServiceStatus,
+  ActivityEvent, ActivityKind, AppNotification, ServiceAttachment, ServiceCategory, ServiceComment, ServiceRequest, ServiceStatus,
   Tenant, TenantStatus, Visitor, VisitorStatus,
 } from './types';
 
@@ -239,6 +239,16 @@ class Simulation {
     const r = this.world.requests.find((x) => x.id === id);
     if (!r) return;
     r.rating = { score, feedback, ratedAt: Date.now() };
+    this.emit();
+  }
+
+  /** Evidence added while the work is happening — a photo of the fault, the
+   *  fix, or a document — not part of the tenant's original submission. */
+  addAttachment(id: string, attachment: Omit<ServiceAttachment, 'id' | 'uploadedAt'>) {
+    const r = this.world.requests.find((x) => x.id === id);
+    if (!r) return;
+    r.attachments.push({ ...attachment, id: `att-${Date.now()}`, uploadedAt: Date.now() });
+    r.updatedAt = Date.now();
     this.emit();
   }
 

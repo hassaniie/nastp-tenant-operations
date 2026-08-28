@@ -387,7 +387,7 @@ export interface ServiceAttachment {
 export interface ServiceComment {
   id: string;
   author: string;
-  authorRole: 'tenant' | 'admin' | 'system';
+  authorRole: 'tenant' | 'admin' | 'tech' | 'system';
   body: string;
   ts: number;
   internal?: boolean;

@@ -7,9 +7,12 @@
  * looking alike.
  *
  * Only this technician's own work. No park-wide view, no other queues.
+ * Opening a job hands off to the same request drawer the admin and tenant
+ * use, in `tech` mode — start work, log a note (tenant-visible or internal),
+ * attach a photo, and resolve with a required note explaining what was done.
  */
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { AlarmClock, CheckCircle2, Wrench } from 'lucide-react';
 import { Page, StatGrid } from '../../components/ui/page';
 import { Card, CardBody, CardHeader } from '../../components/ui/card';
@@ -17,6 +20,7 @@ import { StatCard, PageHeader } from '../../components/common';
 import { IconBox, StatusBadge } from '../../components/ui/primitives';
 import { EmptyState } from '../../components/ui/data';
 import { PriorityBadge, ServiceStatusBadge, CATEGORY_ICON } from '../../components/status';
+import { ServiceRequestDrawer } from '../serviceShared';
 import { useLive } from '../../data/live';
 import { useAuth } from '../../store/auth';
 import { departmentById, OPEN_TECH_STATUSES, SERVICE_CATEGORY_LABEL } from '../../data/catalog';
@@ -28,6 +32,7 @@ const PRIORITY_RANK: Record<ServicePriority, number> = { critical: 0, high: 1, m
 export default function TechJobs() {
   const { session } = useAuth();
   const technicianId = session?.subjectId;
+  const [openId, setOpenId] = useState<string | null>(null);
 
   const data = useLive((w) => {
     const me = w.technicians.find((t) => t.id === technicianId);
@@ -38,6 +43,7 @@ export default function TechJobs() {
       active: mine.filter((r) => OPEN_TECH_STATUSES.has(r.status)),
       resolved: mine.filter((r) => r.status === 'resolved' || r.status === 'confirmed' || r.status === 'closed'),
       tenantName: (id: string) => w.tenantById[id]?.name ?? 'Unknown tenant',
+      open: openId ? mine.find((r) => r.id === openId) ?? null : null,
     };
   });
 
@@ -49,6 +55,11 @@ export default function TechJobs() {
           (a.dueAt ?? Infinity) - (b.dueAt ?? Infinity),
       ),
     [data.active],
+  );
+
+  const recentlyCompleted = useMemo(
+    () => [...data.resolved].sort((a, b) => (b.resolvedAt ?? b.updatedAt) - (a.resolvedAt ?? a.updatedAt)).slice(0, 5),
+    [data.resolved],
   );
 
   const overdue = queue.filter((r) => r.dueAt && r.dueAt < Date.now()).length;
@@ -90,20 +101,47 @@ export default function TechJobs() {
               icon={<IconBox icon={CheckCircle2} tone="success" size="lg" />}
             />
           ) : (
-            queue.map((r) => <JobRow key={r.id} request={r} tenantName={data.tenantName(r.tenantId)} />)
+            queue.map((r) => <JobRow key={r.id} request={r} tenantName={data.tenantName(r.tenantId)} onOpen={() => setOpenId(r.id)} />)
           )}
         </CardBody>
       </Card>
+
+      {recentlyCompleted.length > 0 && (
+        <Card>
+          <CardHeader
+            title="Recently completed"
+            subtitle="Your last few resolved jobs"
+            icon={<IconBox icon={CheckCircle2} tone="success" size="sm" />}
+          />
+          <CardBody className="flex flex-col gap-2">
+            {recentlyCompleted.map((r) => (
+              <JobRow key={r.id} request={r} tenantName={data.tenantName(r.tenantId)} onOpen={() => setOpenId(r.id)} />
+            ))}
+          </CardBody>
+        </Card>
+      )}
+
+      <ServiceRequestDrawer
+        request={data.open}
+        open={Boolean(data.open)}
+        onOpenChange={(o) => !o && setOpenId(null)}
+        mode="tech"
+        tenantName={data.open ? data.tenantName(data.open.tenantId) : undefined}
+      />
     </Page>
   );
 }
 
-function JobRow({ request: r, tenantName }: { request: ServiceRequest; tenantName: string }) {
+function JobRow({ request: r, tenantName, onOpen }: { request: ServiceRequest; tenantName: string; onOpen: () => void }) {
   const Icon = CATEGORY_ICON[r.category] ?? Wrench;
   const isOverdue = Boolean(r.dueAt && r.dueAt < Date.now());
 
   return (
-    <div className="flex items-start gap-3 rounded-xl border border-border-subtle bg-surface-inset/50 p-3">
+    <button
+      type="button"
+      onClick={onOpen}
+      className="flex items-start gap-3 rounded-xl border border-border-subtle bg-surface-inset/50 p-3 text-left transition-colors hover:border-border-strong hover:bg-surface-inset"
+    >
       <IconBox icon={Icon} tone="service" size="sm" />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -128,6 +166,6 @@ function JobRow({ request: r, tenantName }: { request: ServiceRequest; tenantNam
           {isOverdue && <StatusBadge tone="critical" size="sm" dot={false}>Overdue</StatusBadge>}
         </div>
       </div>
-    </div>
+    </button>
   );
 }
