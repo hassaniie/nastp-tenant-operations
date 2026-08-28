@@ -427,6 +427,17 @@ export interface ServiceRequest {
   updatedAt: number;
   resolvedAt?: number;
   dueAt?: number;
+  /** Timestamp the current `waiting_tenant` period started, if it's in one
+   *  right now. Folded into `slaPausedMs` the moment it leaves that status —
+   *  never read on its own to mean "currently paused". */
+  waitingSince?: number;
+  /** Cumulative time spent in `waiting_tenant` across the request's whole
+   *  life, excluded from resolution-time performance figures — a technician
+   *  isn't penalised for however long the tenant took to answer. */
+  slaPausedMs?: number;
+  /** Set only when the system closed this on its own — no tenant response
+   *  within the reopen window — as opposed to an explicit confirm/close. */
+  autoClosedAt?: number;
   attachments: ServiceAttachment[];
   comments: ServiceComment[];
   timeline: ServiceStatusEvent[];

@@ -23,10 +23,10 @@ import { SERVICE_STATUS } from '../lib/meta';
 import {
   SERVICE_CATEGORY_LABEL, departmentById, departmentForCategory, technicianOpenLoad,
 } from '../data/catalog';
-import { simulation, useLive } from '../data/live';
+import { simulation, useLive, REOPEN_WINDOW_MS } from '../data/live';
 import { useSession } from '../store/session';
 import { useAuth } from '../store/auth';
-import { ago, cn, fmtDateTime } from '../lib/utils';
+import { ago, cn, duration, fmtDateTime } from '../lib/utils';
 import type { ServiceCategory, ServiceRequest, ServiceStatus } from '../data/types';
 
 const DISPATCHABLE_STATUSES: ReadonlySet<ServiceStatus> = new Set([
@@ -91,6 +91,11 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
 
   // A tenant never sees an internal note — that's the whole point of one.
   const visibleComments = mode === 'tenant' ? r.comments.filter((c) => !c.internal) : r.comments;
+
+  // Same window on both ends: reopening past it isn't offered, because the
+  // system will have assumed it's fine and auto-closed it around the same
+  // time anyway — this just doesn't wait on that tick to say so.
+  const reopenExpired = r.status === 'resolved' && Boolean(r.resolvedAt) && Date.now() - r.resolvedAt! > REOPEN_WINDOW_MS;
 
   const postComment = () => {
     if (!comment.trim()) return;
@@ -160,6 +165,15 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
             ...(mode !== 'admin' ? [
               { label: 'Department', value: department?.name ?? 'Unrouted' },
               { label: 'Assignee', value: assignee?.name ?? 'Unassigned' },
+            ] : []),
+            // Only worth showing once it's actually happened — most requests
+            // never wait on the tenant at all. Staff-only: it's about how the
+            // clock is measured, not something a tenant needs to account for.
+            ...(staff && (r.slaPausedMs || r.waitingSince) ? [
+              {
+                label: 'Paused (on tenant)',
+                value: duration((r.slaPausedMs ?? 0) + (r.waitingSince ? Date.now() - r.waitingSince : 0)) + (r.waitingSince ? ' so far' : ' total'),
+              },
             ] : []),
           ]} />
 
@@ -343,7 +357,11 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
           )}
           {mode === 'tenant' && r.status === 'resolved' && (
             <>
-              <Button variant="ghost" size="sm" onClick={reopen}><RotateCcw className="h-4 w-4" />Reopen</Button>
+              {reopenExpired ? (
+                <span className="text-[12px] text-subtle">Too long ago to reopen — file a new request if the issue persists.</span>
+              ) : (
+                <Button variant="ghost" size="sm" onClick={reopen}><RotateCcw className="h-4 w-4" />Reopen</Button>
+              )}
               <Button variant="success" size="sm" onClick={confirm}><ThumbsUp className="h-4 w-4" />Confirm{rating ? ' & rate' : ''}</Button>
             </>
           )}

@@ -28,6 +28,10 @@ function jitter(power: number, targetMin: number, targetMax: number) {
   return Math.min(targetMax, Math.max(targetMin, next));
 }
 
+/** How long a tenant has to reopen a resolved request before it's assumed
+ *  fine and closed on its own — the one window that governs both. */
+export const REOPEN_WINDOW_MS = 5 * 24 * HOUR;
+
 class Simulation {
   private world: World = createWorld();
   private listeners = new Set<() => void>();
@@ -101,6 +105,19 @@ class Simulation {
           tenantId: v.tenantId,
           href: '/admin/visitors/overstaying',
         });
+      }
+    }
+
+    // Auto-close: a resolved request the tenant neither confirmed nor
+    // reopened within the window is assumed fine, the same way the reopen
+    // window itself expires — closing the loop even when nobody acts on it.
+    for (const r of this.world.requests) {
+      if (r.status === 'resolved' && r.resolvedAt && now - r.resolvedAt > REOPEN_WINDOW_MS) {
+        r.status = 'closed';
+        r.autoClosedAt = now;
+        r.updatedAt = now;
+        r.timeline.push({ ts: now, status: 'closed', by: 'System', note: 'Automatically closed — no response within 5 days of resolution.' });
+        this.activity('request_updated', r.tenantId, 'Request auto-closed', r.reference, 'System', 'service');
       }
     }
     this.emit();
@@ -216,13 +233,28 @@ class Simulation {
     return req;
   }
 
+  /** Folds a running `waiting_tenant` period into the cumulative pause total
+   *  the moment the request leaves that status — by any path (a normal
+   *  transition, a reassignment, a re-categorisation). Never call this
+   *  without also either leaving the status as `waiting_tenant` or changing
+   *  it away from it; it doesn't check which. */
+  private foldWaitingPause(r: ServiceRequest, now: number) {
+    if (r.waitingSince === undefined) return;
+    r.slaPausedMs = (r.slaPausedMs ?? 0) + (now - r.waitingSince);
+    r.waitingSince = undefined;
+  }
+
   transitionRequest(id: string, status: ServiceStatus, by: string, note?: string) {
     const r = this.world.requests.find((x) => x.id === id);
     if (!r) return;
+    const now = Date.now();
+    if (r.status === 'waiting_tenant' && status !== 'waiting_tenant') this.foldWaitingPause(r, now);
+    if (status === 'waiting_tenant' && r.status !== 'waiting_tenant') r.waitingSince = now;
+
     r.status = status;
-    r.updatedAt = Date.now();
-    r.timeline.push({ ts: Date.now(), status, by, note });
-    if (status === 'resolved' || status === 'confirmed' || status === 'closed') r.resolvedAt = Date.now();
+    r.updatedAt = now;
+    r.timeline.push({ ts: now, status, by, note });
+    if (status === 'resolved' || status === 'confirmed' || status === 'closed') r.resolvedAt = now;
     this.activity(status === 'resolved' ? 'request_resolved' : 'request_updated', r.tenantId, `Request ${status.replace('_', ' ')}`, `${r.reference}`, by, 'service');
     this.emit();
   }
@@ -232,6 +264,25 @@ class Simulation {
     if (!r) return;
     r.comments.push({ ...comment, id: `c-${Date.now()}`, ts: Date.now() });
     r.updatedAt = Date.now();
+
+    // Closes the loop the other direction: a technician asked the tenant
+    // something, the tenant answered here, and the ticket resumes on its own
+    // rather than sitting in "Waiting for Tenant" until someone notices.
+    if (comment.authorRole === 'tenant' && r.status === 'waiting_tenant') {
+      const now = Date.now();
+      this.foldWaitingPause(r, now);
+      r.status = 'in_progress';
+      r.timeline.push({ ts: now, status: 'in_progress', by: comment.author, note: 'Tenant replied — resumed' });
+      this.activity('request_updated', r.tenantId, 'Tenant replied', `${r.reference} resumed`, comment.author, 'service');
+      this.pushNotification({
+        domain: 'service',
+        title: 'Tenant replied',
+        body: `${r.reference}: ${comment.author} answered — back in progress.`,
+        severity: 'attention',
+        tenantId: r.tenantId,
+        href: '/admin/service',
+      });
+    }
     this.emit();
   }
 
@@ -292,10 +343,13 @@ class Simulation {
     const fromDept = departmentById(r.departmentId);
     const toDept = departmentForCategory(category);
 
+    const now = Date.now();
+    if (r.status === 'waiting_tenant') this.foldWaitingPause(r, now);
+
     r.category = category;
     r.departmentId = toDept.id;
     r.technicianId = undefined;
-    r.updatedAt = Date.now();
+    r.updatedAt = now;
     if (['assigned', 'in_progress', 'waiting_tenant', 'reopened'].includes(r.status)) r.status = 'acknowledged';
 
     const rerouted = fromDept && fromDept.id !== toDept.id;
