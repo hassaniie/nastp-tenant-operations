@@ -26,7 +26,7 @@ import type {
   DataGridTableInstance,
 } from "@/components/reui/data-grid/data-grid"
 import { flexRender, Subscribe } from "@tanstack/react-table"
-import type { Cell, Column, Header, Row, Table } from "@tanstack/react-table"
+import type { Cell, Column, Header, Row } from "@tanstack/react-table"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -954,7 +954,6 @@ function DataGridTableHead({ children }: { children: ReactNode }) {
 
 function DataGridTableHeadRow({
   children,
-  rowId,
 }: {
   children: ReactNode
   rowId: string
@@ -1458,7 +1457,7 @@ function DataGridTableFootRowCell({
 }
 
 function DataGridTableBodyRowSkeleton({ children }: { children: ReactNode }) {
-  const { table, props } = useDataGrid()
+  const { props } = useDataGrid()
 
   return (
     <tr
@@ -2341,7 +2340,7 @@ const MemoizedDataGridTableBodyRows = memo(
     next.table._isSelectingCells === true
 ) as typeof DataGridTableBodyRows
 
-function DataGridTableHeader<TData extends object>() {
+function DataGridTableHeader() {
   const { table, props } = useDataGrid()
   const mergedHeaderGroups = getDataGridTableMergedHeaderGroups(table)
   const hasRightPinnedColumns = hasDataGridTableRightPinnedColumns(table)
@@ -2410,7 +2409,7 @@ function DataGridTableHeader<TData extends object>() {
   )
 }
 
-function DataGridTable<TData extends object>({
+function DataGridTable({
   footerContent,
   renderHeader = true,
 }: {

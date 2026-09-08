@@ -39,7 +39,7 @@ export function Delta({ value, suffix = '', invert, className, showZero }: { val
 export function AnimatedNumber({ value, digits = 0, className, duration = 520 }: { value: number; digits?: number; className?: string; duration?: number }) {
   const [display, setDisplay] = useState(value);
   const from = useRef(value);
-  const raf = useRef<number>();
+  const raf = useRef<number | undefined>(undefined);
   useEffect(() => {
     const start = performance.now();
     const origin = from.current;

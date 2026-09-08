@@ -60,6 +60,52 @@ npx tsc --noEmit && npm run build
 git add -A && git commit -m "Install free ReUI components" && git push
 ```
 
+## Step 2b — What the install actually needed afterwards (done)
+
+The registry fetch succeeded but left four things to repair. All are committed;
+this section exists so the same fixes can be re-applied after a future
+`shadcn add`, which will reintroduce some of them.
+
+1. **The CLI wrote ReUI's namespaced items to `src/components/reui`** — relative
+   to `src/`, not through the `@` alias — while writing plain shadcn primitives
+   correctly to `src/tenant/components/ui`. Moved with `git mv` to
+   `src/tenant/components/reui`. **This will happen again on every
+   `shadcn add`**; move the new folder before typechecking.
+
+2. **`cn` was imported from a package, not from this project.** The CLI emitted
+   `import { cn } from "cn"` in all 12 primitives, and an npm package literally
+   named `cn` got installed to satisfy it. That silently bypassed this app's own
+   `cn` (`@/lib/utils`, clsx + tailwind-merge) that the other ~240 files and all
+   41 vendored ReUI files use. Rewritten to `@/lib/utils`; the `cn` package is
+   uninstalled. Re-check this after any `shadcn add`.
+
+3. **React upgraded 18.3 → 19.** ReUI's registry code is authored against React
+   19's type model, where `RefObject<T>.current` is mutable and `useRef<T |
+   null>(null)` is assignable to a `ref` prop. Under React 18 types that
+   produced 8 errors across `cascader-footer.tsx`, `cascader.tsx` and
+   `data-grid-cell-selection.tsx` — and every further group in this migration
+   installs more of the same code, so patching the vendored files would have
+   been a tax that grows and gets clobbered on each reinstall. The upgrade was
+   safe to make here: the app used no React-19-removed API, was already on
+   `createRoot`, and every UI dependency (Radix v1, Base UI 1.8, router v7)
+   supports 19. One app-side change was needed —
+   `useRef<number>()` → `useRef<number | undefined>(undefined)` in
+   `components/common.tsx`, React 19 requiring an explicit initial value.
+
+4. **12 unused declarations in vendored files** (unused type imports, two dead
+   `useMemo`/`useCallback` bodies, an unused generic parameter) tripped
+   `noUnusedLocals`/`noUnusedParameters`. Deleted rather than relaxing the two
+   flags, which the app's own ~240 files satisfy and which are the only
+   unused-code check the project has (there is no ESLint). Expect these to come
+   back on reinstall; the deletions are provably behaviour-neutral.
+
+`tsconfig.json` also moved `lib` from ES2020 to ES2022 for `String.replaceAll`,
+used by the vendored code.
+
+Verified after all of the above: `npx tsc --noEmit` clean (0 errors, both
+unused-checks still on), `npm run build` clean, the 80-route light/dark sweep
+80/80 clean, and the auth, phase-4 and phase-5 behavioural suites all passing.
+
 ## Step 3 — Hand it back
 
 Tell me it's pushed and I take over the actual migration: swapping each page
