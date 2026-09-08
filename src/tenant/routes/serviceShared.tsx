@@ -61,6 +61,10 @@ const TECH_NEXT: Partial<Record<ServiceStatus, Array<{ to: ServiceStatus; label:
 };
 const TECH_RESOLVABLE: ReadonlySet<ServiceStatus> = new Set(['in_progress', 'waiting_tenant', 'reopened']);
 
+/** Said in both places a tenant can land past the reopen window: the sliver
+ *  before auto-close lands, and the closed request they open afterwards. */
+const REOPEN_EXPIRED_NOTE = 'Too long ago to reopen — file a new request if the issue persists.';
+
 export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenantName }: { request: ServiceRequest | null; open: boolean; onOpenChange: (o: boolean) => void; mode: 'admin' | 'tenant' | 'tech'; tenantName?: string }) {
   const { toast } = useSession();
   const { subject } = useAuth();
@@ -94,8 +98,12 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
 
   // Same window on both ends: reopening past it isn't offered, because the
   // system will have assumed it's fine and auto-closed it around the same
-  // time anyway — this just doesn't wait on that tick to say so.
+  // time anyway — this just doesn't wait on that tick to say so. That sliver
+  // is measured in seconds, though: once the tick lands the request is closed
+  // rather than resolved, and the tenant who comes back to it in History is
+  // the one who actually needs telling why there is no Reopen button.
   const reopenExpired = r.status === 'resolved' && Boolean(r.resolvedAt) && Date.now() - r.resolvedAt! > REOPEN_WINDOW_MS;
+  const autoClosed = r.status === 'closed' && Boolean(r.autoClosedAt);
 
   const postComment = () => {
     if (!comment.trim()) return;
@@ -358,12 +366,15 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
           {mode === 'tenant' && r.status === 'resolved' && (
             <>
               {reopenExpired ? (
-                <span className="text-[12px] text-subtle">Too long ago to reopen — file a new request if the issue persists.</span>
+                <span className="text-[12px] text-subtle">{REOPEN_EXPIRED_NOTE}</span>
               ) : (
                 <Button variant="ghost" size="sm" onClick={reopen}><RotateCcw className="h-4 w-4" />Reopen</Button>
               )}
               <Button variant="success" size="sm" onClick={confirm}><ThumbsUp className="h-4 w-4" />Confirm{rating ? ' & rate' : ''}</Button>
             </>
+          )}
+          {mode === 'tenant' && autoClosed && (
+            <span className="text-[12px] text-subtle">{REOPEN_EXPIRED_NOTE}</span>
           )}
           {mode === 'tenant' && (r.status === 'confirmed' || r.status === 'closed') && !r.rating && (
             <Button variant="secondary" size="sm" onClick={() => { if (rating) { simulation.rateRequest(r.id, rating); toast({ title: 'Thanks for the rating', variant: 'success' }); } }} disabled={!rating}><CheckCheck className="h-4 w-4" />Submit rating</Button>
