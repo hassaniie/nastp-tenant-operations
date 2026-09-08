@@ -17,5 +17,10 @@
     "utils": "@/components/shadcn/lib/utils",
     "hooks": "@/components/shadcn/hooks"
   },
-  "iconLibrary": "lucide"
+  "iconLibrary": "lucide",
+  "registries": {
+    "@reui": {
+      "url": "https://reui.io/r/{style}/{name}.json"
+    }
+  }
 }

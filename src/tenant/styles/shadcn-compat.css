@@ -1,0 +1,96 @@
+/**
+ * shadcn / ReUI token compatibility layer.
+ *
+ * This file exists so vendored shadcn and ReUI components render in the
+ * NASTP palette without either side being rewritten. It is strictly
+ * ADDITIVE: it defines the token names those libraries expect and points
+ * each one at a token `theme.css` already owns. It never redefines a token
+ * that `theme.css` defines, so no existing utility changes value and no
+ * existing screen changes appearance.
+ *
+ * `theme.css` remains the single source of truth for the palette. Evolving
+ * the look later means editing values there; this file follows automatically.
+ *
+ * On ordering: every alias below is a `var()` reference, and CSS custom
+ * properties resolve at use time rather than at declaration time. That is
+ * what makes one alias set enough for both themes — when `[data-theme]`
+ * swaps `--surface`, everything aliased to it swaps with it — and it is why
+ * this file may be imported ahead of the definitions it points at.
+ *
+ * Already compatible in `theme.css`, deliberately not repeated here:
+ *   --background  --foreground  --primary  --primary-foreground
+ *   --secondary   --border      --ring
+ */
+
+:root {
+  /* ------------------------------------------------------------ surfaces */
+  --card: var(--surface);
+  --card-foreground: var(--foreground);
+  --popover: var(--surface-overlay);
+  --popover-foreground: var(--foreground);
+  --accent: var(--surface-raised);
+  --accent-foreground: var(--foreground);
+  --secondary-foreground: var(--foreground);
+
+  /**
+   * The one genuine collision, resolved without touching existing code.
+   *
+   * `theme.css:215` maps --color-muted to --foreground-muted, i.e. a TEXT
+   * colour, and `text-muted` appears 103 times across the app. shadcn and
+   * ReUI use `muted` for a SURFACE and `muted-foreground` for the text on
+   * it. Redefining --color-muted to satisfy them would silently repaint all
+   * 103 call sites.
+   *
+   * So the surface gets its own name here, and vendored components are swept
+   * `bg-muted` -> `bg-muted-surface` on install. That sweep is safe to
+   * automate because `bg-muted` appears zero times in the existing app —
+   * every match is by definition a vendored file.
+   */
+  --muted-surface: var(--surface-inset);
+  --muted-foreground: var(--foreground-muted);
+
+  /* -------------------------------------------------------------- intent */
+  /* shadcn calls it `destructive`; the operations vocabulary calls the same
+   * red `critical`. Aliased rather than renamed so `lib/meta.ts` stays the
+   * authority on what a status colour means. */
+  --destructive: var(--critical);
+  --destructive-foreground: #ffffff;
+
+  --input: var(--border);
+
+  /**
+   * Raw token only — deliberately NOT wired into Tailwind's --radius-*
+   * scale. Overriding those would change `rounded-md` / `rounded-lg` /
+   * `rounded-xl` everywhere, which is a real visual change to the existing
+   * app and out of scope for a compatibility layer. Components that
+   * reference var(--radius) directly pick this up; harmonising the radius
+   * scale is a deliberate design decision for a later phase.
+   */
+  --radius: 10px;
+}
+
+/**
+ * Expose the aliases above as Tailwind utilities. `inline` keeps the
+ * generated utility pointing at the underlying var rather than baking in a
+ * value, which is what lets a theme switch repaint these live.
+ *
+ * --color-muted is absent on purpose: it already exists in theme.css and
+ * must keep meaning the text colour. See the note above.
+ */
+@theme inline {
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted-surface: var(--muted-surface);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-input: var(--input);
+}

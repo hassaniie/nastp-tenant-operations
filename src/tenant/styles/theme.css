@@ -1,5 +1,13 @@
 @import 'tailwindcss';
 
+/* shadcn / ReUI token compatibility. Strictly additive aliases onto the
+ * tokens defined below — see shadcn-compat.css. Chained here rather than
+ * imported from main.tsx because Tailwind v4 only resolves `@theme` inside
+ * the stylesheet graph rooted at `@import 'tailwindcss'`; a sibling
+ * stylesheet imported from JS is bundled but its theme block is ignored.
+ * Load order is irrelevant: every alias is a lazily-resolved var(). */
+@import './shadcn-compat.css';
+
 /**
  * NASTP Tenant Operations — design system.
  *
