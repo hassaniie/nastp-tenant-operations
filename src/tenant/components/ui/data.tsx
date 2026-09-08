@@ -2,14 +2,23 @@
  * Data surfaces: the table and the states every data view must be able to show
  * — loading, empty, error. These are components rather than copy-pasted markup
  * so a screen physically cannot forget one.
+ *
+ * The table renders through ReUI's `data-grid` (TanStack Table v9) while
+ * keeping the `Column<T>` shape the pages already declare. The migration swaps
+ * the engine, not the fifteen call sites: sorting, pagination, skeletons and
+ * the header chrome are the grid's now, and the states below stay ours because
+ * the grid has no concept of a failed fetch.
  */
 
-import {
-  AlertTriangle, ChevronDown, ChevronLeft, ChevronRight, ChevronsUpDown, ChevronUp, Inbox, RefreshCw,
-} from 'lucide-react';
+import { AlertTriangle, Inbox, RefreshCw } from 'lucide-react';
 import { useMemo, useState, type ReactNode } from 'react';
+import { useTable, type ColumnDef, type PaginationState } from '@tanstack/react-table';
 import { cn } from '../../lib/utils';
-import { Button, Skeleton } from './primitives';
+import { Button } from './primitives';
+import { DataGrid, DataGridContainer, dataGridFeatures, type DataGridFeatures } from '../reui/data-grid/data-grid';
+import { DataGridTable } from '../reui/data-grid/data-grid-table';
+import { DataGridPagination } from '../reui/data-grid/data-grid-pagination';
+import { DataGridColumnHeader } from '../reui/data-grid/data-grid-column-header';
 
 /* ------------------------------------------------------------------- Table */
 
@@ -18,9 +27,11 @@ export interface Column<T> {
   header: ReactNode;
   cell: (row: T, index: number) => ReactNode;
   sortValue?: (row: T) => string | number;
-  width?: string;
   align?: 'left' | 'right' | 'center';
+  /** Classes for the body cell. */
   className?: string;
+  /** Classes for the header cell — sizing a column lives here (e.g. `w-11`). */
+  headerClassName?: string;
   hideBelow?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
@@ -31,7 +42,10 @@ const HIDE: Record<NonNullable<Column<unknown>['hideBelow']>, string> = {
   xl: 'hidden xl:table-cell',
 };
 
-export function DataTable<T>({
+const ALIGN_CELL = { left: '', right: 'text-right', center: 'text-center' } as const;
+const ALIGN_HEAD = { left: '', right: 'justify-end', center: 'justify-center' } as const;
+
+export function DataTable<T extends object>({
   rows,
   columns,
   rowKey,
@@ -66,138 +80,91 @@ export function DataTable<T>({
   className?: string;
   selectedKey?: string;
 }) {
-  const [sort, setSort] = useState<{ key: string; dir: 'asc' | 'desc' } | null>(null);
-  const [page, setPage] = useState(0);
+  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: pageSize || 10 });
+  const pageSizeOptions = useMemo(() => Array.from(new Set([pageSize, 10, 25, 50, 100])).sort((a, b) => a - b), [pageSize]);
 
-  const sorted = useMemo(() => {
-    if (!sort) return rows;
-    const col = columns.find((c) => c.key === sort.key);
-    if (!col?.sortValue) return rows;
-    const dir = sort.dir === 'asc' ? 1 : -1;
-    return [...rows].sort((a, b) => {
-      const av = col.sortValue!(a);
-      const bv = col.sortValue!(b);
-      if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * dir;
-      return String(av).localeCompare(String(bv)) * dir;
-    });
-  }, [rows, sort, columns]);
+  const gridColumns = useMemo<ColumnDef<DataGridFeatures, T>[]>(
+    () =>
+      columns.map((col) => {
+        const align = col.align ?? 'left';
+        const hidden = col.hideBelow ? HIDE[col.hideBelow] : undefined;
+        const sortable = Boolean(col.sortValue);
+        const title = typeof col.header === 'string' ? col.header : undefined;
 
-  const pageCount = pageSize ? Math.max(1, Math.ceil(sorted.length / pageSize)) : 1;
-  const current = Math.min(page, pageCount - 1);
-  const visible = pageSize ? sorted.slice(current * pageSize, current * pageSize + pageSize) : sorted;
+        return {
+          id: col.key,
+          // The sort key doubles as the accessor: TanStack sorts on the
+          // accessed value, which is exactly what `sortValue` already returns.
+          ...(col.sortValue ? { accessorFn: (row: T) => col.sortValue!(row) } : {}),
+          enableSorting: sortable,
+          header: ({ column }) => (
+            <div className={cn('flex w-full items-center', ALIGN_HEAD[align])}>
+              {sortable ? <DataGridColumnHeader column={column} title={title} /> : col.header}
+            </div>
+          ),
+          cell: ({ row }) => col.cell(row.original, row.index),
+          meta: {
+            headerTitle: title ?? col.key,
+            headerClassName: cn(hidden, col.headerClassName),
+            cellClassName: cn(hidden, ALIGN_CELL[align], col.className),
+          },
+        };
+      }),
+    [columns],
+  );
+
+  const table = useTable({
+    features: dataGridFeatures,
+    data: rows,
+    columns: gridColumns,
+    getRowId: (row: T, index: number) => rowKey(row, index),
+    // `dataGridFeatures` always registers the paginated row model, so a grid
+    // that must show every row has to opt out of it rather than omit a page size.
+    ...(pageSize > 0 ? { onPaginationChange: setPagination } : { manualPagination: true }),
+    // Drives the `data-state=selected` styling only; no selection column is
+    // rendered, so this stays a highlight rather than a checkbox affordance.
+    enableRowSelection: true,
+    state: {
+      ...(pageSize > 0 ? { pagination } : {}),
+      rowSelection: selectedKey ? { [selectedKey]: true } : {},
+    },
+  });
 
   if (error) return <ErrorState message={error} onRetry={onRetry} />;
 
   return (
     <div className={cn('flex min-h-0 flex-col', className)}>
-      <div className="min-h-0 flex-1 overflow-auto">
-        <table className="w-full border-collapse text-left">
-          <thead className={cn(stickyHeader && 'sticky top-0 z-10')}>
-            <tr className="bg-surface-inset">
-              {columns.map((col) => {
-                const sortable = Boolean(col.sortValue);
-                const active = sort?.key === col.key;
-                return (
-                  <th
-                    key={col.key}
-                    style={{ width: col.width }}
-                    className={cn(
-                      'whitespace-nowrap border-b border-border px-3.5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.09em] text-subtle',
-                      col.align === 'right' && 'text-right',
-                      col.align === 'center' && 'text-center',
-                      col.hideBelow && HIDE[col.hideBelow],
-                      sortable && 'cursor-pointer select-none transition-colors hover:text-foreground',
-                    )}
-                    onClick={
-                      sortable
-                        ? () => setSort((prev) => (prev?.key === col.key ? { key: col.key, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { key: col.key, dir: 'asc' }))
-                        : undefined
-                    }
-                  >
-                    <span className={cn('inline-flex items-center gap-1', col.align === 'right' && 'flex-row-reverse')}>
-                      {col.header}
-                      {sortable && (active ? sort!.dir === 'asc' ? <ChevronUp className="h-3 w-3 text-primary" /> : <ChevronDown className="h-3 w-3 text-primary" /> : <ChevronsUpDown className="h-3 w-3 opacity-40" />)}
-                    </span>
-                  </th>
-                );
-              })}
-            </tr>
-          </thead>
-          <tbody>
-            {loading &&
-              Array.from({ length: 8 }).map((_, i) => (
-                <tr key={`sk-${i}`} className="border-b border-border-subtle">
-                  {columns.map((col) => (
-                    <td key={col.key} className={cn('px-3.5', dense ? 'py-2' : 'py-3', col.hideBelow && HIDE[col.hideBelow])}>
-                      <Skeleton className="h-3.5 w-full max-w-[150px]" />
-                    </td>
-                  ))}
-                </tr>
-              ))}
-
-            {!loading &&
-              visible.map((row, i) => {
-                const key = rowKey(row, i);
-                return (
-                  <tr
-                    key={key}
-                    onClick={onRowClick ? () => onRowClick(row) : undefined}
-                    className={cn(
-                      'border-b border-border-subtle transition-colors',
-                      onRowClick && 'cursor-pointer hover:bg-surface-raised',
-                      selectedKey === key && 'bg-primary-muted/40',
-                    )}
-                  >
-                    {columns.map((col) => (
-                      <td
-                        key={col.key}
-                        className={cn(
-                          'px-3.5 align-middle text-[13px] text-muted-foreground',
-                          dense ? 'py-2' : 'py-3',
-                          col.align === 'right' && 'text-right',
-                          col.align === 'center' && 'text-center',
-                          col.hideBelow && HIDE[col.hideBelow],
-                          col.className,
-                        )}
-                      >
-                        {col.cell(row, i)}
-                      </td>
-                    ))}
-                  </tr>
-                );
-              })}
-          </tbody>
-        </table>
-
-        {!loading && !visible.length && <EmptyState title={emptyTitle} description={emptyDescription} action={emptyAction} icon={emptyIcon} />}
-      </div>
-
-      {pageSize > 0 && sorted.length > pageSize && <Pagination page={current} pageCount={pageCount} total={sorted.length} pageSize={pageSize} onChange={setPage} />}
-    </div>
-  );
-}
-
-/* -------------------------------------------------------------- Pagination */
-
-export function Pagination({ page, pageCount, total, pageSize, onChange }: { page: number; pageCount: number; total: number; pageSize: number; onChange: (page: number) => void }) {
-  const from = page * pageSize + 1;
-  const to = Math.min(total, (page + 1) * pageSize);
-  return (
-    <div className="flex items-center justify-between border-t border-border px-3.5 py-2.5">
-      <p className="tnum text-[12px] text-subtle">
-        {from}–{to} of {total.toLocaleString()}
-      </p>
-      <div className="flex items-center gap-1">
-        <Button variant="ghost" size="icon-sm" disabled={page === 0} onClick={() => onChange(page - 1)} aria-label="Previous page">
-          <ChevronLeft className="h-3.5 w-3.5" />
-        </Button>
-        <span className="tnum px-2 text-[12px] text-muted-foreground">
-          {page + 1} / {pageCount}
-        </span>
-        <Button variant="ghost" size="icon-sm" disabled={page >= pageCount - 1} onClick={() => onChange(page + 1)} aria-label="Next page">
-          <ChevronRight className="h-3.5 w-3.5" />
-        </Button>
-      </div>
+      <DataGrid
+        table={table}
+        recordCount={rows.length}
+        isLoading={loading}
+        loadingMode="skeleton"
+        onRowClick={onRowClick}
+        emptyMessage={<EmptyState title={emptyTitle} description={emptyDescription} action={emptyAction} icon={emptyIcon} />}
+        tableLayout={{
+          dense,
+          headerSticky: stickyHeader,
+          headerBackground: true,
+          width: 'auto',
+          rowBorder: true,
+        }}
+        tableClassNames={{
+          bodyRow: cn(
+            'text-[13px] text-muted-foreground',
+            onRowClick && 'cursor-pointer',
+            'data-[state=selected]:bg-primary-muted/40',
+          ),
+          headerRow: 'bg-surface-inset',
+        }}
+      >
+        <DataGridContainer className="min-h-0 flex-1">
+          <DataGridTable />
+        </DataGridContainer>
+        {/* ReUI's default size list is [5,10,25,50,100]; the pages here ask for
+            12, 13, 14 and 20, and a size outside the list leaves the selector
+            rendering blank. Seed it with whatever this table actually uses. */}
+        {pageSize > 0 && rows.length > pageSize && <DataGridPagination sizes={pageSizeOptions} />}
+      </DataGrid>
     </div>
   );
 }

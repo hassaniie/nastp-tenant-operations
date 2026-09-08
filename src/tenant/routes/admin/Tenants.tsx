@@ -101,7 +101,7 @@ export default function Tenants() {
     {
       key: 'actions',
       header: '',
-      width: '44px',
+      headerClassName: 'w-11',
       cell: (r) => <RowActions summary={r} onOpen={() => navigate(`/admin/tenants/${r.tenant.id}`)} />,
     },
   ];
