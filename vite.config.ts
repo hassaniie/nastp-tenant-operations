@@ -7,7 +7,12 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
+      // Points at the application root, not `src`, so the shadcn/ReUI
+      // convention (`@/components/...`, `@/lib/utils`) resolves to the real
+      // tree at src/tenant. Kept in step with `paths` in tsconfig.json —
+      // Vite resolves the bundle, TypeScript resolves the type-check, and a
+      // disagreement between the two builds but fails `npm run typecheck`.
+      '@': fileURLToPath(new URL('./src/tenant', import.meta.url)),
     },
   },
   build: {
