@@ -12,7 +12,7 @@ const ICON = {
 } as const;
 
 const TONE: Record<Toast['variant'], string> = {
-  default: 'text-muted',
+  default: 'text-muted-foreground',
   success: 'text-success',
   warning: 'text-warning',
   critical: 'text-critical',
@@ -34,7 +34,7 @@ export function Toaster() {
             <Icon className={cn('mt-0.5 h-4.5 w-4.5 shrink-0', TONE[t.variant])} />
             <div className="min-w-0 flex-1">
               <p className="text-[13px] font-medium text-foreground">{t.title}</p>
-              {t.description && <p className="mt-0.5 text-[12px] leading-relaxed text-muted">{t.description}</p>}
+              {t.description && <p className="mt-0.5 text-[12px] leading-relaxed text-muted-foreground">{t.description}</p>}
               {t.action && (
                 <Button variant="subtle" size="xs" className="mt-2" onClick={() => { t.action!.onClick(); dismissToast(t.id); }}>
                   {t.action.label}

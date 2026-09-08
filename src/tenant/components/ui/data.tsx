@@ -152,7 +152,7 @@ export function DataTable<T>({
                       <td
                         key={col.key}
                         className={cn(
-                          'px-3.5 align-middle text-[13px] text-muted',
+                          'px-3.5 align-middle text-[13px] text-muted-foreground',
                           dense ? 'py-2' : 'py-3',
                           col.align === 'right' && 'text-right',
                           col.align === 'center' && 'text-center',
@@ -191,7 +191,7 @@ export function Pagination({ page, pageCount, total, pageSize, onChange }: { pag
         <Button variant="ghost" size="icon-sm" disabled={page === 0} onClick={() => onChange(page - 1)} aria-label="Previous page">
           <ChevronLeft className="h-3.5 w-3.5" />
         </Button>
-        <span className="tnum px-2 text-[12px] text-muted">
+        <span className="tnum px-2 text-[12px] text-muted-foreground">
           {page + 1} / {pageCount}
         </span>
         <Button variant="ghost" size="icon-sm" disabled={page >= pageCount - 1} onClick={() => onChange(page + 1)} aria-label="Next page">
@@ -225,7 +225,7 @@ export function ErrorState({ message, onRetry, className, compact }: { message: 
       </div>
       <div>
         <p className="text-[14px] font-medium text-foreground">Could not load this data</p>
-        <p className="mx-auto mt-1 max-w-md text-[13px] leading-relaxed text-muted">{message}</p>
+        <p className="mx-auto mt-1 max-w-md text-[13px] leading-relaxed text-muted-foreground">{message}</p>
       </div>
       {onRetry && (
         <Button size="sm" variant="secondary" onClick={onRetry}>

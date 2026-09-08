@@ -61,7 +61,7 @@ export function DialogHeader({ title, description, icon }: { title: ReactNode; d
         {icon}
         <div>
           <DialogPrimitive.Title className="text-[15px] font-semibold text-foreground">{title}</DialogPrimitive.Title>
-          {description && <DialogPrimitive.Description className="mt-1 text-[13px] leading-relaxed text-muted">{description}</DialogPrimitive.Description>}
+          {description && <DialogPrimitive.Description className="mt-1 text-[13px] leading-relaxed text-muted-foreground">{description}</DialogPrimitive.Description>}
         </div>
       </div>
       <DialogPrimitive.Close className="rounded-md p-1.5 text-subtle transition-colors hover:bg-surface-raised hover:text-foreground">
@@ -221,7 +221,7 @@ export const MenuItem = forwardRef<
     className={cn(
       'flex cursor-pointer select-none items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] outline-none transition-colors',
       'data-[highlighted]:bg-surface-raised data-[disabled]:pointer-events-none data-[disabled]:opacity-40',
-      destructive ? 'text-critical data-[highlighted]:bg-critical-dim' : 'text-muted data-[highlighted]:text-foreground',
+      destructive ? 'text-critical data-[highlighted]:bg-critical-dim' : 'text-muted-foreground data-[highlighted]:text-foreground',
       className,
     )}
     {...props}

@@ -43,7 +43,7 @@ export default function Meters() {
     { key: 'serial', header: 'Serial', cell: (m) => <span className="tnum font-medium text-foreground">{m.serial}</span>, sortValue: (m) => m.serial },
     { key: 'name', header: 'Meter', cell: (m) => <span>{m.name}</span>, hideBelow: 'md' },
     { key: 'kind', header: 'Type', cell: (m) => <StatusBadge tone={m.kind === 'main' ? 'primary' : 'neutral'} size="sm" dot={false}>{m.kind === 'main' ? 'Main' : 'Sub-meter'}</StatusBadge>, sortValue: (m) => m.kind },
-    { key: 'owner', header: 'Assigned to', cell: (m) => <span className={m.kind === 'main' ? 'text-subtle' : 'text-muted'}>{m.tenantName}</span>, hideBelow: 'lg' },
+    { key: 'owner', header: 'Assigned to', cell: (m) => <span className={m.kind === 'main' ? 'text-subtle' : 'text-muted-foreground'}>{m.tenantName}</span>, hideBelow: 'lg' },
     { key: 'load', header: 'Load', align: 'right', cell: (m) => <span className="tnum">{num(m.live.powerKw, 1)} kW</span>, sortValue: (m) => m.live.powerKw },
     { key: 'pf', header: 'PF', align: 'right', cell: (m) => <span className="tnum">{m.live.powerFactor.toFixed(2)}</span>, hideBelow: 'xl' },
     { key: 'status', header: 'Status', cell: (m) => <MeterStatusBadge status={m.status} size="sm" /> },

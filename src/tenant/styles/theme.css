@@ -212,7 +212,13 @@
   --color-surface-subtle: var(--surface-subtle);
 
   --color-foreground: var(--foreground);
-  --color-muted: var(--foreground-muted);
+  /* `muted` follows shadcn/ReUI semantics: a subdued *surface*, with
+   * `muted-foreground` as the text that sits on it. This app's dimmed-text
+   * ramp keeps its extra steps (`subtle`, `disabled`) — shadcn only defines
+   * one, and collapsing three levels into one would flatten a hierarchy the
+   * typography pass deliberately built. */
+  --color-muted: var(--surface-inset);
+  --color-muted-foreground: var(--foreground-muted);
   --color-subtle: var(--foreground-subtle);
   --color-disabled: var(--foreground-disabled);
 
@@ -257,6 +263,33 @@
   --color-viz-4: var(--viz-4);
   --color-viz-5: var(--viz-5);
   --color-viz-6: var(--viz-6);
+
+  /*
+   * shadcn/ReUI standard tokens.
+   *
+   * Mapped onto the surfaces and status hues already defined above rather
+   * than introducing a second palette — a ReUI component dropped into this
+   * app inherits the app's own colours instead of arriving with its own.
+   * Every one of these resolves through a base token that already switches
+   * between the dark and light blocks, so no per-theme duplication is needed.
+   */
+  --color-card: var(--surface);
+  --color-card-foreground: var(--foreground);
+  --color-popover: var(--surface-overlay);
+  --color-popover-foreground: var(--foreground);
+  --color-accent: var(--surface-raised);
+  --color-accent-foreground: var(--foreground);
+  --color-destructive: var(--critical);
+  --color-destructive-foreground: var(--primary-foreground);
+  --color-input: var(--border);
+
+  /* Charts reuse the validated categorical ramp, so a ReUI chart and a
+   * hand-built one read as the same system. */
+  --color-chart-1: var(--viz-1);
+  --color-chart-2: var(--viz-2);
+  --color-chart-3: var(--viz-3);
+  --color-chart-4: var(--viz-4);
+  --color-chart-5: var(--viz-5);
 
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;

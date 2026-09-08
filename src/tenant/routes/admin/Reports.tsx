@@ -57,7 +57,7 @@ export default function Reports() {
                 <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-subtle">{cat}</p>
                 <div className="flex flex-col gap-1">
                   {REPORTS.filter((r) => r.category === cat).map((r) => (
-                    <button key={r.id} onClick={() => setSelected(r.id)} className={cn('rounded-lg px-2.5 py-2 text-left text-[13px] transition-colors', selected === r.id ? 'bg-primary-muted text-foreground' : 'text-muted hover:bg-surface-raised hover:text-foreground')}>
+                    <button key={r.id} onClick={() => setSelected(r.id)} className={cn('rounded-lg px-2.5 py-2 text-left text-[13px] transition-colors', selected === r.id ? 'bg-primary-muted text-foreground' : 'text-muted-foreground hover:bg-surface-raised hover:text-foreground')}>
                       {r.title}
                     </button>
                   ))}
@@ -98,7 +98,7 @@ export default function Reports() {
                       {rows.map((row, i) => (
                         <tr key={i} className="border-b border-border-subtle">
                           {Object.keys(rows[0]).map((k) => (
-                            <td key={k} className="whitespace-nowrap px-3.5 py-2.5 text-[13px] text-muted">{String(row[k])}</td>
+                            <td key={k} className="whitespace-nowrap px-3.5 py-2.5 text-[13px] text-muted-foreground">{String(row[k])}</td>
                           ))}
                         </tr>
                       ))}

@@ -49,7 +49,7 @@ export default function AcceptInvite() {
       <Shell>
         <IconBox icon={MailWarning} tone="warning" size="lg" />
         <h1 className="text-[20px] font-semibold text-foreground">{copy.title}</h1>
-        <p className="max-w-[34ch] text-[13px] text-muted">{copy.body}</p>
+        <p className="max-w-[34ch] text-[13px] text-muted-foreground">{copy.body}</p>
         <Link to={doorFor('portal')} className="text-[13px] font-medium text-primary underline underline-offset-2">
           Go to sign in
         </Link>
@@ -81,7 +81,7 @@ export default function AcceptInvite() {
     <Shell>
       <IconBox icon={KeyRound} tone="primary" size="lg" />
       <h1 className="text-[20px] font-semibold text-foreground">Set your password</h1>
-      <p className="max-w-[34ch] text-[13px] text-muted">
+      <p className="max-w-[34ch] text-[13px] text-muted-foreground">
         For <span className="font-medium text-foreground">{t.email}</span>. This activates your account.
       </p>
 

@@ -48,7 +48,7 @@ export default function ScheduleVisitor() {
     <Card>
       <CardHeader title="Schedule a Visitor" subtitle="Register an individual visitor for reception" icon={<IconBox icon={CalendarPlus} tone="visitor" size="sm" />} />
       <CardBody className="flex flex-col gap-5">
-        <div className="flex items-start gap-2.5 rounded-xl border border-border-subtle bg-surface-inset/50 p-3 text-[12px] text-muted">
+        <div className="flex items-start gap-2.5 rounded-xl border border-border-subtle bg-surface-inset/50 p-3 text-[12px] text-muted-foreground">
           <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-info" />
           <span>The visitor arrives at reception and presents ID — no QR code or digital pass is issued. Fields marked <span className="text-critical">*</span> are required.</span>
         </div>

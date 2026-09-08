@@ -43,7 +43,7 @@ export default function PortalEnergyAlerts() {
                     <AlertSeverityBadge severity={a.severity} size="sm" />
                     <span className="rounded bg-surface px-1.5 py-0.5 text-[11px] text-subtle">{ALERT_KIND_LABEL[a.kind]}</span>
                   </div>
-                  <p className="mt-0.5 text-[12px] text-muted">{a.description}</p>
+                  <p className="mt-0.5 text-[12px] text-muted-foreground">{a.description}</p>
                   <p className="mt-1 text-[11px] text-subtle">{a.source} · {ago(a.ts)}</p>
                 </div>
                 {a.status === 'active' && <Button variant="ghost" size="xs" onClick={() => simulation.acknowledgeAlert(a.id)}><Check className="h-3.5 w-3.5" />Acknowledge</Button>}

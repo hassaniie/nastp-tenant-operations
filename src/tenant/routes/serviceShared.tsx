@@ -153,7 +153,7 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
         <DrawerBody className="flex flex-col gap-5">
           <div className="flex items-start gap-3 rounded-xl border border-border-subtle bg-surface-inset/50 p-3">
             <IconBox icon={Icon} tone="service" size="md" />
-            <p className="text-[13px] leading-relaxed text-muted">{r.description}</p>
+            <p className="text-[13px] leading-relaxed text-muted-foreground">{r.description}</p>
           </div>
 
           <DefList columns={2} items={[
@@ -233,7 +233,7 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
               {r.attachments.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {r.attachments.map((a) => (
-                    <span key={a.id} className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-inset px-2.5 py-1.5 text-[12px] text-muted">
+                    <span key={a.id} className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-inset px-2.5 py-1.5 text-[12px] text-muted-foreground">
                       <Paperclip className="h-3.5 w-3.5" />{a.name} <span className="text-subtle">· {Math.round(a.sizeKb)} KB</span>
                     </span>
                   ))}
@@ -265,7 +265,7 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
                       {c.internal && <StatusBadge tone="warning" size="sm" dot={false}>Internal</StatusBadge>}
                       <span className="text-[11px] text-subtle">{ago(c.ts)}</span>
                     </div>
-                    <p className="mt-0.5 text-[13px] leading-relaxed text-muted">{c.body}</p>
+                    <p className="mt-0.5 text-[13px] leading-relaxed text-muted-foreground">{c.body}</p>
                   </div>
                 </div>
               ))}
@@ -311,14 +311,14 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
           {mode === 'tenant' && r.status === 'resolved' && (
             <div className="rounded-xl border border-success/25 bg-success-dim/40 p-3.5">
               <p className="text-[13px] font-medium text-foreground">This request is marked resolved.</p>
-              <p className="mt-0.5 text-[12px] text-muted">Rate the service and confirm, or reopen if the issue persists.</p>
+              <p className="mt-0.5 text-[12px] text-muted-foreground">Rate the service and confirm, or reopen if the issue persists.</p>
               <div className="mt-2.5"><RatingStars value={rating} onChange={setRating} size={20} /></div>
             </div>
           )}
           {r.rating && (
             <div className="flex items-center gap-2 rounded-xl border border-border-subtle bg-surface-inset/50 p-3">
               <RatingStars value={r.rating.score} size={16} />
-              <span className="text-[12px] text-muted">{r.rating.feedback ?? 'Rated by tenant'}</span>
+              <span className="text-[12px] text-muted-foreground">{r.rating.feedback ?? 'Rated by tenant'}</span>
             </div>
           )}
         </DrawerBody>
@@ -483,7 +483,7 @@ function CategoryOverrideDialog({ current, onSubmit, trigger }: { current: Servi
         <DialogBody className="flex flex-col gap-4">
           <SimpleSelect value={category} onChange={setCategory} options={CATEGORY_OPTIONS} />
           {rerouting && (
-            <p className="text-[12px] text-muted">
+            <p className="text-[12px] text-muted-foreground">
               Will route to <span className="font-medium text-foreground">{target.name}</span>
               {target.triageOnly ? ' — triage only, so it will need re-categorising again before anyone can be assigned' : ''}.
             </p>

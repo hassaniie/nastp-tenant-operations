@@ -192,7 +192,7 @@ function StepLocation({ draft, set, buildings, floors }: { draft: Draft; set: (p
             ))}
           </div>
           <div className="mt-3 flex items-center justify-between rounded-xl border border-primary/20 bg-primary-muted/40 px-3.5 py-2.5">
-            <span className="text-[12px] text-muted">{draft.offices.length} office{draft.offices.length === 1 ? '' : 's'} · Building → Floor → Offices</span>
+            <span className="text-[12px] text-muted-foreground">{draft.offices.length} office{draft.offices.length === 1 ? '' : 's'} · Building → Floor → Offices</span>
             <span className="tnum text-[13px] font-semibold text-foreground">{area(total)} total</span>
           </div>
         </div>
@@ -206,7 +206,7 @@ function StepEnergy({ draft, set }: { draft: Draft; set: (p: Partial<Draft>) => 
     <>
       <StepHead icon={Gauge} title="Energy Infrastructure" subtitle="Assign a sub-meter to each space" />
       <CardBody className="flex flex-col gap-4">
-        <div className="rounded-xl border border-border-subtle bg-surface-inset/50 p-3.5 text-[12px] leading-relaxed text-muted">
+        <div className="rounded-xl border border-border-subtle bg-surface-inset/50 p-3.5 text-[12px] leading-relaxed text-muted-foreground">
           Every tenant is metered by <span className="font-medium text-foreground">sub-meters</span>. The floor's main meter belongs to building infrastructure and is not assigned to the tenant. Consumption and charges come from these sub-meters.
         </div>
         {draft.offices.map((o, i) => {
@@ -237,7 +237,7 @@ function StepRates({ tariff, baseKw }: { tariff?: import('../../data/types').Tar
     <>
       <StepHead icon={Zap} title="Energy Configuration" subtitle="Applicable, globally-configured rates" />
       <CardBody className="flex flex-col gap-4">
-        <div className="rounded-xl border border-border-subtle bg-surface-inset/50 p-3.5 text-[12px] text-muted">
+        <div className="rounded-xl border border-border-subtle bg-surface-inset/50 p-3.5 text-[12px] text-muted-foreground">
           Rates are configured centrally and are not customised per tenant. This tenant will bill against <span className="font-medium text-foreground">{tariff?.name ?? 'the current schedule'}</span>.
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -249,7 +249,7 @@ function StepRates({ tariff, baseKw }: { tariff?: import('../../data/types').Tar
         <div className="rounded-xl border border-border bg-surface p-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle">How charges are calculated</p>
           <p className="mt-2 text-[13px] text-foreground">Consumption <span className="text-subtle">×</span> Applicable Rate <span className="text-subtle">=</span> Energy Charge</p>
-          <p className="mt-2 text-[12px] text-muted">Estimated monthly usage ≈ <span className="tnum font-medium text-foreground">{num(monthlyKwh)} kWh</span>, roughly <span className="tnum font-medium text-foreground">{currency(monthlyKwh * rate('off_peak'), { compact: true })}</span> at the off-peak rate.</p>
+          <p className="mt-2 text-[12px] text-muted-foreground">Estimated monthly usage ≈ <span className="tnum font-medium text-foreground">{num(monthlyKwh)} kWh</span>, roughly <span className="tnum font-medium text-foreground">{currency(monthlyKwh * rate('off_peak'), { compact: true })}</span> at the off-peak rate.</p>
         </div>
       </CardBody>
     </>
@@ -261,7 +261,7 @@ function RateTile({ label, value }: { label: string; value: number }) {
     <div className="rounded-xl border border-border-subtle bg-surface-inset/50 p-3 text-center">
       <p className="tnum text-[18px] font-semibold text-foreground">{value.toFixed(2)}</p>
       <p className="text-[11px] text-subtle">PKR / kWh</p>
-      <p className="mt-1 text-[11px] font-medium text-muted">{label}</p>
+      <p className="mt-1 text-[11px] font-medium text-muted-foreground">{label}</p>
     </div>
   );
 }
@@ -295,7 +295,7 @@ function StepPortal({ draft, set }: { draft: Draft; set: (p: Partial<Draft>) => 
     <>
       <StepHead icon={UserRound} title="Portal Access" subtitle="Configure the primary tenant user" />
       <CardBody className="flex flex-col gap-4">
-        <div className="rounded-xl border border-border-subtle bg-surface-inset/50 p-3.5 text-[12px] text-muted">
+        <div className="rounded-xl border border-border-subtle bg-surface-inset/50 p-3.5 text-[12px] text-muted-foreground">
           One primary user is configured now. Additional users and roles can be added later without changing the tenant. On activation, an invitation is generated for this user.
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -325,7 +325,7 @@ function StepReview({ draft, validity, totalArea }: { draft: Draft; validity: bo
         {warnings.length > 0 && (
           <div className="flex items-start gap-2.5 rounded-xl border border-warning/25 bg-warning-dim/40 p-3">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
-            <div className="text-[12px] text-muted">
+            <div className="text-[12px] text-muted-foreground">
               <p className="font-medium text-foreground">Before you activate</p>
               <ul className="mt-1 list-disc pl-4">{warnings.map((w) => <li key={w}>{w}</li>)}</ul>
             </div>

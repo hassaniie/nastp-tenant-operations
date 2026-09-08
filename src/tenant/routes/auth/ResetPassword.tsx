@@ -53,7 +53,7 @@ export function RequestReset() {
       <Shell>
         <IconBox icon={Mail} tone="primary" size="lg" />
         <h1 className="text-[20px] font-semibold text-foreground">Check your email</h1>
-        <p className="max-w-[36ch] text-[13px] text-muted">
+        <p className="max-w-[36ch] text-[13px] text-muted-foreground">
           If an account exists for <span className="font-medium text-foreground">{email}</span>, a reset
           link is on its way. It will expire in an hour.
         </p>
@@ -73,7 +73,7 @@ export function RequestReset() {
               No mail server exists in this build, so the link that would have been emailed is shown here.
             </p>
             <div className="mt-2 flex items-center gap-2 rounded-lg border border-border bg-surface-inset px-3 py-2">
-              <code className="flex-1 truncate text-[11px] text-muted">{demoLink}</code>
+              <code className="flex-1 truncate text-[11px] text-muted-foreground">{demoLink}</code>
               <Button variant="secondary" size="xs" onClick={() => navigator.clipboard.writeText(demoLink)}>Copy</Button>
             </div>
           </Card>
@@ -86,7 +86,7 @@ export function RequestReset() {
     <Shell>
       <IconBox icon={KeyRound} tone="primary" size="lg" />
       <h1 className="text-[20px] font-semibold text-foreground">Reset your password</h1>
-      <p className="max-w-[34ch] text-[13px] text-muted">
+      <p className="max-w-[34ch] text-[13px] text-muted-foreground">
         Enter the email for your {DOOR_LABEL[door].toLowerCase()} account and we’ll send a reset link.
       </p>
       <Card className="w-full max-w-[380px] p-5">
@@ -132,7 +132,7 @@ export function CompleteReset() {
       <Shell>
         <IconBox icon={MailWarning} tone="warning" size="lg" />
         <h1 className="text-[20px] font-semibold text-foreground">{copy.title}</h1>
-        <p className="max-w-[34ch] text-[13px] text-muted">{copy.body}</p>
+        <p className="max-w-[34ch] text-[13px] text-muted-foreground">{copy.body}</p>
         <Link to="/reset" className="text-[13px] font-medium text-primary underline underline-offset-2">Request a new link</Link>
       </Shell>
     );
@@ -144,7 +144,7 @@ export function CompleteReset() {
       <Shell>
         <IconBox icon={CheckCircle2} tone="success" size="lg" />
         <h1 className="text-[20px] font-semibold text-foreground">Password updated</h1>
-        <p className="max-w-[34ch] text-[13px] text-muted">
+        <p className="max-w-[34ch] text-[13px] text-muted-foreground">
           Sign in with your new password. For your security this did not sign you in automatically.
         </p>
         <Button variant="primary" onClick={() => navigate(doorFor(door as Experience))}>Go to sign in</Button>
@@ -172,7 +172,7 @@ export function CompleteReset() {
     <Shell>
       <IconBox icon={ShieldCheck} tone="primary" size="lg" />
       <h1 className="text-[20px] font-semibold text-foreground">Choose a new password</h1>
-      {t && <p className="max-w-[34ch] text-[13px] text-muted">For <span className="font-medium text-foreground">{t.email}</span>.</p>}
+      {t && <p className="max-w-[34ch] text-[13px] text-muted-foreground">For <span className="font-medium text-foreground">{t.email}</span>.</p>}
       <Card className="w-full max-w-[380px] p-5">
         <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
           <Field label="New password" hint="At least 8 characters.">

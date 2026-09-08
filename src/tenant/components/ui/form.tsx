@@ -140,7 +140,7 @@ export const SelectItem = forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      'relative flex cursor-pointer select-none items-center rounded-lg py-2 pl-3 pr-8 text-[13px] text-muted outline-none',
+      'relative flex cursor-pointer select-none items-center rounded-lg py-2 pl-3 pr-8 text-[13px] text-muted-foreground outline-none',
       'data-[highlighted]:bg-surface-raised data-[highlighted]:text-foreground data-[state=checked]:text-foreground',
       className,
     )}
@@ -252,7 +252,7 @@ export function Field({
 }) {
   return (
     <label className={cn('flex flex-col gap-1.5', className)}>
-      <span className="flex items-center gap-1.5 text-[12px] font-medium text-muted">
+      <span className="flex items-center gap-1.5 text-[12px] font-medium text-muted-foreground">
         {label}
         {required && <span className="text-critical">*</span>}
         {optional && <span className="text-[11px] font-normal text-subtle">Optional</span>}

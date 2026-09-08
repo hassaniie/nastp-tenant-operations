@@ -40,7 +40,7 @@ export default function Billing() {
     { key: 'period', header: 'Period', cell: (i) => i.periodLabel, hideBelow: 'md' },
     { key: 'kwh', header: 'kWh', align: 'right', cell: (i) => <span className="tnum">{num(i.totalKwh)}</span>, sortValue: (i) => i.totalKwh, hideBelow: 'lg' },
     { key: 'total', header: 'Amount', align: 'right', cell: (i) => <span className="tnum font-medium text-foreground">{currency(i.total)}</span>, sortValue: (i) => i.total },
-    { key: 'due', header: 'Due', cell: (i) => <span className="tnum text-muted">{fmtDateFull(i.dueDate)}</span>, hideBelow: 'xl' },
+    { key: 'due', header: 'Due', cell: (i) => <span className="tnum text-muted-foreground">{fmtDateFull(i.dueDate)}</span>, hideBelow: 'xl' },
     { key: 'status', header: 'Status', cell: (i) => <PaymentBadge status={i.paymentStatus} size="sm" /> },
   ];
 

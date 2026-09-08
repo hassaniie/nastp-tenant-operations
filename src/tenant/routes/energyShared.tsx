@@ -105,8 +105,8 @@ export function InvoiceDialog({ invoice, open, onOpenChange, tenantName }: { inv
                 {inv.lines.map((l) => (
                   <tr key={l.component} className="border-t border-border-subtle">
                     <td className="px-3.5 py-2.5 capitalize text-foreground">{l.component.replace('_', '-')}</td>
-                    <td className="tnum px-3.5 py-2.5 text-right text-muted">{num(l.units)}</td>
-                    <td className="tnum px-3.5 py-2.5 text-right text-muted">{l.rate.toFixed(2)}</td>
+                    <td className="tnum px-3.5 py-2.5 text-right text-muted-foreground">{num(l.units)}</td>
+                    <td className="tnum px-3.5 py-2.5 text-right text-muted-foreground">{l.rate.toFixed(2)}</td>
                     <td className="tnum px-3.5 py-2.5 text-right font-medium text-foreground">{currency(l.amount)}</td>
                   </tr>
                 ))}

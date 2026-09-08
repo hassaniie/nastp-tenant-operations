@@ -74,7 +74,7 @@ export function SectionHeader({
     <div className={cn('flex flex-wrap items-end justify-between gap-3', className)}>
       <div>
         <h2 className="text-[11px] font-semibold uppercase tracking-[0.13em] text-subtle">{title}</h2>
-        {description && <p className="mt-1 text-[13px] text-muted">{description}</p>}
+        {description && <p className="mt-1 text-[13px] text-muted-foreground">{description}</p>}
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
     </div>

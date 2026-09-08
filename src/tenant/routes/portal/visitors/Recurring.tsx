@@ -38,7 +38,7 @@ export default function RecurringVisitors() {
           actions={<Button variant="primary" size="sm" onClick={() => setAdding(true)}><Plus className="h-4 w-4" />Add recurring</Button>}
         />
         <CardBody className="flex flex-col gap-2.5">
-          <div className="flex items-start gap-2.5 rounded-xl border border-border-subtle bg-surface-inset/50 p-3 text-[12px] text-muted">
+          <div className="flex items-start gap-2.5 rounded-xl border border-border-subtle bg-surface-inset/50 p-3 text-[12px] text-muted-foreground">
             <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-info" />
             <span>Each recurrence generates individual visit instances at reception. Pausing stops future instances; past visits are unaffected.</span>
           </div>

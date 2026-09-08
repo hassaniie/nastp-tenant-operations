@@ -29,7 +29,7 @@ export default function NotFound() {
         <IconBox icon={Compass} tone="neutral" size="lg" />
         <div className="flex flex-col gap-1.5">
           <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-foreground">This page does not exist</h1>
-          <p className="text-[13px] text-muted">
+          <p className="text-[13px] text-muted-foreground">
             The link may be out of date, or the address mistyped.
           </p>
         </div>

@@ -90,7 +90,7 @@ export function IdleMonitor() {
           icon={<IconBox icon={Clock} tone="warning" size="sm" />}
         />
         <DialogBody>
-          <p className="text-[13px] text-muted">
+          <p className="text-[13px] text-muted-foreground">
             Signing out in <span className="tnum font-medium text-foreground">{Math.max(0, Math.ceil(remainingMs / 1000))}s</span>.
             Anything unsaved on this page is kept as a draft where the page supports it.
           </p>
