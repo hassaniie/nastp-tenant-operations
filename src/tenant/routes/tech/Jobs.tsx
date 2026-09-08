@@ -151,7 +151,7 @@ function JobRow({ request: r, tenantName, onOpen }: { request: ServiceRequest; t
             <ServiceStatusBadge status={r.status} size="sm" />
           </div>
         </div>
-        <p className="mt-0.5 truncate text-[12px] text-muted">
+        <p className="mt-0.5 truncate text-[12px] text-muted-foreground">
           {r.reference} · {SERVICE_CATEGORY_LABEL[r.category]} · {tenantName}
         </p>
         <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-subtle">

@@ -109,14 +109,14 @@ function Rail({ groups, badges, activeId, collapsed, onToggle, onNavigate, mobil
                     className={cn(
                       'group relative flex items-center gap-2.5 rounded-[10px] px-2.5 py-2 text-[13px] font-medium transition-all duration-150',
                       collapsed && 'justify-center px-0',
-                      active ? 'bg-primary-muted text-foreground' : 'text-muted hover:bg-surface-raised hover:text-foreground',
+                      active ? 'bg-primary-muted text-foreground' : 'text-muted-foreground hover:bg-surface-raised hover:text-foreground',
                     )}
                   >
                     {active && <span className="absolute inset-y-1.5 left-0 w-[2.5px] rounded-full bg-primary" aria-hidden />}
                     <item.icon className={cn('h-4.5 w-4.5 shrink-0', active && 'text-primary')} />
                     {!collapsed && <span className="truncate">{item.label}</span>}
                     {badge > 0 && (
-                      <span className={cn('tnum ml-auto flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[11px] font-semibold', item.badge === 'alerts' || item.badge === 'overstaying' ? 'bg-critical text-white' : 'bg-surface-inset text-muted', collapsed && 'absolute right-1 top-1 ml-0 h-[17px] min-w-[17px] text-[11px]')}>
+                      <span className={cn('tnum ml-auto flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[11px] font-semibold', item.badge === 'alerts' || item.badge === 'overstaying' ? 'bg-critical text-white' : 'bg-surface-inset text-muted-foreground', collapsed && 'absolute right-1 top-1 ml-0 h-[17px] min-w-[17px] text-[11px]')}>
                         {badge}
                       </span>
                     )}
@@ -152,7 +152,7 @@ function TopBar({ onOpenMobileNav }: { onOpenMobileNav: () => void }) {
 
   return (
     <header className="flex h-[58px] shrink-0 items-center gap-3 border-b border-border bg-background px-3 lg:px-5">
-      <button onClick={onOpenMobileNav} className="rounded-md p-1.5 text-muted transition-colors hover:bg-surface-raised hover:text-foreground lg:hidden" aria-label="Open navigation">
+      <button onClick={onOpenMobileNav} className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-surface-raised hover:text-foreground lg:hidden" aria-label="Open navigation">
         <Menu className="h-5 w-5" />
       </button>
 
@@ -162,7 +162,7 @@ function TopBar({ onOpenMobileNav }: { onOpenMobileNav: () => void }) {
 
       <button
         onClick={() => setPaletteOpen(true)}
-        className="hidden h-9 items-center gap-2 rounded-[10px] border border-border bg-surface-inset px-3 text-[13px] text-subtle transition-colors hover:border-border-strong hover:text-muted md:flex md:w-[240px] xl:w-[300px]"
+        className="hidden h-9 items-center gap-2 rounded-[10px] border border-border bg-surface-inset px-3 text-[13px] text-subtle transition-colors hover:border-border-strong hover:text-muted-foreground md:flex md:w-[240px] xl:w-[300px]"
       >
         <Search className="h-3.5 w-3.5" />
         <span className="flex-1 text-left">Search…</span>
@@ -215,7 +215,7 @@ export function Shell({ experience }: { experience: 'admin' | 'portal' }) {
             <div className="absolute inset-y-0 left-0 animate-[slide-in_0.24s_cubic-bezier(0.22,1,0.36,1)]">
               <Rail groups={groups} badges={badges} activeId={activeId} collapsed={false} onToggle={() => setMobileNav(false)} onNavigate={() => setMobileNav(false)} mobile />
             </div>
-            <button onClick={() => setMobileNav(false)} className="absolute right-3 top-3 rounded-lg bg-surface-raised p-2 text-muted" aria-label="Close navigation">
+            <button onClick={() => setMobileNav(false)} className="absolute right-3 top-3 rounded-lg bg-surface-raised p-2 text-muted-foreground" aria-label="Close navigation">
               <X className="h-4 w-4" />
             </button>
           </div>

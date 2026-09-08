@@ -76,7 +76,7 @@ export default function Buildings() {
                           <p className="text-[11px] text-subtle">{f.offices.length} offices · {area(f.floor.netLeasableSqft)} leasable</p>
                         </div>
                       </div>
-                      <span className="inline-flex items-center gap-1.5 rounded-lg bg-surface px-2 py-1 text-[11px] text-muted"><Gauge className="h-3 w-3 text-energy" />Main {f.mainSerial}</span>
+                      <span className="inline-flex items-center gap-1.5 rounded-lg bg-surface px-2 py-1 text-[11px] text-muted-foreground"><Gauge className="h-3 w-3 text-energy" />Main {f.mainSerial}</span>
                     </div>
                   ))}
                 </div>

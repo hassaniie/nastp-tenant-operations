@@ -65,7 +65,7 @@ function AlertRow({ alert: a, tenantName }: { alert: EnergyAlert; tenantName: st
           <AlertSeverityBadge severity={a.severity} size="sm" />
           <span className="rounded bg-surface px-1.5 py-0.5 text-[11px] text-subtle">{ALERT_KIND_LABEL[a.kind]}</span>
         </div>
-        <p className="mt-0.5 text-[12px] text-muted">{a.description}</p>
+        <p className="mt-0.5 text-[12px] text-muted-foreground">{a.description}</p>
         <p className="mt-1 text-[11px] text-subtle">{tenantName} · {a.source}{a.value !== undefined ? ` · value ${num(a.value)} vs threshold ${num(a.threshold ?? 0)}` : ''} · {ago(a.ts)}</p>
       </div>
       <div className="flex shrink-0 items-center gap-1.5">

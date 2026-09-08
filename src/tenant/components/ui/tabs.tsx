@@ -57,7 +57,7 @@ export function TabBar<T extends string>({
             onClick={() => onChange(t.value)}
             className={cn(
               'relative inline-flex items-center gap-2 whitespace-nowrap px-3.5 py-2.5 text-[13px] font-medium transition-colors',
-              active ? 'text-foreground' : 'text-subtle hover:text-muted',
+              active ? 'text-foreground' : 'text-subtle hover:text-muted-foreground',
             )}
           >
             {t.icon}
@@ -137,7 +137,7 @@ export function FilterChips<T extends string>({
             aria-pressed={active}
             className={cn(
               'inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-[12px] font-medium transition-all',
-              active ? 'border-primary/40 bg-primary-muted text-foreground' : 'border-border bg-surface-inset text-subtle hover:border-border-strong hover:text-muted',
+              active ? 'border-primary/40 bg-primary-muted text-foreground' : 'border-border bg-surface-inset text-subtle hover:border-border-strong hover:text-muted-foreground',
             )}
           >
             {opt.dot && <span className="h-1.5 w-1.5 rounded-full" style={{ background: opt.dot }} />}

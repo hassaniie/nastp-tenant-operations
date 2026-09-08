@@ -59,13 +59,13 @@ export default function Users() {
               {(Object.keys(ADMIN_ROLE) as (keyof typeof ADMIN_ROLE)[]).map((role) => (
                 <div key={role} className="flex items-center gap-2 rounded-xl border border-border-subtle bg-surface-inset p-3">
                   <StatusBadge tone={ADMIN_ROLE[role].tone} size="sm" dot={false}>{ADMIN_ROLE[role].label}</StatusBadge>
-                  <span className="text-[12px] text-muted">{ADMIN_ROLE[role].description}</span>
+                  <span className="text-[12px] text-muted-foreground">{ADMIN_ROLE[role].description}</span>
                 </div>
               ))}
             </div>
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle">Planned roles</p>
             <div className="flex flex-wrap gap-1.5">
-              {FUTURE_ROLES.map((r) => <span key={r} className="rounded-lg border border-border bg-surface-inset px-2.5 py-1 text-[12px] text-muted">{r}</span>)}
+              {FUTURE_ROLES.map((r) => <span key={r} className="rounded-lg border border-border bg-surface-inset px-2.5 py-1 text-[12px] text-muted-foreground">{r}</span>)}
             </div>
           </CardBody>
         </Card>

@@ -46,7 +46,7 @@ export default function Organization() {
               <h2 className="text-[20px] font-semibold tracking-[-0.02em] text-foreground">{t.name}</h2>
               <TenantStatusBadge status={t.status} />
             </div>
-            <p className="mt-0.5 text-[13px] text-muted">{t.legalName} · {ORG_TYPE_LABEL[t.organizationType]}</p>
+            <p className="mt-0.5 text-[13px] text-muted-foreground">{t.legalName} · {ORG_TYPE_LABEL[t.organizationType]}</p>
             <p className="mt-1 text-[12px] text-subtle">{data.building} · {data.floors.join(', ')}</p>
           </div>
         </div>

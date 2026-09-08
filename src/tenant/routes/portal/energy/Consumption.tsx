@@ -29,7 +29,7 @@ export default function PortalEnergyConsumption() {
   return (
     <>
       <div className="flex items-center justify-between">
-        <p className="text-[13px] text-muted">Metered consumption, {granularity} granularity</p>
+        <p className="text-[13px] text-muted-foreground">Metered consumption, {granularity} granularity</p>
         <RangeControl value={range} onChange={setRange} />
       </div>
 

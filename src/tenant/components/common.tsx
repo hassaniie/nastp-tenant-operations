@@ -39,7 +39,7 @@ export function Delta({ value, suffix = '', invert, className, showZero }: { val
 export function AnimatedNumber({ value, digits = 0, className, duration = 520 }: { value: number; digits?: number; className?: string; duration?: number }) {
   const [display, setDisplay] = useState(value);
   const from = useRef(value);
-  const raf = useRef<number>();
+  const raf = useRef<number | undefined>(undefined);
   useEffect(() => {
     const start = performance.now();
     const origin = from.current;
@@ -189,7 +189,7 @@ export function Timeline({ items, className }: { items: TimelineItem[]; classNam
                 <p className="text-[13px] font-medium text-foreground">{item.title}</p>
                 {item.meta && <span className="shrink-0 text-[11px] text-subtle">{item.meta}</span>}
               </div>
-              {item.detail && <p className="mt-0.5 text-[12px] leading-relaxed text-muted">{item.detail}</p>}
+              {item.detail && <p className="mt-0.5 text-[12px] leading-relaxed text-muted-foreground">{item.detail}</p>}
             </div>
           </li>
         );
@@ -199,9 +199,9 @@ export function Timeline({ items, className }: { items: TimelineItem[]; classNam
 }
 
 const TONE_ICON_FROM: Record<Tone, string> = {
-  neutral: 'text-muted', primary: 'text-primary', success: 'text-success', warning: 'text-warning',
+  neutral: 'text-muted-foreground', primary: 'text-primary', success: 'text-success', warning: 'text-warning',
   critical: 'text-critical', info: 'text-info', energy: 'text-energy', visitor: 'text-visitor',
-  service: 'text-service', online: 'text-online', offline: 'text-muted',
+  service: 'text-service', online: 'text-online', offline: 'text-muted-foreground',
 };
 
 /* ----------------------------------------------------------------- Stepper */
@@ -228,7 +228,7 @@ export function Stepper({ steps, current, onStep, className }: { steps: Array<{ 
               >
                 {done ? <Check className="h-3.5 w-3.5" /> : i + 1}
               </button>
-              <span className={cn('hidden text-[12px] font-medium lg:inline', active ? 'text-foreground' : done ? 'text-muted' : 'text-subtle')}>{step.label}</span>
+              <span className={cn('hidden text-[12px] font-medium lg:inline', active ? 'text-foreground' : done ? 'text-muted-foreground' : 'text-subtle')}>{step.label}</span>
             </li>
             {i < steps.length - 1 && <span className={cn('h-px w-4 flex-1 lg:w-8', done ? 'bg-success/40' : 'bg-border')} aria-hidden />}
           </Fragment>
@@ -275,7 +275,7 @@ export function PageHeader({ title, description, actions, breadcrumb, className 
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <h1 className="text-[20px] font-semibold tracking-[-0.02em] text-foreground">{title}</h1>
-          {description && <p className="mt-1 text-[13px] text-muted">{description}</p>}
+          {description && <p className="mt-1 text-[13px] text-muted-foreground">{description}</p>}
         </div>
         {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
       </div>
@@ -295,7 +295,7 @@ export function Breadcrumb({ items, className }: { items: Array<{ label: ReactNo
               {item.label}
             </Link>
           ) : (
-            <span className={cn(i === items.length - 1 && 'text-muted')}>{item.label}</span>
+            <span className={cn(i === items.length - 1 && 'text-muted-foreground')}>{item.label}</span>
           )}
           {i < items.length - 1 && <ChevronRight className="h-3 w-3 opacity-60" />}
         </Fragment>

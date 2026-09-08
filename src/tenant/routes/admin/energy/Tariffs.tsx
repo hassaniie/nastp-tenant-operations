@@ -42,7 +42,7 @@ export default function Tariffs() {
 
   const columns: Column<Tariff>[] = [
     { key: 'name', header: 'Schedule', cell: (t) => <span className="font-medium text-foreground">{t.name}</span> },
-    { key: 'period', header: 'Effective period', cell: (t) => <span className="tnum text-muted">{fmtDateFull(t.effectiveFrom)} → {t.effectiveTo ? fmtDateFull(t.effectiveTo) : 'current'}</span> },
+    { key: 'period', header: 'Effective period', cell: (t) => <span className="tnum text-muted-foreground">{fmtDateFull(t.effectiveFrom)} → {t.effectiveTo ? fmtDateFull(t.effectiveTo) : 'current'}</span> },
     { key: 'energy', header: 'Energy', align: 'right', cell: (t) => <span className="tnum">{rateOf(t, 'energy').toFixed(2)}</span> },
     { key: 'genset', header: 'Genset', align: 'right', cell: (t) => <span className="tnum">{rateOf(t, 'genset').toFixed(2)}</span> },
     { key: 'peak', header: 'Peak', align: 'right', cell: (t) => <span className="tnum">{rateOf(t, 'peak').toFixed(2)}</span> },
@@ -62,10 +62,10 @@ export default function Tariffs() {
               <div key={c} className="rounded-xl border border-border-subtle bg-surface-inset/50 p-3 text-center">
                 <p className="tnum text-[20px] font-semibold text-foreground">{rateOf(current, c).toFixed(2)}</p>
                 <p className="text-[11px] text-subtle">PKR / kWh</p>
-                <p className="mt-1 text-[11px] font-medium text-muted">{COMPONENT_LABEL[c]}</p>
+                <p className="mt-1 text-[11px] font-medium text-muted-foreground">{COMPONENT_LABEL[c]}</p>
               </div>
             ))}
-            <div className="col-span-full flex items-start gap-2 rounded-xl border border-border-subtle bg-surface-inset/40 p-3 text-[12px] text-muted">
+            <div className="col-span-full flex items-start gap-2 rounded-xl border border-border-subtle bg-surface-inset/40 p-3 text-[12px] text-muted-foreground">
               <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-info" />
               <span>Charge = Consumption × Applicable Rate. Historical consumption stays bound to the rate that applied during its period — a rate change never recomputes a past bill.</span>
             </div>

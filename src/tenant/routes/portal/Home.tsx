@@ -75,7 +75,7 @@ export default function PortalHome() {
               <div className="rounded-xl border border-border-subtle bg-surface-inset/50 p-3">
                 <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-subtle">Next visitor</p>
                 <p className="mt-1 text-[13px] font-medium text-foreground">{snap.nextVisitor.fullName}</p>
-                <p className="text-[12px] text-muted">{snap.nextVisitor.company ?? snap.nextVisitor.purpose} · {fmtTime(snap.nextVisitor.expectedArrival)}</p>
+                <p className="text-[12px] text-muted-foreground">{snap.nextVisitor.company ?? snap.nextVisitor.purpose} · {fmtTime(snap.nextVisitor.expectedArrival)}</p>
               </div>
             ) : (
               <p className="rounded-xl border border-border-subtle bg-surface-inset/50 p-3 text-[12px] text-subtle">No upcoming visitors scheduled.</p>
@@ -84,7 +84,7 @@ export default function PortalHome() {
               <div className="flex flex-col gap-1.5">
                 {inside.map((v) => (
                   <div key={v.id} className="flex items-center justify-between gap-2">
-                    <span className="truncate text-[12px] text-muted">{v.fullName}</span>
+                    <span className="truncate text-[12px] text-muted-foreground">{v.fullName}</span>
                     <VisitorStatusBadge status={v.status} size="sm" />
                   </div>
                 ))}

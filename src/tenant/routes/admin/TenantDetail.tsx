@@ -93,7 +93,7 @@ export default function TenantDetail() {
                 <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-foreground">{t.name}</h1>
                 <TenantStatusBadge status={t.status} />
               </div>
-              <p className="mt-0.5 text-[13px] text-muted">{t.legalName} · {ORG_TYPE_LABEL[t.organizationType]}</p>
+              <p className="mt-0.5 text-[13px] text-muted-foreground">{t.legalName} · {ORG_TYPE_LABEL[t.organizationType]}</p>
               <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-subtle">
                 <span className="inline-flex items-center gap-1.5"><Building2 className="h-3.5 w-3.5" />{s.buildingName} · {s.floorNames.join(', ')}</span>
                 <span className="inline-flex items-center gap-1.5"><UserRound className="h-3.5 w-3.5" />{t.primaryContact.name}</span>
@@ -195,7 +195,7 @@ function Overview({ summary: s, areaUnit, readings, activity, openReqs, activeVi
             <CardBody className="flex flex-col gap-2">
               {openReqs.length === 0 ? <p className="py-4 text-center text-[12px] text-subtle">No open requests.</p> : openReqs.slice(0, 5).map((r) => (
                 <div key={r.id} className="flex items-center justify-between gap-2">
-                  <span className="min-w-0 truncate text-[13px] text-muted">{r.title}</span>
+                  <span className="min-w-0 truncate text-[13px] text-muted-foreground">{r.title}</span>
                   <PriorityBadge priority={r.priority} size="sm" />
                 </div>
               ))}
@@ -206,7 +206,7 @@ function Overview({ summary: s, areaUnit, readings, activity, openReqs, activeVi
             <CardBody className="flex flex-col gap-2">
               {activeVisitors.length === 0 ? <p className="py-4 text-center text-[12px] text-subtle">No visitors inside.</p> : activeVisitors.slice(0, 5).map((v) => (
                 <div key={v.id} className="flex items-center justify-between gap-2">
-                  <span className="min-w-0 truncate text-[13px] text-muted">{v.fullName}</span>
+                  <span className="min-w-0 truncate text-[13px] text-muted-foreground">{v.fullName}</span>
                   <VisitorStatusBadge status={v.status} size="sm" />
                 </div>
               ))}
@@ -258,7 +258,7 @@ function Spaces({ offices, meters, loading, areaUnit, totalArea }: { offices: Of
     { key: 'label', header: 'Label', cell: (o) => o.label, hideBelow: 'sm' },
     { key: 'area', header: 'Area', align: 'right', cell: (o) => <span className="tnum">{area(o.areaSqft, areaUnit)}</span>, sortValue: (o) => o.areaSqft },
     { key: 'status', header: 'Status', cell: (o) => <StatusBadge tone={o.status === 'occupied' ? 'success' : 'neutral'} size="sm">{o.status}</StatusBadge> },
-    { key: 'meter', header: 'Sub-meter', cell: (o) => { const m = meterFor(o.meterId); return m ? <span className="tnum text-muted">{m.serial}</span> : <span className="text-subtle">Not wired</span>; } },
+    { key: 'meter', header: 'Sub-meter', cell: (o) => { const m = meterFor(o.meterId); return m ? <span className="tnum text-muted-foreground">{m.serial}</span> : <span className="text-subtle">Not wired</span>; } },
   ];
   return (
     <div className="flex flex-col gap-4">
@@ -286,7 +286,7 @@ function Energy({ meters, readings, loading, summary: s, tenantId }: { meters: M
   return (
     <div className="flex flex-col gap-4">
       <Card>
-        <CardHeader title="Consumption" subtitle="Daily, last 30 days" icon={<IconBox icon={Zap} tone="energy" size="sm" />} actions={<span className="tnum text-[12px] text-muted">{currency(s.periodCharges, { compact: true })} this period</span>} />
+        <CardHeader title="Consumption" subtitle="Daily, last 30 days" icon={<IconBox icon={Zap} tone="energy" size="sm" />} actions={<span className="tnum text-[12px] text-muted-foreground">{currency(s.periodCharges, { compact: true })} this period</span>} />
         <CardBody><TrendChart data={readings} series={[{ key: 'kwh', label: 'kWh' }, { key: 'peakKwh', label: 'Peak kWh' }]} height={200} unit="kWh" valueFormatter={(v) => `${num(v)} kWh`} /></CardBody>
       </Card>
       <Card>
@@ -385,12 +385,12 @@ function Users({ users, loading }: { users: TenantUser[]; loading: boolean }) {
             icon={<IconBox icon={LinkIcon} tone="primary" size="sm" />}
           />
           <DialogBody className="flex flex-col gap-3">
-            <p className="text-[12px] text-muted">
+            <p className="text-[12px] text-muted-foreground">
               There is no mail server in this build, so the link is generated here instead of sent.
               Share it with the tenant to let them set a password and activate the account.
             </p>
             <div className="flex items-center gap-2 rounded-lg border border-border bg-surface-inset px-3 py-2">
-              <code className="flex-1 truncate text-[11.5px] text-muted">{linkFor?.url}</code>
+              <code className="flex-1 truncate text-[11.5px] text-muted-foreground">{linkFor?.url}</code>
               <Button variant="secondary" size="xs" onClick={() => linkFor && copy(linkFor.url)}>Copy</Button>
             </div>
           </DialogBody>

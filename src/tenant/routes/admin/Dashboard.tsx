@@ -120,7 +120,7 @@ export default function AdminDashboard() {
                             <p className="truncate text-[13px] font-medium text-foreground">{item.title}</p>
                             <StatusBadge tone={item.tone} size="sm" dot={false}>{item.tag}</StatusBadge>
                           </div>
-                          <p className="mt-0.5 truncate text-[12px] text-muted">{item.detail}</p>
+                          <p className="mt-0.5 truncate text-[12px] text-muted-foreground">{item.detail}</p>
                           <p className="mt-1 text-[11px] text-subtle">{item.tenant} · {ago(item.ts)}</p>
                         </div>
                       </button>
@@ -197,7 +197,7 @@ function VisitorRow({ name, company, time }: { name: string; company?: string; t
         <p className="truncate text-[13px] font-medium text-foreground">{name}</p>
         {company && <p className="truncate text-[11px] text-subtle">{company}</p>}
       </div>
-      <span className="tnum shrink-0 rounded-md bg-surface-inset px-2 py-1 text-[11px] font-medium text-muted">{time}</span>
+      <span className="tnum shrink-0 rounded-md bg-surface-inset px-2 py-1 text-[11px] font-medium text-muted-foreground">{time}</span>
     </div>
   );
 }

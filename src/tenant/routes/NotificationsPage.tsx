@@ -69,7 +69,7 @@ export function NotificationsPage({ scope }: { scope: 'admin' | 'tenant' }) {
                     <p className="truncate text-[13px] font-medium text-foreground">{n.title}</p>
                     {!n.read && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />}
                   </div>
-                  <p className="mt-0.5 text-[12px] leading-relaxed text-muted">{n.body}</p>
+                  <p className="mt-0.5 text-[12px] leading-relaxed text-muted-foreground">{n.body}</p>
                   <p className="mt-1 text-[11px] text-subtle">{(n as { tenantName?: string }).tenantName && scope === 'admin' ? `${(n as { tenantName?: string }).tenantName} · ` : ''}{ago(n.ts)}</p>
                 </div>
               </button>

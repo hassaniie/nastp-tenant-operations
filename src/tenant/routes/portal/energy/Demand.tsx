@@ -27,7 +27,7 @@ export default function PortalEnergyDemand() {
   return (
     <>
       <div className="flex items-center justify-between">
-        <p className="text-[13px] text-muted">Demand reflects the peak load sustained over each interval.</p>
+        <p className="text-[13px] text-muted-foreground">Demand reflects the peak load sustained over each interval.</p>
         <RangeControl value={range} onChange={setRange} />
       </div>
 

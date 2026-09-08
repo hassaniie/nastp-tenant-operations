@@ -88,7 +88,7 @@ export function VisitorDrawer({ visitor, open, onOpenChange, mode = 'admin', ten
             { label: <span className="inline-flex items-center gap-1"><Car className="h-3 w-3" />Vehicle</span>, value: v.vehicleNo ?? '—' },
             { label: 'Host', value: v.host, span: true },
           ]} />
-          {v.notes && <div className="rounded-xl border border-border-subtle bg-surface-inset/50 p-3 text-[12px] text-muted">{v.notes}</div>}
+          {v.notes && <div className="rounded-xl border border-border-subtle bg-surface-inset/50 p-3 text-[12px] text-muted-foreground">{v.notes}</div>}
           <div>
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle">Visit timeline</p>
             <Timeline items={timeline} />

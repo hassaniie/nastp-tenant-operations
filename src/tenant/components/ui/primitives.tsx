@@ -22,11 +22,11 @@ const buttonVariants = cva(
           'bg-primary text-primary-foreground shadow-[0_1px_0_rgba(255,255,255,0.12)_inset,0_2px_10px_rgba(99,102,241,0.28)] hover:bg-primary-hover',
         secondary:
           'bg-surface-raised text-foreground border border-border hover:border-border-strong hover:bg-surface-overlay',
-        ghost: 'text-muted hover:text-foreground hover:bg-surface-raised',
+        ghost: 'text-muted-foreground hover:text-foreground hover:bg-surface-raised',
         outline: 'border border-border-strong text-foreground hover:bg-surface-raised',
         danger: 'bg-critical text-white shadow-[0_2px_8px_rgba(244,63,94,0.3)] hover:brightness-110',
         success: 'bg-success text-white font-semibold hover:brightness-110',
-        subtle: 'bg-surface-inset text-muted hover:text-foreground',
+        subtle: 'bg-surface-inset text-muted-foreground hover:text-foreground',
       },
       size: {
         xs: 'h-7 gap-1.5 px-2.5 text-[12px] rounded-lg [&_svg]:h-3.5 [&_svg]:w-3.5',
@@ -69,7 +69,7 @@ Button.displayName = 'Button';
 
 /** Soft "chip" surface per semantic tone — dim background, saturated text. */
 export const TONE_CHIP: Record<Tone, string> = {
-  neutral: 'bg-neutral-dim text-muted border border-border',
+  neutral: 'bg-neutral-dim text-muted-foreground border border-border',
   primary: 'bg-primary-muted text-primary border border-primary/25',
   success: 'bg-success-dim text-success border border-success/25',
   warning: 'bg-warning-dim text-warning border border-warning/25',
@@ -79,7 +79,7 @@ export const TONE_CHIP: Record<Tone, string> = {
   visitor: 'bg-visitor-dim text-visitor border border-visitor/25',
   service: 'bg-service-dim text-service border border-service/25',
   online: 'bg-online-dim text-online border border-online/25',
-  offline: 'bg-offline-dim text-muted border border-border',
+  offline: 'bg-offline-dim text-muted-foreground border border-border',
 };
 
 export const TONE_DOT: Record<Tone, string> = {
@@ -89,12 +89,12 @@ export const TONE_DOT: Record<Tone, string> = {
 };
 
 export const TONE_ICON_BOX: Record<Tone, string> = {
-  neutral: 'text-muted bg-surface-raised', primary: 'text-primary bg-primary-muted',
+  neutral: 'text-muted-foreground bg-surface-raised', primary: 'text-primary bg-primary-muted',
   success: 'text-success bg-success-dim', warning: 'text-warning bg-warning-dim',
   critical: 'text-critical bg-critical-dim', info: 'text-info bg-info-dim',
   energy: 'text-energy bg-energy-dim', visitor: 'text-visitor bg-visitor-dim',
   service: 'text-service bg-service-dim', online: 'text-online bg-online-dim',
-  offline: 'text-muted bg-offline-dim',
+  offline: 'text-muted-foreground bg-offline-dim',
 };
 
 /* -------------------------------------------------------------- StatusBadge */
@@ -142,13 +142,13 @@ const badgeVariants = cva(
   {
     variants: {
       tone: {
-        neutral: 'bg-neutral-dim text-muted border border-border',
+        neutral: 'bg-neutral-dim text-muted-foreground border border-border',
         primary: 'bg-primary-muted text-primary border border-primary/25',
         success: 'bg-success-dim text-success border border-success/25',
         warning: 'bg-warning-dim text-warning border border-warning/25',
         critical: 'bg-critical-dim text-critical border border-critical/25',
         info: 'bg-info-dim text-info border border-info/25',
-        outline: 'border border-border-strong text-muted',
+        outline: 'border border-border-strong text-muted-foreground',
       },
       size: { sm: 'text-[11px] px-1.5 py-0', md: '' },
     },

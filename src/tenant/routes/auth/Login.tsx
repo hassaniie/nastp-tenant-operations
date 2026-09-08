@@ -142,7 +142,7 @@ function LoginScreen({ door }: { door: Experience }) {
           <div className="flex flex-col gap-1">
             <p className="text-[11px] font-medium uppercase tracking-[0.13em] text-subtle">{config.eyebrow}</p>
             <h1 className="text-[24px] font-semibold tracking-[-0.02em] text-foreground">{config.title}</h1>
-            <p className="mx-auto max-w-[34ch] text-[13px] text-muted">{config.blurb}</p>
+            <p className="mx-auto max-w-[34ch] text-[13px] text-muted-foreground">{config.blurb}</p>
           </div>
         </div>
 
@@ -210,7 +210,7 @@ function LoginScreen({ door }: { door: Experience }) {
               <p className="text-[12px] font-medium text-foreground">Seeded accounts</p>
               <p className="text-[11px] text-subtle">
                 This build runs on simulated data with no mail server, so the accounts are listed
-                here. Password for all of them is <span className="font-mono text-muted">{DEMO_PASSWORD}</span>.
+                here. Password for all of them is <span className="font-mono text-muted-foreground">{DEMO_PASSWORD}</span>.
               </p>
             </div>
             <div className="flex flex-col gap-1">
@@ -228,7 +228,7 @@ function LoginScreen({ door }: { door: Experience }) {
                     'hover:bg-surface-raised',
                   )}
                 >
-                  <span className="truncate font-mono text-[11.5px] text-muted">{a.email}</span>
+                  <span className="truncate font-mono text-[11.5px] text-muted-foreground">{a.email}</span>
                   <span className="shrink-0 text-[11px] text-subtle">{a.label}</span>
                 </button>
               ))}
@@ -241,7 +241,7 @@ function LoginScreen({ door }: { door: Experience }) {
           {config.otherDoors.map((other, i) => (
             <span key={other}>
               {i > 0 && ' · '}
-              <Link to={doorFor(other)} className="text-muted underline underline-offset-2 hover:text-foreground">
+              <Link to={doorFor(other)} className="text-muted-foreground underline underline-offset-2 hover:text-foreground">
                 {DOOR_LABEL[other]}
               </Link>
             </span>
