@@ -7,6 +7,7 @@
  * the tenant's own mark so a tenant always knows whose workspace they are in.
  */
 
+import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { ChevronsLeft, ChevronsRight, Menu, Moon, Search, Sun, X } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
@@ -23,6 +24,8 @@ import { ExperienceSwitcher } from './ExperienceSwitcher';
 import { UserMenu } from './UserMenu';
 import { CommandPalette } from './CommandPalette';
 import { IdleMonitor } from './IdleMonitor';
+import { AdminNavigation } from './AdminNavigation';
+import '../styles/admin-workspace.css';
 
 type Badges = { alerts: number; overstaying: number; openRequests: number; notifications: number };
 
@@ -151,18 +154,24 @@ function TopBar({ onOpenMobileNav }: { onOpenMobileNav: () => void }) {
   const title = match ? (match.nested && match.group.label ? match.group.label : match.leaf.label) : undefined;
 
   return (
-    <header className="flex h-[58px] shrink-0 items-center gap-3 border-b border-border bg-background px-3 lg:px-5">
+    <header className="ops-topbar flex h-[58px] shrink-0 items-center gap-3 border-b border-border bg-background px-3 lg:px-5">
       <button onClick={onOpenMobileNav} className="rounded-md p-1.5 text-muted transition-colors hover:bg-surface-raised hover:text-foreground lg:hidden" aria-label="Open navigation">
         <Menu className="h-5 w-5" />
       </button>
 
       <div className="min-w-0 flex-1">
-        <h1 className="truncate text-[15px] font-semibold tracking-[-0.015em] text-foreground">{title ?? (experience === 'admin' ? 'NASTP Admin' : 'Tenant Portal')}</h1>
+        {experience === 'admin' ? (
+          <div className="truncate text-[15px] font-semibold tracking-[-0.015em] text-foreground">
+            <span className="ops-mobile-title">NASTP</span>
+            <span className="ops-header-title"><span className="ops-breadcrumb">Workspace <span>/</span> </span>{title ?? 'NASTP Admin'}</span>
+          </div>
+        ) : <h1 className="truncate text-[15px] font-semibold tracking-[-0.015em] text-foreground">{title ?? 'Tenant Portal'}</h1>}
       </div>
 
+      {experience === 'admin' && <button onClick={() => setPaletteOpen(true)} className="rounded-md p-2 text-muted md:hidden" aria-label="Search workspace"><Search className="h-4 w-4" /></button>}
       <button
         onClick={() => setPaletteOpen(true)}
-        className="hidden h-9 items-center gap-2 rounded-[10px] border border-border bg-surface-inset px-3 text-[13px] text-subtle transition-colors hover:border-border-strong hover:text-muted md:flex md:w-[240px] xl:w-[300px]"
+        className="ops-search hidden h-9 items-center gap-2 rounded-[10px] border border-border bg-surface-inset px-3 text-[13px] text-subtle transition-colors hover:border-border-strong hover:text-muted md:flex md:w-[240px] xl:w-[300px]"
       >
         <Search className="h-3.5 w-3.5" />
         <span className="flex-1 text-left">Search…</span>
@@ -180,7 +189,7 @@ function TopBar({ onOpenMobileNav }: { onOpenMobileNav: () => void }) {
         <div className="mx-1 hidden h-6 w-px bg-border sm:block" />
         <ExperienceSwitcher />
 
-        <div className="ml-1 hidden border-l border-border pl-2 lg:block">
+        <div className="ops-account ml-1 hidden border-l border-border pl-2 lg:block">
           <UserMenu />
         </div>
       </div>
@@ -202,14 +211,42 @@ export function Shell({ experience }: { experience: 'admin' | 'portal' }) {
     document.getElementById('main-scroll')?.scrollTo({ top: 0 });
   }, [location.pathname]);
 
+  useEffect(() => {
+    const desktop = window.matchMedia('(min-width: 1024px)');
+    const closeOnDesktop = () => { if (desktop.matches) setMobileNav(false); };
+    desktop.addEventListener('change', closeOnDesktop);
+    return () => desktop.removeEventListener('change', closeOnDesktop);
+  }, []);
+
   return (
     <TooltipProvider delayDuration={220} skipDelayDuration={400}>
-      <div className={cn('flex h-full w-full overflow-hidden bg-canvas')}>
+      <div className={cn('flex h-full w-full overflow-hidden bg-canvas', experience === 'admin' && 'ops-shell')}>
         <div className="hidden lg:block">
-          <Rail groups={groups} badges={badges} activeId={activeId} collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
+          {experience === 'admin' ? <AdminNavigation badges={badges} collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} /> : <Rail groups={groups} badges={badges} activeId={activeId} collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />}
         </div>
 
-        {mobileNav && (
+        {experience === 'admin' && (
+          <DialogPrimitive.Root open={mobileNav} onOpenChange={setMobileNav}>
+            <DialogPrimitive.Portal>
+              <DialogPrimitive.Overlay className="fixed inset-0 z-[70] bg-black/60 lg:hidden" />
+              <DialogPrimitive.Content
+                aria-describedby={undefined}
+                onCloseAutoFocus={(event) => {
+                  event.preventDefault();
+                  document.querySelector<HTMLButtonElement>('[aria-label="Open navigation"]')?.focus();
+                }}
+                className="ops-shell fixed inset-y-0 left-0 z-[71] outline-none lg:hidden"
+              >
+                <DialogPrimitive.Title className="sr-only">Navigation</DialogPrimitive.Title>
+                <AdminNavigation badges={badges} collapsed={false} onToggle={() => setMobileNav(false)} onNavigate={() => setMobileNav(false)} mobile />
+                <DialogPrimitive.Close className="absolute right-2 top-2 rounded-md p-2 text-[var(--ops-muted)]" aria-label="Close navigation">
+                  <X className="h-4 w-4" />
+                </DialogPrimitive.Close>
+              </DialogPrimitive.Content>
+            </DialogPrimitive.Portal>
+          </DialogPrimitive.Root>
+        )}
+        {experience === 'portal' && mobileNav && (
           <div className="fixed inset-0 z-[70] lg:hidden">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] animate-[fade-in_0.16s_ease-out]" onClick={() => setMobileNav(false)} />
             <div className="absolute inset-y-0 left-0 animate-[slide-in_0.24s_cubic-bezier(0.22,1,0.36,1)]">

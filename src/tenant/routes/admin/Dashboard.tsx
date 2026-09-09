@@ -1,203 +1,670 @@
-/**
- * Admin — Ecosystem Operations Dashboard (§8).
- *
- * Not a generic KPI grid. Top: the global operational summary. Main-left:
- * energy intelligence. Main-right: an "Operational Attention" action center
- * that answers *what needs attention right now* — the highest-signal items
- * across energy, visitors and the service center, ranked by urgency. Lower:
- * live tenant operations. Reads the live world synchronously.
- */
-
 import {
-  AlarmClock, ArrowRight, Bell, Building2, DoorOpen, Gauge, TriangleAlert, UserPlus, Wrench, Zap,
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { Page, StatGrid, ContentGrid, SplitGrid } from '../../components/ui/page';
-import { Card, CardBody, CardHeader } from '../../components/ui/card';
-import { StatCard, PageHeader, Timeline } from '../../components/common';
-import { Button, IconBox, StatusBadge, TenantMark } from '../../components/ui/primitives';
-import { TrendChart, BarSeriesChart } from '../../components/charts';
-import { useLive } from '../../data/live';
-import { computeAdminKpis, aggregateReadings, tenantSummary } from '../../data/selectors';
-import { ago, compact, currency, energy, fmtTime, num } from '../../lib/utils';
-import { ACTIVITY_ICON } from '../../lib/activityMeta';
-import { CATEGORY_ICON } from '../../components/status';
+  AlarmClock,
+  ArrowDownRight,
+  ArrowRight,
+  ArrowUpRight,
+  Bell,
+  CalendarDays,
+  CheckCheck,
+  Gauge,
+  Plus,
+  Zap,
+} from "lucide-react";
+import { useState, type ReactNode } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { Button } from "../../components/ui/ops-button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../../components/ui/ops-table";
+import { Tabs, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { useLive } from "../../data/live";
+import {
+  computeAdminKpis,
+  aggregateReadings,
+  tenantSummary,
+} from "../../data/selectors";
+import { ago, compact, currency, energy, fmtTime, num } from "../../lib/utils";
+import { ACTIVITY_ICON } from "../../lib/activityMeta";
+import { CATEGORY_ICON } from "../../components/status";
+
+function SectionTitle({
+  title,
+  detail,
+  children,
+}: {
+  title: string;
+  detail?: string;
+  children?: ReactNode;
+}) {
+  return (
+    <div className="ops-section-title">
+      <div>
+        <h2>{title}</h2>
+        {detail && <p>{detail}</p>}
+      </div>
+      {children}
+    </div>
+  );
+}
+function TextLink({ to, children }: { to: string; children: ReactNode }) {
+  return (
+    <Link className="ops-text-link" to={to}>
+      {children}
+      <ArrowUpRight size={15} />
+    </Link>
+  );
+}
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const kpis = useLive(computeAdminKpis);
-  const daily = useLive((w) => aggregateReadings(w, 'daily'));
-  const ranking = useLive((w) => w.tenants.filter((t) => t.status === 'active').map((t) => tenantSummary(w, t.id)).sort((a, b) => b.periodKwh - a.periodKwh).slice(0, 6));
+  const daily = useLive((w) => aggregateReadings(w, "daily"));
+  const ranking = useLive((w) =>
+    w.tenants
+      .filter((t) => t.status === "active")
+      .map((t) => tenantSummary(w, t.id))
+      .sort((a, b) => b.periodKwh - a.periodKwh)
+      .slice(0, 6),
+  );
   const attention = useLive(buildAttention);
   const activity = useLive((w) => w.activity.slice(0, 8));
-  const upcoming = useLive((w) => w.visitors.filter((v) => v.status === 'scheduled').sort((a, b) => a.expectedArrival - b.expectedArrival).slice(0, 7));
-  const recentTenants = useLive((w) => [...w.tenants].sort((a, b) => b.createdAt - a.createdAt).slice(0, 6).map((t) => tenantSummary(w, t.id)));
-
-  const consumptionSpark = daily.slice(-14).map((d) => d.kwh);
-  const chargeSpark = daily.slice(-14).map((d) => d.kwh * 45);
-
-  return (
-    <Page>
-      <PageHeader
-        title="Ecosystem Operations"
-        description="Live command view across tenants, energy, visitors and the service center."
-        actions={<Button variant="primary" size="sm" onClick={() => navigate('/admin/tenants/new')}><UserPlus className="h-4 w-4" />Add Tenant</Button>}
-      />
-
-      {/* TOP — global operational summary */}
-      <StatGrid cols={4}>
-        <StatCard label="Active Tenants" value={num(kpis.tenantsActive)} icon={Building2} tone="primary" caption={`${kpis.tenantsPending} pending · ${kpis.tenantsSuspended} suspended`} onClick={() => navigate('/admin/tenants')} />
-        <StatCard label="Current Load" value={energy(kpis.currentLoadKw, 'kW').value} unit={energy(kpis.currentLoadKw, 'kW').unit} icon={Zap} tone="energy" spark={consumptionSpark} sparkColor="var(--module-energy)" caption={`Peak ${num(kpis.peakDemandKw)} kW`} onClick={() => navigate('/admin/energy')} />
-        <StatCard label="Visitors Inside" value={num(kpis.visitorsInside)} icon={DoorOpen} tone="visitor" caption={`${kpis.visitorsScheduledToday} scheduled today`} onClick={() => navigate('/admin/visitors/inside')} />
-        <StatCard label="Open Requests" value={num(kpis.requestsOpen)} icon={Wrench} tone="service" caption={`${kpis.requestsCritical} critical · ${kpis.requestsOverdue} overdue`} onClick={() => navigate('/admin/service')} />
-      </StatGrid>
-
-      <StatGrid cols={4}>
-        <StatCard label="Month Consumption" value={energy(kpis.totalConsumptionKwh).value} unit={energy(kpis.totalConsumptionKwh).unit} icon={Gauge} tone="neutral" caption="All active tenants" />
-        <StatCard label="Month Charges" value={currency(kpis.totalChargesMonth, { compact: true })} icon={Zap} tone="energy" spark={chargeSpark} sparkColor="var(--module-energy)" />
-        <StatCard label="Overstaying" value={num(kpis.visitorsOverstaying)} icon={AlarmClock} tone={kpis.visitorsOverstaying ? 'critical' : 'success'} caption={kpis.visitorsOverstaying ? 'Needs attention' : 'None right now'} onClick={() => navigate('/admin/visitors/overstaying')} />
-        <StatCard label="Offline Meters" value={num(kpis.offlineMeters)} icon={Gauge} tone={kpis.offlineMeters ? 'critical' : 'success'} caption={`${kpis.metersTotal} total`} onClick={() => navigate('/admin/energy/meters')} />
-      </StatGrid>
-
-      {/* MAIN — energy intelligence + operational attention */}
-      <SplitGrid>
-        <div className="flex flex-col gap-4">
-          <Card>
-            <CardHeader title="Consumption & Peak Demand" subtitle="Park-wide, last 30 days" icon={<IconBox icon={Zap} tone="energy" size="sm" />} actions={<Button variant="ghost" size="xs" onClick={() => navigate('/admin/energy')}>Energy<ArrowRight className="h-3.5 w-3.5" /></Button>} />
-            <CardBody>
-              <TrendChart
-                data={daily}
-                series={[{ key: 'kwh', label: 'Consumption (kWh)' }]}
-                unit="kWh"
-                height={220}
-                valueFormatter={(v) => `${num(v)} kWh`}
-              />
-            </CardBody>
-          </Card>
-
-          <Card>
-            <CardHeader title="Highest Consuming Tenants" subtitle="This billing period" icon={<IconBox icon={Building2} tone="primary" size="sm" />} />
-            <CardBody>
-              <BarSeriesChart
-                data={ranking.map((r) => ({ label: r.tenant.code, kwh: r.periodKwh }))}
-                series={[{ key: 'kwh', label: 'kWh' }]}
-                horizontal
-                height={200}
-                valueFormatter={(v) => `${num(v)} kWh`}
-              />
-            </CardBody>
-          </Card>
-        </div>
-
-        {/* Operational attention — what needs attention right now.
-            The queue is unbounded, so in the two-column layout the card is
-            taken out of flow: the cell then contributes no intrinsic height,
-            the energy column sizes the row, and the list scrolls inside
-            whatever height that yields. Left in flow it grew to 1230px and
-            stranded ~480px of empty space beside the charts. */}
-        <div className="relative">
-          <Card className="min-h-0 xl:absolute xl:inset-0">
-            <CardHeader
-              title="Operational Attention"
-              subtitle={`${attention.length} item${attention.length === 1 ? '' : 's'} need review`}
-              icon={<IconBox icon={TriangleAlert} tone={attention.length ? 'warning' : 'success'} size="sm" />}
-            />
-            <div className="min-h-0 flex-1 overflow-y-auto p-2.5">
-              {attention.length === 0 ? (
-                <div className="flex flex-col items-center gap-2 px-4 py-12 text-center">
-                  <IconBox icon={Bell} tone="success" size="lg" />
-                  <p className="text-[13px] font-medium text-foreground">Nothing needs attention</p>
-                  <p className="text-[12px] text-subtle">All tenants nominal across every domain.</p>
-                </div>
-              ) : (
-                <ul className="flex flex-col gap-1.5">
-                  {attention.map((item) => (
-                    <li key={item.id}>
-                      <button onClick={() => navigate(item.href)} className="flex w-full items-start gap-3 rounded-xl border border-border-subtle bg-surface-inset/50 p-3 text-left transition-colors hover:border-border-strong hover:bg-surface-raised">
-                        <IconBox icon={item.icon} tone={item.tone} size="sm" />
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center justify-between gap-2">
-                            <p className="truncate text-[13px] font-medium text-foreground">{item.title}</p>
-                            <StatusBadge tone={item.tone} size="sm" dot={false}>{item.tag}</StatusBadge>
-                          </div>
-                          <p className="mt-0.5 truncate text-[12px] text-muted">{item.detail}</p>
-                          <p className="mt-1 text-[11px] text-subtle">{item.tenant} · {ago(item.ts)}</p>
-                        </div>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </Card>
-        </div>
-      </SplitGrid>
-
-      {/* LOWER — tenant operations */}
-      <ContentGrid cols={3} align="start">
-        <Card>
-          <CardHeader title="Recent Activity" subtitle="Across all tenants" />
-          <CardBody>
-            <Timeline
-              items={activity.map((a) => ({
-                id: a.id,
-                icon: ACTIVITY_ICON[a.kind] ?? Bell,
-                tone: a.domain === 'energy' ? 'energy' : a.domain === 'visitor' ? 'visitor' : a.domain === 'service' ? 'service' : 'primary',
-                title: a.title,
-                detail: a.detail,
-                meta: ago(a.ts),
-              }))}
-            />
-          </CardBody>
-        </Card>
-
-        <Card>
-          <CardHeader title="Upcoming Visitors" subtitle="Next arrivals" icon={<IconBox icon={DoorOpen} tone="visitor" size="sm" />} actions={<Button variant="ghost" size="xs" onClick={() => navigate('/admin/visitors/scheduled')}>All</Button>} />
-          <CardBody className="flex flex-col gap-1">
-            {upcoming.length === 0 ? (
-              <p className="py-6 text-center text-[12px] text-subtle">No upcoming visitors.</p>
-            ) : (
-              upcoming.map((v) => (
-                <VisitorRow key={v.id} name={v.fullName} company={v.company} time={fmtTime(v.expectedArrival)} />
-              ))
-            )}
-          </CardBody>
-        </Card>
-
-        <Card>
-          <CardHeader title="Recent Onboarding" subtitle="Newest tenants" icon={<IconBox icon={Building2} tone="primary" size="sm" />} actions={<Button variant="ghost" size="xs" onClick={() => navigate('/admin/tenants')}>All</Button>} />
-          <CardBody className="flex flex-col gap-2">
-            {recentTenants.map((r) => (
-              <button key={r.tenant.id} onClick={() => navigate(`/admin/tenants/${r.tenant.id}`)} className="flex items-center gap-3 rounded-xl px-1 py-1.5 text-left transition-colors hover:bg-surface-raised">
-                <TenantMark name={r.tenant.name} hue={r.tenant.brandHue} size={32} />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-[13px] font-medium text-foreground">{r.tenant.name}</p>
-                  <p className="truncate text-[11px] text-subtle">{r.buildingName} · {ago(r.tenant.createdAt)}</p>
-                </div>
-                <StatusBadge tone={{ active: 'success', suspended: 'critical', draft: 'neutral', pending_configuration: 'warning', pending_activation: 'info', expired: 'neutral', archived: 'neutral' }[r.tenant.status] as never} size="sm">
-                  {r.tenant.status.replace('_', ' ')}
-                </StatusBadge>
-              </button>
-            ))}
-          </CardBody>
-        </Card>
-      </ContentGrid>
-
-      <p className="pb-2 text-center text-[11px] text-subtle">
-        Live values update every few seconds · {compact(kpis.metersTotal)} meters monitored across the park
-      </p>
-    </Page>
+  const upcoming = useLive((w) =>
+    w.visitors
+      .filter((v) => v.status === "scheduled")
+      .sort((a, b) => a.expectedArrival - b.expectedArrival)
+      .slice(0, 7),
   );
-}
-
-function VisitorRow({ name, company, time }: { name: string; company?: string; time: string }) {
+  const recentTenants = useLive((w) =>
+    [...w.tenants]
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .slice(0, 6)
+      .map((t) => tenantSummary(w, t.id)),
+  );
+  const [measure, setMeasure] = useState("kwh");
+  const [chartTable, setChartTable] = useState(false);
+  const [queueFilter, setQueueFilter] = useState("all");
+  const [showAll, setShowAll] = useState(false);
+  const selectedAttention = attention.filter(
+    (a) =>
+      queueFilter === "all" ||
+      (queueFilter === "critical" ? a.rank === 0 : a.rank !== 0),
+  );
+  const queue = showAll ? selectedAttention : selectedAttention.slice(0, 5);
+  const consumption = energy(kpis.totalConsumptionKwh);
+  const today = new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(new Date());
+  const chartKey = measure === "kwh" ? "kwh" : "demandKw";
+  const chartUnit = measure === "kwh" ? "kWh" : "kW";
   return (
-    <div className="flex items-center justify-between gap-3 rounded-lg px-1 py-1.5">
-      <div className="min-w-0">
-        <p className="truncate text-[13px] font-medium text-foreground">{name}</p>
-        {company && <p className="truncate text-[11px] text-subtle">{company}</p>}
+    <div className="ops-dashboard">
+      <nav className="ops-module-nav" aria-label="Operations modules">
+        <Link to="/admin" aria-current="page">
+          Overview
+        </Link>
+        <Link to="/admin/tenants">Tenants</Link>
+        <Link to="/admin/energy">Energy</Link>
+        <Link to="/admin/visitors">Visitors</Link>
+        <Link to="/admin/service">Service center</Link>
+      </nav>
+      <div className="ops-page-heading">
+        <div>
+          <div className="ops-eyebrow">
+            Park intelligence{" "}
+            <span className="ops-live">
+              <i />
+              Live
+            </span>
+          </div>
+          <h1>
+            Operations overview<span>.</span>
+          </h1>
+          <p>Your park at a glance. Every tenant, every operation.</p>
+        </div>
+        <div className="ops-heading-actions">
+          <span className="ops-date">
+            <CalendarDays size={15} />
+            {today}
+          </span>
+          <Button onClick={() => navigate("/admin/tenants/new")}>
+            <Plus />
+            Add tenant
+          </Button>
+        </div>
       </div>
-      <span className="tnum shrink-0 rounded-md bg-surface-inset px-2 py-1 text-[11px] font-medium text-muted">{time}</span>
+      <div className="ops-metrics">
+        <Link to="/admin/tenants" className="ops-metric">
+          <span>
+            Active tenants
+            <ArrowUpRight />
+          </span>
+          <strong>
+            {num(kpis.tenantsActive)}
+            <small>/ {num(kpis.tenantsTotal)}</small>
+          </strong>
+          <p>
+            {kpis.tenantsPending} pending<span>·</span>
+            {kpis.tenantsSuspended} suspended
+          </p>
+        </Link>
+        <Link to="/admin/energy" className="ops-metric">
+          <span>
+            Current load
+            <ArrowUpRight />
+          </span>
+          <strong>
+            {energy(kpis.currentLoadKw, "kW").value}
+            <small>kW</small>
+          </strong>
+          <p>
+            <span className="ops-live-dot" />
+            Live demand<span>·</span>Meter peak {num(kpis.peakDemandKw)} kW
+          </p>
+        </Link>
+        <Link to="/admin/visitors/inside" className="ops-metric">
+          <span>
+            Visitors inside
+            <ArrowUpRight />
+          </span>
+          <strong>
+            {num(kpis.visitorsInside)}
+            <small>people</small>
+          </strong>
+          <p>{kpis.visitorsScheduledToday} scheduled today</p>
+        </Link>
+        <Link to="/admin/service" className="ops-metric">
+          <span>
+            Open requests
+            <ArrowUpRight />
+          </span>
+          <strong>
+            {num(kpis.requestsOpen)}
+            <small>requests</small>
+          </strong>
+          <p>
+            <span className={kpis.requestsCritical ? "ops-danger" : ""}>
+              {kpis.requestsCritical} critical
+            </span>
+            <span>·</span>
+            {kpis.requestsOverdue} overdue
+          </p>
+        </Link>
+      </div>
+      <div className="ops-energy-grid">
+        <section className="ops-energy-main" aria-labelledby="energy-title">
+          <div className="ops-section-title">
+            <div>
+              <h2 id="energy-title">Energy performance</h2>
+              <p>Park-wide consumption · Last 30 days</p>
+            </div>
+            <TextLink to="/admin/energy">Explore energy</TextLink>
+          </div>
+          <div className="ops-energy-summary">
+            <div>
+              <span>Month consumption</span>
+              <strong>
+                {consumption.value}
+                <small>{consumption.unit}</small>
+              </strong>
+              <p>Across all active tenants</p>
+            </div>
+            <div>
+              <span>Month charges</span>
+              <strong className="ops-charge">
+                {currency(kpis.totalChargesMonth, { compact: true })}
+              </strong>
+              <p>Current billing period</p>
+            </div>
+          </div>
+          <div className="ops-chart-toolbar">
+            <Tabs value={measure} onValueChange={setMeasure}>
+              <TabsList className="ops-segmented" aria-label="Energy measure">
+                <TabsTrigger
+                  value="kwh"
+                  id="energy-tab-kwh"
+                  aria-controls="energy-panel"
+                >
+                  Consumption
+                </TabsTrigger>
+                <TabsTrigger
+                  value="demandKw"
+                  id="energy-tab-demandKw"
+                  aria-controls="energy-panel"
+                >
+                  Peak demand
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <button
+              className="ops-text-button"
+              onClick={() => setChartTable((v) => !v)}
+            >
+              {chartTable ? "Show chart" : "View data"}
+            </button>
+          </div>
+          <div
+            id="energy-panel"
+            role="tabpanel"
+            aria-labelledby={`energy-tab-${measure}`}
+            tabIndex={0}
+          >
+            {chartTable ? (
+              <div className="ops-chart-data">
+                <Table aria-label="Daily energy readings">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Consumption (kWh)</TableHead>
+                      <TableHead>Demand (kW)</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {daily.map((d) => (
+                      <TableRow key={d.ts}>
+                        <TableCell>{d.label}</TableCell>
+                        <TableCell>{num(d.kwh)}</TableCell>
+                        <TableCell>{num(d.demandKw)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div
+                className="ops-energy-chart"
+                role="img"
+                aria-label={`${measure === "kwh" ? "Consumption" : "Peak demand"} over the last 30 days. Use View data for exact values.`}
+              >
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={daily}
+                    margin={{ top: 14, right: 0, bottom: 0, left: -20 }}
+                  >
+                    <CartesianGrid
+                      stroke="var(--ops-line)"
+                      strokeDasharray="3 4"
+                      vertical={false}
+                    />
+                    <XAxis
+                      dataKey="label"
+                      axisLine={false}
+                      tickLine={false}
+                      minTickGap={40}
+                      tick={{ fill: "var(--ops-muted)", fontSize: 12 }}
+                      dy={8}
+                    />
+                    <YAxis
+                      tickFormatter={compact}
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: "var(--ops-muted)", fontSize: 12 }}
+                      width={60}
+                    />
+                    <Tooltip
+                      cursor={{ fill: "var(--ops-hover)" }}
+                      content={({ active, payload, label }) =>
+                        active && payload?.length ? (
+                          <div className="ops-chart-tooltip">
+                            <span>{label}</span>
+                            <strong>
+                              {num(Number(payload[0].value))} {chartUnit}
+                            </strong>
+                          </div>
+                        ) : null
+                      }
+                    />
+                    <Bar
+                      dataKey={chartKey}
+                      fill="var(--ops-chart)"
+                      radius={[3, 3, 0, 0]}
+                      maxBarSize={22}
+                      isAnimationActive={false}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </div>
+          <div className="ops-energy-footer">
+            <span>
+              <i className="ops-legend" />
+              {measure === "kwh" ? "Daily consumption" : "Daily peak demand"} (
+              {chartUnit})
+            </span>
+            <span>
+              {daily[0]?.label} – {daily[daily.length - 1]?.label}
+            </span>
+          </div>
+        </section>
+        <section className="ops-ranking">
+          <SectionTitle
+            title="Highest consuming tenants"
+            detail="This billing period"
+          />
+          <div className="ops-ranking-label">
+            <span>Tenant</span>
+            <span>Consumption</span>
+          </div>
+          <ol>
+            {ranking.map((r, index) => (
+              <li key={r.tenant.id}>
+                <Link to={`/admin/tenants/${r.tenant.id}`}>
+                  <span className="ops-rank-num">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <div className="ops-rank-detail">
+                    <div>
+                      <span>{r.tenant.name}</span>
+                      <strong>
+                        {num(r.periodKwh)}
+                        <small> kWh</small>
+                      </strong>
+                    </div>
+                    <div className="ops-rank-track">
+                      <i
+                        style={{
+                          width: `${ranking[0]?.periodKwh ? (r.periodKwh / ranking[0].periodKwh) * 100 : 0}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ol>
+          {!ranking.length && (
+            <p className="ops-empty">No active tenant readings.</p>
+          )}
+          <div className="ops-meter-health">
+            <div>
+              <Gauge size={16} />
+              <span>Meter connectivity</span>
+              <strong>
+                {kpis.metersTotal - kpis.offlineMeters}
+                <small> / {kpis.metersTotal}</small>
+              </strong>
+            </div>
+            <Link to="/admin/energy/meters">
+              <span className={kpis.offlineMeters ? "ops-danger" : ""}>
+                {kpis.offlineMeters} offline meters
+              </span>
+              <ArrowRight size={14} />
+            </Link>
+          </div>
+        </section>
+      </div>
+      <div className="ops-triage-grid">
+        <section className="ops-attention">
+          <SectionTitle
+            title="Operational attention"
+            detail="Prioritized exceptions across the park"
+          >
+            <span className="ops-count">{attention.length} to review</span>
+          </SectionTitle>
+          <div className="ops-queue-toolbar">
+            <Tabs
+              value={queueFilter}
+              onValueChange={(v) => {
+                setQueueFilter(v);
+                setShowAll(false);
+              }}
+            >
+              <TabsList
+                className="ops-filter-tabs"
+                aria-label="Attention filter"
+              >
+                <TabsTrigger
+                  value="all"
+                  id="attention-tab-all"
+                  aria-controls="attention-panel"
+                >
+                  All items <span>{attention.length}</span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="critical"
+                  id="attention-tab-critical"
+                  aria-controls="attention-panel"
+                >
+                  Critical & offline
+                </TabsTrigger>
+                <TabsTrigger
+                  value="other"
+                  id="attention-tab-other"
+                  aria-controls="attention-panel"
+                >
+                  Other alerts
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+          <div
+            id="attention-panel"
+            role="tabpanel"
+            aria-labelledby={`attention-tab-${queueFilter}`}
+            tabIndex={0}
+          >
+            <Table
+              className="ops-attention-table"
+              aria-label="Operational attention"
+            >
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Issue / tenant</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Updated</TableHead>
+                  <TableHead>
+                    <span className="sr-only">Action</span>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {queue.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell>
+                      <Link
+                        className="ops-issue"
+                        to={item.href}
+                        title={`${item.title} — ${item.tenant} · ${item.detail} · ${ago(item.ts)}`}
+                      >
+                        <item.icon size={16} />
+                        <div>
+                          <strong>{item.title}</strong>
+                          <span>
+                            {item.tenant} <b>·</b> {item.detail}
+                          </span>
+                        </div>
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      <span
+                        className={`ops-status ${item.rank === 0 ? "is-critical" : "is-warning"}`}
+                      >
+                        <i />
+                        {item.tag}
+                      </span>
+                    </TableCell>
+                    <TableCell className="ops-nowrap">{ago(item.ts)}</TableCell>
+                    <TableCell>
+                      <Link
+                        to={item.href}
+                        className="ops-row-action"
+                        aria-label={`Review ${item.title}`}
+                      >
+                        <ArrowUpRight size={16} />
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            {!queue.length && (
+              <div className="ops-empty">
+                <CheckCheck size={24} />
+                <p>No items need attention in this view.</p>
+              </div>
+            )}
+          </div>
+          <div className="ops-table-footer">
+            <span>
+              Showing {queue.length} of {selectedAttention.length} prioritized
+              items
+            </span>
+            {selectedAttention.length > 5 && (
+              <button
+                className="ops-text-button"
+                onClick={() => setShowAll((v) => !v)}
+              >
+                {showAll ? "Show fewer" : "View all items"}
+                <ArrowDownRight size={14} />
+              </button>
+            )}
+          </div>
+        </section>
+        <section className="ops-arrivals">
+          <SectionTitle
+            title="Upcoming visitors"
+            detail="Next scheduled arrivals"
+          >
+            <TextLink to="/admin/visitors/scheduled">All</TextLink>
+          </SectionTitle>
+          <Link to="/admin/visitors/overstaying" className="ops-overstay">
+            <AlarmClock size={16} />
+            <span>
+              <strong>{kpis.visitorsOverstaying}</strong> overstaying
+              {kpis.visitorsOverstaying
+                ? " · Review departures"
+                : " · All clear"}
+            </span>
+            <ArrowUpRight size={15} />
+          </Link>
+          <ul>
+            {upcoming.map((v) => (
+              <li key={v.id}>
+                <div className="ops-avatar">
+                  {v.fullName
+                    .split(" ")
+                    .map((n) => n[0])
+                    .slice(0, 2)
+                    .join("")}
+                </div>
+                <div>
+                  <strong>{v.fullName}</strong>
+                  <span>{v.company || v.purpose}</span>
+                </div>
+                <time dateTime={new Date(v.expectedArrival).toISOString()}>
+                  <span>
+                    {new Intl.DateTimeFormat("en-GB", {
+                      day: "numeric",
+                      month: "short",
+                    }).format(v.expectedArrival)}
+                  </span>
+                  {fmtTime(v.expectedArrival)}
+                </time>
+              </li>
+            ))}
+          </ul>
+          {!upcoming.length && (
+            <p className="ops-empty">No upcoming visitors.</p>
+          )}
+        </section>
+      </div>
+      <div className="ops-bottom-grid">
+        <section className="ops-onboarding">
+          <SectionTitle
+            title="Recent onboarding"
+            detail="Newest organizations in your park"
+          >
+            <TextLink to="/admin/tenants">All tenants</TextLink>
+          </SectionTitle>
+          <Table aria-label="Recent onboarding">
+            <TableHeader>
+              <TableRow>
+                <TableHead>Organization</TableHead>
+                <TableHead>Building</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Joined</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {recentTenants.map((r) => (
+                <TableRow key={r.tenant.id}>
+                  <TableCell>
+                    <Link
+                      className="ops-tenant-link"
+                      to={`/admin/tenants/${r.tenant.id}`}
+                    >
+                      <span className="ops-avatar">
+                        {r.tenant.code.slice(0, 2)}
+                      </span>
+                      <strong>{r.tenant.name}</strong>
+                    </Link>
+                  </TableCell>
+                  <TableCell>{r.buildingName}</TableCell>
+                  <TableCell>
+                    <span
+                      className={`ops-status ${r.tenant.status === "active" ? "is-success" : r.tenant.status === "suspended" ? "is-critical" : ""}`}
+                    >
+                      <i />
+                      {r.tenant.status.replace(/_/g, " ")}
+                    </span>
+                  </TableCell>
+                  <TableCell className="ops-nowrap">
+                    {ago(r.tenant.createdAt)}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </section>
+        <section className="ops-activity">
+          <SectionTitle
+            title="Recent activity"
+            detail="Live updates across all tenants"
+          />
+          <ol>
+            {activity.map((a) => {
+              const Icon = ACTIVITY_ICON[a.kind] ?? Bell;
+              return (
+                <li key={a.id}>
+                  <span className="ops-activity-icon">
+                    <Icon size={15} />
+                  </span>
+                  <div>
+                    <strong>{a.title}</strong>
+                    <p>{a.detail}</p>
+                  </div>
+                  <time>{ago(a.ts)}</time>
+                </li>
+              );
+            })}
+          </ol>
+        </section>
+      </div>
+      <footer className="ops-page-footer">
+        <span>
+          <i className="ops-live-dot" />
+          Live values update every few seconds
+        </span>
+        <span>
+          {compact(kpis.metersTotal)} meters monitored across the park
+        </span>
+      </footer>
     </div>
   );
 }
@@ -207,7 +674,7 @@ function VisitorRow({ name, company, time }: { name: string; company?: string; t
 interface AttentionItem {
   id: string;
   icon: typeof Zap;
-  tone: 'critical' | 'warning' | 'energy' | 'visitor' | 'service';
+  tone: "critical" | "warning" | "energy" | "visitor" | "service";
   tag: string;
   title: string;
   detail: string;
@@ -217,21 +684,76 @@ interface AttentionItem {
   rank: number;
 }
 
-function buildAttention(w: import('../../data/world').World): AttentionItem[] {
+function buildAttention(w: import("../../data/world").World): AttentionItem[] {
   const items: AttentionItem[] = [];
-  const tenantName = (id: string) => w.tenantById[id]?.name ?? '—';
+  const tenantName = (id: string) => w.tenantById[id]?.name ?? "—";
 
-  for (const r of w.requests.filter((x) => x.priority === 'critical' && !['closed', 'confirmed', 'cancelled'].includes(x.status))) {
-    items.push({ id: `req-${r.id}`, icon: CATEGORY_ICON[r.category], tone: 'critical', tag: 'Critical', title: r.title, detail: `${r.reference} · ${r.category.replace('_', ' ')}`, tenant: tenantName(r.tenantId), ts: r.updatedAt, href: `/admin/service?open=${r.id}`, rank: 0 });
+  for (const r of w.requests.filter(
+    (x) =>
+      x.priority === "critical" &&
+      !["closed", "confirmed", "cancelled"].includes(x.status),
+  )) {
+    items.push({
+      id: `req-${r.id}`,
+      icon: CATEGORY_ICON[r.category],
+      tone: "critical",
+      tag: "Critical",
+      title: r.title,
+      detail: `${r.reference} · ${r.category.replace("_", " ")}`,
+      tenant: tenantName(r.tenantId),
+      ts: r.updatedAt,
+      href: `/admin/service?open=${r.id}`,
+      rank: 0,
+    });
   }
-  for (const v of w.visitors.filter((x) => x.status === 'overstaying')) {
-    items.push({ id: `vis-${v.id}`, icon: AlarmClock, tone: 'warning', tag: 'Overstay', title: `${v.fullName} overstaying`, detail: v.company ?? v.purpose, tenant: tenantName(v.tenantId), ts: v.expectedDeparture, href: '/admin/visitors/overstaying', rank: 1 });
+  for (const v of w.visitors.filter((x) => x.status === "overstaying")) {
+    items.push({
+      id: `vis-${v.id}`,
+      icon: AlarmClock,
+      tone: "warning",
+      tag: "Overstay",
+      title: `${v.fullName} overstaying`,
+      detail: v.company ?? v.purpose,
+      tenant: tenantName(v.tenantId),
+      ts: v.expectedDeparture,
+      href: "/admin/visitors/overstaying",
+      rank: 1,
+    });
   }
-  for (const m of w.meters.filter((x) => x.status === 'offline' && x.tenantId)) {
-    items.push({ id: `mtr-${m.id}`, icon: Gauge, tone: 'critical', tag: 'Offline', title: `${m.name} offline`, detail: `Serial ${m.serial}`, tenant: tenantName(m.tenantId!), ts: m.lastReadingAt, href: '/admin/energy/meters', rank: 0 });
+  for (const m of w.meters.filter(
+    (x) => x.status === "offline" && x.tenantId,
+  )) {
+    items.push({
+      id: `mtr-${m.id}`,
+      icon: Gauge,
+      tone: "critical",
+      tag: "Offline",
+      title: `${m.name} offline`,
+      detail: `Serial ${m.serial}`,
+      tenant: tenantName(m.tenantId!),
+      ts: m.lastReadingAt,
+      href: "/admin/energy/meters",
+      rank: 0,
+    });
   }
-  for (const a of w.alerts.filter((x) => x.status === 'active' && (x.severity === 'warning' || x.severity === 'critical') && x.kind !== 'meter_offline')) {
-    items.push({ id: `al-${a.id}`, icon: Zap, tone: 'energy', tag: a.severity === 'critical' ? 'Critical' : 'High', title: a.title, detail: a.description, tenant: tenantName(a.tenantId), ts: a.ts, href: '/admin/energy/alerts', rank: 2 });
+  for (const a of w.alerts.filter(
+    (x) =>
+      x.status === "active" &&
+      (x.severity === "warning" || x.severity === "critical") &&
+      x.kind !== "meter_offline",
+  )) {
+    items.push({
+      id: `al-${a.id}`,
+      icon: Zap,
+      tone: "energy",
+      tag: a.severity === "critical" ? "Critical" : "High",
+      title: a.title,
+      detail: a.description,
+      tenant: tenantName(a.tenantId),
+      ts: a.ts,
+      href: "/admin/energy/alerts",
+      rank: 2,
+    });
   }
   return items.sort((a, b) => a.rank - b.rank || b.ts - a.ts).slice(0, 12);
 }
