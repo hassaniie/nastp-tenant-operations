@@ -1,29 +1,30 @@
 /**
- * The NASTP Admin shell, rebuilt on the ReUI/shadcn component language.
+ * The NASTP Admin shell.
  *
- * Scoped to the admin experience on purpose: `Shell.tsx` still renders the
- * Tenant Portal exactly as it did, so this pilot changes one experience and
- * leaves the other two untouched.
+ * Scoped to the admin experience: `Shell.tsx` still renders the Tenant Portal
+ * unchanged, so this moves one experience and leaves the other two alone.
  *
- * What actually changed, beyond paint:
- *   • The rail is a quiet plane rather than a bordered box. Group labels drop
- *     to a 10px lead-in, items lose their accent bar, and the active row is a
- *     filled `bg-accent` plate — the shadcn/ReUI navigation idiom.
- *   • Counts are real ReUI `Badge`s (`destructive-light` for anything that is
- *     actually wrong, `secondary` for volume), so a number in the rail carries
- *     the same status vocabulary as a number on the page.
- *   • The rail scrolls in a shadcn `ScrollArea`, so long navigation does not
- *     hand the page a second native scrollbar.
- *   • The top bar reads as a location + a command surface: a breadcrumb pair
- *     rather than one bare title, and search promoted to a real control.
+ * The composition, not just the paint:
+ *   • Search lives in the rail, directly under the workspace switcher, rather
+ *     than floating in the top bar. It is a permanent affordance where the eye
+ *     already is, and it frees the bar to be a context strip instead of a
+ *     mixed utility tray.
+ *   • The bar is therefore slim: breadcrumb on the left, utilities on the
+ *     right, nothing competing in the middle.
+ *   • Navigation rows are 14px on a 34px row. The previous 13px-on-30px was
+ *     dense for the sake of density; this reads at a glance without shouting.
+ *   • Group labels drop the wide uppercase tracking — separation comes from
+ *     spacing and a hairline, which is quieter and needs no decoration.
+ *   • Only problems get a Badge. Volume counts (open requests, unread
+ *     notifications) render as plain muted numerals, so a red pill in the rail
+ *     always means something is wrong.
  *
- * Behaviour is deliberately identical: the same `matchNav` resolution, the
- * same badge counts, the same collapse and mobile-drawer state, the same
- * command palette, toaster and idle monitor. No navigation destination, guard
- * or permission is touched.
+ * Behaviour is unchanged: same `matchNav` resolution, same badge counts, same
+ * collapse and drawer state, same palette, toaster and idle monitor. No
+ * destination, guard or permission is touched.
  */
 
-import { ChevronsLeft, ChevronsRight, Menu, Moon, PanelLeft, Search, Sun, X } from 'lucide-react';
+import { ChevronsLeft, ChevronsRight, Menu, Moon, Search, Sun, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
@@ -35,7 +36,6 @@ import { Badge } from '../components/reui/badge';
 import { Button } from '../components/shadcn/button';
 import { ScrollArea } from '../components/shadcn/scroll-area';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../components/shadcn/tooltip';
-import { Kbd } from '../components/ui/primitives';
 import { Toaster } from '../components/ui/toast';
 import { NotificationBell } from './NotificationBell';
 import { ExperienceSwitcher } from './ExperienceSwitcher';
@@ -45,7 +45,7 @@ import { IdleMonitor } from './IdleMonitor';
 
 type Badges = { alerts: number; overstaying: number; openRequests: number; notifications: number };
 
-/** Unchanged from Shell.tsx — the admin scope of the same counts. */
+/** Unchanged — the admin scope of the same counts. */
 function computeBadges(w: World): Badges {
   return {
     alerts: w.alerts.filter((a) => a.status === 'active').length,
@@ -55,32 +55,8 @@ function computeBadges(w: World): Badges {
   };
 }
 
-/** Anything that is actually wrong shouts; volume counts stay quiet. */
-const BADGE_VARIANT: Record<string, 'destructive-light' | 'secondary'> = {
-  alerts: 'destructive-light',
-  overstaying: 'destructive-light',
-  openRequests: 'secondary',
-  notifications: 'secondary',
-};
-
-function Workspace({ collapsed }: { collapsed: boolean }) {
-  return (
-    <div className={cn('flex min-w-0 items-center gap-2.5', collapsed && 'justify-center')}>
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-        <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" aria-hidden>
-          <path d="M4 20V9l8-5 8 5v11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M9 20v-6h6v6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </span>
-      {!collapsed && (
-        <div className="min-w-0 leading-tight">
-          <p className="truncate text-[13px] font-semibold tracking-[-0.01em] text-foreground">NASTP</p>
-          <p className="truncate text-[11px] text-muted-foreground">Tenant Operations</p>
-        </div>
-      )}
-    </div>
-  );
-}
+/** Only a genuine problem earns colour in the rail. */
+const IS_PROBLEM: Record<string, boolean> = { alerts: true, overstaying: true, openRequests: false, notifications: false };
 
 function Rail({
   groups, badges, activeId, collapsed, onToggle, onNavigate, mobile,
@@ -88,67 +64,101 @@ function Rail({
   groups: NavGroup[]; badges: Badges; activeId?: string; collapsed: boolean;
   onToggle: () => void; onNavigate?: () => void; mobile?: boolean;
 }) {
+  const { setPaletteOpen } = useSession();
+
   return (
     <nav
       className={cn(
         'flex h-full flex-col border-r border-border bg-background transition-[width] duration-200 ease-out',
-        collapsed ? 'w-[68px]' : 'w-[252px]',
+        collapsed ? 'w-[72px]' : 'w-[248px]',
       )}
       aria-label="Primary"
     >
-      <div className={cn('flex h-[60px] shrink-0 items-center gap-2 px-3', collapsed && 'justify-center px-0')}>
-        <Workspace collapsed={collapsed} />
+      {/* workspace */}
+      <div className={cn('flex items-center gap-2 px-3 pb-2 pt-3', collapsed && 'justify-center px-2')}>
+        <div className={cn('flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-1.5 py-1.5', collapsed && 'flex-none px-0')}>
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] bg-primary text-primary-foreground">
+            <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" aria-hidden>
+              <path d="M4 20V9l8-5 8 5v11" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M9 20v-6h6v6" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
+          {!collapsed && (
+            <div className="min-w-0 leading-tight">
+              <p className="truncate text-[14px] font-semibold tracking-[-0.01em] text-foreground">NASTP</p>
+              <p className="truncate text-[12px] text-muted-foreground">Tenant Operations</p>
+            </div>
+          )}
+        </div>
         {!mobile && !collapsed && (
-          <Button variant="ghost" size="icon" onClick={onToggle} className="ml-auto h-7 w-7 text-muted-foreground" aria-label="Collapse navigation">
+          <Button variant="ghost" size="icon" onClick={onToggle} className="h-7 w-7 shrink-0 text-muted-foreground" aria-label="Collapse navigation">
             <ChevronsLeft className="h-4 w-4" />
           </Button>
         )}
       </div>
 
+      {/* search — a permanent affordance in the rail, not a top-bar guest */}
+      <div className={cn('px-3 pb-3', collapsed && 'px-2')}>
+        {collapsed ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" onClick={() => setPaletteOpen(true)} className="h-9 w-full text-muted-foreground" aria-label="Search">
+                <Search className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right">Search · ⌘K</TooltipContent>
+          </Tooltip>
+        ) : (
+          <button
+            onClick={() => setPaletteOpen(true)}
+            className="flex h-9 w-full items-center gap-2.5 rounded-lg border border-border bg-card px-2.5 text-[13.5px] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground"
+          >
+            <Search className="h-4 w-4 shrink-0" />
+            <span className="flex-1 text-left">Search</span>
+            <span className="shrink-0 font-mono text-[11px] text-muted-foreground/70">⌘K</span>
+          </button>
+        )}
+      </div>
+
       <ScrollArea className="min-h-0 flex-1">
-        <div className="px-3 pb-4">
-          {groups.map((group) => (
-            <div key={group.id} className="mb-5 last:mb-0">
+        <div className={cn('px-3 pb-4', collapsed && 'px-2')}>
+          {groups.map((group, gi) => (
+            <div key={group.id} className={cn(gi > 0 && 'mt-1.5 border-t border-border/70 pt-3')}>
               {!collapsed && group.label && (
-                <p className="px-2 pb-2 pt-1 text-[10px] font-semibold uppercase tracking-[0.13em] text-muted-foreground/70">
-                  {group.label}
-                </p>
+                <p className="px-2 pb-1.5 text-[11.5px] font-medium text-muted-foreground/75">{group.label}</p>
               )}
-              <ul className="flex flex-col gap-[3px]">
+              <ul className="flex flex-col gap-px">
                 {group.items.map((item) => {
                   const badge = item.badge ? badges[item.badge] : 0;
                   // Active state comes from the centralized matcher, not from each
                   // link's own `end` rule — that is what keeps nested/detail routes
                   // (e.g. /admin/tenants/:id) lit under their parent module.
                   const active = item.id === activeId;
+                  const problem = item.badge ? IS_PROBLEM[item.badge] : false;
                   const link = (
                     <Link
                       to={item.path}
                       onClick={onNavigate}
                       aria-current={active ? 'page' : undefined}
                       className={cn(
-                        'group flex items-center gap-2.5 rounded-lg px-2.5 py-[7px] text-[13px] transition-colors duration-100',
+                        'group flex h-[34px] items-center gap-2.5 rounded-lg px-2.5 text-[14px] transition-colors duration-100',
                         collapsed && 'justify-center px-0',
                         active
                           ? 'bg-accent font-medium text-foreground'
-                          : 'font-normal text-muted-foreground hover:bg-accent/60 hover:text-foreground',
+                          : 'font-normal text-muted-foreground hover:bg-accent/55 hover:text-foreground',
                       )}
                     >
-                      <item.icon className={cn('h-4 w-4 shrink-0', active ? 'text-foreground' : 'text-muted-foreground')} />
+                      <item.icon className={cn('h-[17px] w-[17px] shrink-0', active ? 'text-primary' : 'text-muted-foreground/80')} />
                       {!collapsed && <span className="truncate">{item.label}</span>}
-                      {!collapsed && badge > 0 && item.badge && (
-                        <Badge variant={BADGE_VARIANT[item.badge]} size="xs" className="ml-auto tabular-nums">
-                          {badge}
-                        </Badge>
+                      {!collapsed && badge > 0 && (
+                        problem ? (
+                          <Badge variant="destructive-light" size="xs" className="ml-auto tabular-nums">{badge}</Badge>
+                        ) : (
+                          <span className="ml-auto text-[12.5px] tabular-nums text-muted-foreground/70">{badge}</span>
+                        )
                       )}
-                      {collapsed && badge > 0 && (
-                        <span
-                          aria-hidden
-                          className={cn(
-                            'absolute right-2 top-1.5 h-1.5 w-1.5 rounded-full',
-                            BADGE_VARIANT[item.badge!] === 'destructive-light' ? 'bg-destructive' : 'bg-muted-foreground',
-                          )}
-                        />
+                      {collapsed && badge > 0 && problem && (
+                        <span aria-hidden className="absolute right-2.5 top-2 h-1.5 w-1.5 rounded-full bg-destructive" />
                       )}
                     </Link>
                   );
@@ -184,53 +194,42 @@ function Rail({
   );
 }
 
-function TopBar({ onOpenMobileNav }: { onOpenMobileNav: () => void }) {
-  const { prefs, setPrefs, setPaletteOpen } = useSession();
+/** A context strip. Location on the left, utilities on the right, nothing in
+ *  the middle competing with either. */
+function ContextBar({ onOpenMobileNav }: { onOpenMobileNav: () => void }) {
+  const { prefs, setPrefs } = useSession();
   const location = useLocation();
   const match = matchNav(ADMIN_NAV, location.pathname);
+  const section = match?.group.label;
   // On a nested/detail route the leaf label ('All Tenants') would misdescribe
   // the page, so surface the module instead — the page's own header carries
   // the specific title.
-  const section = match?.group.label;
-  const title = match ? (match.nested && match.group.label ? match.group.label : match.leaf.label) : 'NASTP Admin';
+  const title = match ? (match.nested && match.group.label ? match.group.label : match.leaf.label) : 'Admin';
 
   return (
-    <header className="flex h-[60px] shrink-0 items-center gap-3 border-b border-border bg-background px-3 lg:px-5">
+    <header className="flex h-[52px] shrink-0 items-center gap-3 border-b border-border bg-background px-3 lg:px-6">
       <Button variant="ghost" size="icon" onClick={onOpenMobileNav} className="h-8 w-8 lg:hidden" aria-label="Open navigation">
         <Menu className="h-[18px] w-[18px]" />
       </Button>
 
-      {/* Location, not just a title: the module reads as context and the page
-          as the current place — the breadcrumb shape every operations console
-          uses to say where you are. */}
-      <div className="flex min-w-0 flex-1 items-center gap-2">
-        <PanelLeft className="hidden h-4 w-4 shrink-0 text-muted-foreground/60 sm:block" aria-hidden />
+      <nav aria-label="Breadcrumb" className="flex min-w-0 flex-1 items-center gap-1.5 text-[13px]">
+        <span className="hidden shrink-0 text-muted-foreground/70 sm:inline">NASTP</span>
+        <span className="hidden text-muted-foreground/40 sm:inline">/</span>
         {section && section !== title && (
           <>
-            <span className="hidden truncate text-[13px] text-muted-foreground sm:inline">{section}</span>
-            <span className="hidden text-muted-foreground/40 sm:inline">/</span>
+            <span className="hidden truncate text-muted-foreground/70 md:inline">{section}</span>
+            <span className="hidden text-muted-foreground/40 md:inline">/</span>
           </>
         )}
-        <h1 className="truncate text-[13px] font-medium text-foreground">{title}</h1>
-      </div>
+        <span className="truncate font-medium text-foreground">{title}</span>
+      </nav>
 
-      <button
-        onClick={() => setPaletteOpen(true)}
-        className="hidden h-8 items-center gap-2 rounded-lg border border-border bg-card px-2.5 text-[13px] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground md:flex md:w-[220px] xl:w-[280px]"
-      >
-        <Search className="h-3.5 w-3.5 shrink-0" />
-        <span className="flex-1 text-left">Search…</span>
-        <Kbd>⌘K</Kbd>
-      </button>
-
-      <div className="flex items-center gap-1">
+      <div className="flex shrink-0 items-center gap-0.5">
         <NotificationBell />
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
+              variant="ghost" size="icon" className="h-8 w-8"
               onClick={() => setPrefs({ theme: prefs.theme === 'dark' ? 'light' : 'dark' })}
               aria-label="Toggle theme"
             >
@@ -239,7 +238,7 @@ function TopBar({ onOpenMobileNav }: { onOpenMobileNav: () => void }) {
           </TooltipTrigger>
           <TooltipContent>Switch to {prefs.theme === 'dark' ? 'light' : 'dark'} theme</TooltipContent>
         </Tooltip>
-        <div className="mx-1.5 hidden h-5 w-px bg-border sm:block" />
+        <div className="mx-2 h-5 w-px bg-border" />
         <ExperienceSwitcher />
       </div>
     </header>
@@ -262,44 +261,26 @@ export function AdminShellNext() {
     <TooltipProvider delayDuration={220} skipDelayDuration={400}>
       <div className="flex h-full w-full overflow-hidden bg-canvas">
         <div className="hidden lg:block">
-          <Rail
-            groups={ADMIN_NAV}
-            badges={badges}
-            activeId={activeId}
-            collapsed={collapsed}
-            onToggle={() => setCollapsed((c) => !c)}
-          />
+          <Rail groups={ADMIN_NAV} badges={badges} activeId={activeId} collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
         </div>
 
         {mobileNav && (
           <div className="fixed inset-0 z-[70] lg:hidden">
-            <div
-              className="absolute inset-0 bg-black/60 backdrop-blur-[2px] animate-[fade-in_0.16s_ease-out]"
-              onClick={() => setMobileNav(false)}
-            />
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] animate-[fade-in_0.16s_ease-out]" onClick={() => setMobileNav(false)} />
             <div className="absolute inset-y-0 left-0 animate-[slide-in_0.24s_cubic-bezier(0.22,1,0.36,1)]">
               <Rail
-                groups={ADMIN_NAV}
-                badges={badges}
-                activeId={activeId}
-                collapsed={false}
-                onToggle={() => setMobileNav(false)}
-                onNavigate={() => setMobileNav(false)}
-                mobile
+                groups={ADMIN_NAV} badges={badges} activeId={activeId} collapsed={false}
+                onToggle={() => setMobileNav(false)} onNavigate={() => setMobileNav(false)} mobile
               />
             </div>
-            <button
-              onClick={() => setMobileNav(false)}
-              className="absolute right-3 top-3 rounded-lg bg-card p-2 text-muted-foreground"
-              aria-label="Close navigation"
-            >
+            <button onClick={() => setMobileNav(false)} className="absolute right-3 top-3 rounded-lg bg-card p-2 text-muted-foreground" aria-label="Close navigation">
               <X className="h-4 w-4" />
             </button>
           </div>
         )}
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <TopBar onOpenMobileNav={() => setMobileNav(true)} />
+          <ContextBar onOpenMobileNav={() => setMobileNav(true)} />
           <main id="main-scroll" className="min-h-0 flex-1 overflow-y-auto">
             <Outlet />
           </main>
