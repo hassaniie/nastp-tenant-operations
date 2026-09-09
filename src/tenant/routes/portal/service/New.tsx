@@ -7,9 +7,9 @@
 import { FilePlus2, Paperclip, RotateCcw, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardBody, CardHeader } from '../../../components/ui/card';
-import { Button, IconBox, StatusBadge } from '../../../components/ui/primitives';
-import { Field, Input, Textarea, SimpleSelect } from '../../../components/ui/form';
+import { Card, CardBody, CardHeader } from '../../../components/app/card';
+import { Button, IconBox, StatusBadge } from '../../../components/app/primitives';
+import { Field, Input, Textarea, SimpleSelect } from '../../../components/app/form';
 import { CATEGORY_ICON } from '../../../components/status';
 import { SERVICE_CATEGORY_LABEL } from '../../../data/catalog';
 import { useSession } from '../../../store/session';
@@ -100,14 +100,14 @@ export default function NewRequest() {
             <SimpleSelect value={f.officeId} onChange={(v) => set({ officeId: v })} options={offices.map((o) => ({ value: o.id, label: `${o.label} · ${o.code}` }))} placeholder="Select office" />
           </Field>
           <Field label="Preview">
-            <div className="flex h-10 items-center gap-2 rounded-[10px] border border-border-subtle bg-surface-inset px-3 text-[13px] text-muted"><CatIcon className="h-4 w-4 text-service" />{SERVICE_CATEGORY_LABEL[f.category]}</div>
+            <div className="flex h-10 items-center gap-2 rounded-[10px] border border-border bg-muted px-3 text-[13px] text-muted-foreground"><CatIcon className="h-4 w-4 text-module-service" />{SERVICE_CATEGORY_LABEL[f.category]}</div>
           </Field>
         </div>
 
         <Field label="Priority" required>
           <div className="flex flex-wrap gap-2">
             {PRIORITIES.map((p) => (
-              <button key={p.value} onClick={() => set({ priority: p.value })} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] font-medium transition-all ${f.priority === p.value ? 'border-primary/40 bg-primary-muted text-foreground' : 'border-border bg-surface-inset text-subtle hover:text-muted'}`}>
+              <button key={p.value} onClick={() => set({ priority: p.value })} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] font-medium transition-all ${f.priority === p.value ? 'border-primary/40 bg-primary/10 text-foreground' : 'border-border bg-muted text-muted-foreground/75 hover:text-muted-foreground'}`}>
                 <StatusBadge tone={p.tone} size="sm" dot>{p.label}</StatusBadge>
               </button>
             ))}
@@ -121,9 +121,9 @@ export default function NewRequest() {
             {attachments.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {attachments.map((a) => (
-                  <span key={a.id} className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-inset px-2.5 py-1.5 text-[12px] text-muted">
-                    <Paperclip className="h-3.5 w-3.5" />{a.name} <span className="text-subtle">· {a.sizeKb} KB</span>
-                    <button onClick={() => setAttachments((prev) => prev.filter((x) => x.id !== a.id))} className="text-subtle hover:text-critical"><X className="h-3 w-3" /></button>
+                  <span key={a.id} className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted px-2.5 py-1.5 text-[12px] text-muted-foreground">
+                    <Paperclip className="h-3.5 w-3.5" />{a.name} <span className="text-muted-foreground/75">· {a.sizeKb} KB</span>
+                    <button onClick={() => setAttachments((prev) => prev.filter((x) => x.id !== a.id))} className="text-muted-foreground/75 hover:text-destructive"><X className="h-3 w-3" /></button>
                   </span>
                 ))}
               </div>

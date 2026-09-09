@@ -5,7 +5,7 @@
  */
 
 import { useState } from 'react';
-import { Card } from '../../../components/ui/card';
+import { Card } from '../../../components/app/card';
 import { VisitorTable, VisitorDrawer } from '../../visitorsShared';
 import { useSession } from '../../../store/session';
 import { useLive } from '../../../data/live';

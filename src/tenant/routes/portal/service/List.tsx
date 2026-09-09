@@ -5,8 +5,8 @@
 
 import { Wrench } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
-import { Card } from '../../../components/ui/card';
-import { DataTable, type Column } from '../../../components/ui/data';
+import { Card } from '../../../components/app/card';
+import { DataTable, type Column } from '../../../components/app/data';
 import { PriorityBadge, ServiceStatusBadge, CATEGORY_ICON } from '../../../components/status';
 import { ServiceRequestDrawer } from '../../serviceShared';
 import { useSession } from '../../../store/session';
@@ -23,11 +23,11 @@ export function PortalServiceList({ kind }: { kind: 'open' | 'history' }) {
   const open = openId ? requests.find((r) => r.id === openId) ?? null : null;
 
   const columns: Column<ServiceRequest>[] = [
-    { key: 'ref', header: 'Ref', cell: (r) => <span className="tnum text-subtle">{r.reference}</span>, hideBelow: 'sm' },
-    { key: 'title', header: 'Request', cell: (r) => { const Icon = CATEGORY_ICON[r.category]; return <div className="flex items-center gap-2.5"><Icon className="h-4 w-4 shrink-0 text-service" /><span className="font-medium text-foreground">{r.title}</span></div>; }, sortValue: (r) => r.title },
+    { key: 'ref', header: 'Ref', cell: (r) => <span className="tnum text-muted-foreground/75">{r.reference}</span>, hideBelow: 'sm' },
+    { key: 'title', header: 'Request', cell: (r) => { const Icon = CATEGORY_ICON[r.category]; return <div className="flex items-center gap-2.5"><Icon className="h-4 w-4 shrink-0 text-module-service" /><span className="font-medium text-foreground">{r.title}</span></div>; }, sortValue: (r) => r.title },
     { key: 'priority', header: 'Priority', cell: (r) => <PriorityBadge priority={r.priority} size="sm" />, hideBelow: 'md' },
     { key: 'status', header: 'Status', cell: (r) => <ServiceStatusBadge status={r.status} size="sm" /> },
-    { key: 'updated', header: 'Updated', cell: (r) => <span className="tnum text-subtle">{ago(r.updatedAt)}</span>, sortValue: (r) => r.updatedAt, hideBelow: 'lg' },
+    { key: 'updated', header: 'Updated', cell: (r) => <span className="tnum text-muted-foreground/75">{ago(r.updatedAt)}</span>, sortValue: (r) => r.updatedAt, hideBelow: 'lg' },
   ];
 
   return (

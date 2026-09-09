@@ -5,12 +5,12 @@
  */
 
 import { BarChart3, Clock, UserCog, Users, Wrench } from 'lucide-react';
-import { Page, StatGrid, ContentGrid, SplitGrid } from '../../../components/ui/page';
-import { Card, CardBody, CardHeader } from '../../../components/ui/card';
+import { Page, StatGrid, ContentGrid, SplitGrid } from '../../../components/app/page';
+import { Card, CardBody, CardHeader } from '../../../components/app/card';
 import { PageHeader, StatCard } from '../../../components/common';
-import { IconBox } from '../../../components/ui/primitives';
+import { IconBox } from '../../../components/app/primitives';
 import { BarSeriesChart, DonutChart } from '../../../components/charts';
-import { DataTable, type Column } from '../../../components/ui/data';
+import { DataTable, type Column } from '../../../components/app/data';
 import { useLive } from '../../../data/live';
 import { NOW } from '../../../data/world';
 import { SERVICE_CATEGORY_LABEL } from '../../../data/catalog';
@@ -53,7 +53,7 @@ export default function Performance() {
   );
 
   const perfColumns: Column<PerfRow>[] = [
-    { key: 'name', header: 'Name', cell: (r) => <div><p className="font-medium text-foreground">{r.name}</p>{r.sub && <p className="text-[11px] text-subtle">{r.sub}</p>}</div>, sortValue: (r) => r.name },
+    { key: 'name', header: 'Name', cell: (r) => <div><p className="font-medium text-foreground">{r.name}</p>{r.sub && <p className="text-[11px] text-muted-foreground/75">{r.sub}</p>}</div>, sortValue: (r) => r.name },
     { key: 'resolved', header: 'Resolved', cell: (r) => <span className="tnum">{num(r.resolved)}</span>, sortValue: (r) => r.resolved },
     { key: 'open', header: 'Open', cell: (r) => <span className="tnum">{num(r.open)}</span>, sortValue: (r) => r.open, hideBelow: 'sm' },
     { key: 'avg', header: 'Avg resolution', cell: (r) => <span className="tnum">{r.avgMs ? duration(r.avgMs) : '—'}</span>, sortValue: (r) => r.avgMs, hideBelow: 'md' },

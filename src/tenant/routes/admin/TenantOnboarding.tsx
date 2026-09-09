@@ -13,11 +13,11 @@ import {
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Page, SplitGrid } from '../../components/ui/page';
-import { Card, CardBody, CardHeader } from '../../components/ui/card';
+import { Page, SplitGrid } from '../../components/app/page';
+import { Card, CardBody, CardHeader } from '../../components/app/card';
 import { Breadcrumb, PageHeader, Stepper } from '../../components/common';
-import { Button, IconBox, ProgressBar, Separator, StatusBadge, TenantMark } from '../../components/ui/primitives';
-import { Field, Input, SimpleSelect, Switch } from '../../components/ui/form';
+import { Button, IconBox, ProgressBar, Separator, StatusBadge, TenantMark } from '../../components/app/primitives';
+import { Field, Input, SimpleSelect, Switch } from '../../components/app/form';
 import { adminApi } from '../../data/api';
 import { simulation } from '../../data/live';
 import { makeReadingSeries, makeSnapshot } from '../../data/world';
@@ -98,7 +98,7 @@ export default function TenantOnboarding() {
       <Breadcrumb items={[{ label: 'Tenants', to: '/admin/tenants' }, { label: 'Onboarding' }]} />
       <PageHeader title="Onboard a Tenant" description="Configure a new organization step by step. Progress is validated and can be saved as a draft at any point." />
 
-      <div className="rounded-2xl border border-border bg-surface p-4">
+      <div className="rounded-2xl border border-border bg-card p-4">
         <Stepper steps={STEPS.map((label, i) => ({ label, done: i < step && validity[i] }))} current={step} onStep={setStep} />
       </div>
 
@@ -152,7 +152,7 @@ function StepOrganization({ draft, set }: { draft: Draft; set: (p: Partial<Draft
         <Field label="Short code" required hint="Used in references and meter IDs"><Input value={draft.code} onChange={(e) => set({ code: e.target.value.toUpperCase() })} placeholder="ORBIT" maxLength={8} /></Field>
         <Field label="Registration No." optional><Input value={draft.registrationNo} onChange={(e) => set({ registrationNo: e.target.value })} placeholder="SECP-123456" /></Field>
         <Field label="NTN / Tax ID" optional><Input value={draft.ntn} onChange={(e) => set({ ntn: e.target.value })} placeholder="1234567-8" /></Field>
-        <div className="col-span-full"><Separator className="my-1" /><p className="mb-3 mt-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle">Primary contact</p></div>
+        <div className="col-span-full"><Separator className="my-1" /><p className="mb-3 mt-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/75">Primary contact</p></div>
         <Field label="Contact name" required><Input value={draft.contactName} onChange={(e) => set({ contactName: e.target.value })} placeholder="Full name" /></Field>
         <Field label="Designation" optional><Input value={draft.contactDesignation} onChange={(e) => set({ contactDesignation: e.target.value })} placeholder="Facilities Lead" /></Field>
         <Field label="Email" required><Input type="email" value={draft.contactEmail} onChange={(e) => set({ contactEmail: e.target.value })} placeholder="name@company.com.pk" /></Field>
@@ -179,20 +179,20 @@ function StepLocation({ draft, set, buildings, floors }: { draft: Draft; set: (p
 
         <div>
           <div className="mb-2 flex items-center justify-between">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle">Offices / Spaces</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/75">Offices / Spaces</p>
             <Button variant="secondary" size="xs" onClick={addOffice}><Plus className="h-3.5 w-3.5" />Add office</Button>
           </div>
           <div className="flex flex-col gap-2.5">
             {draft.offices.map((o, i) => (
-              <div key={o.key} className="flex items-end gap-3 rounded-xl border border-border-subtle bg-surface-inset/50 p-3">
+              <div key={o.key} className="flex items-end gap-3 rounded-xl border border-border bg-muted/50 p-3">
                 <Field label={i === 0 ? 'Label' : ''} className="flex-1"><Input value={o.label} onChange={(e) => update(o.key, { label: e.target.value })} placeholder="Suite 1" /></Field>
                 <Field label={i === 0 ? 'Area (ft²)' : ''} className="w-40"><Input type="number" value={o.areaSqft} onChange={(e) => update(o.key, { areaSqft: Number(e.target.value) })} /></Field>
-                <Button variant="ghost" size="icon" className="mb-0.5 text-subtle hover:text-critical" disabled={draft.offices.length === 1} onClick={() => remove(o.key)} aria-label="Remove office"><Trash2 className="h-4 w-4" /></Button>
+                <Button variant="ghost" size="icon" className="mb-0.5 text-muted-foreground/75 hover:text-destructive" disabled={draft.offices.length === 1} onClick={() => remove(o.key)} aria-label="Remove office"><Trash2 className="h-4 w-4" /></Button>
               </div>
             ))}
           </div>
-          <div className="mt-3 flex items-center justify-between rounded-xl border border-primary/20 bg-primary-muted/40 px-3.5 py-2.5">
-            <span className="text-[12px] text-muted">{draft.offices.length} office{draft.offices.length === 1 ? '' : 's'} · Building → Floor → Offices</span>
+          <div className="mt-3 flex items-center justify-between rounded-xl border border-primary/20 bg-primary/10/40 px-3.5 py-2.5">
+            <span className="text-[12px] text-muted-foreground">{draft.offices.length} office{draft.offices.length === 1 ? '' : 's'} · Building → Floor → Offices</span>
             <span className="tnum text-[13px] font-semibold text-foreground">{area(total)} total</span>
           </div>
         </div>
@@ -206,18 +206,18 @@ function StepEnergy({ draft, set }: { draft: Draft; set: (p: Partial<Draft>) => 
     <>
       <StepHead icon={Gauge} title="Energy Infrastructure" subtitle="Assign a sub-meter to each space" />
       <CardBody className="flex flex-col gap-4">
-        <div className="rounded-xl border border-border-subtle bg-surface-inset/50 p-3.5 text-[12px] leading-relaxed text-muted">
+        <div className="rounded-xl border border-border bg-muted/50 p-3.5 text-[12px] leading-relaxed text-muted-foreground">
           Every tenant is metered by <span className="font-medium text-foreground">sub-meters</span>. The floor's main meter belongs to building infrastructure and is not assigned to the tenant. Consumption and charges come from these sub-meters.
         </div>
         {draft.offices.map((o, i) => {
           const serial = `${draft.code || 'NEW'}${i + 1}`;
           return (
-            <div key={o.key} className="flex items-end gap-3 rounded-xl border border-border-subtle bg-surface p-3">
+            <div key={o.key} className="flex items-end gap-3 rounded-xl border border-border bg-card p-3">
               <div className="flex items-center gap-2.5">
                 <IconBox icon={Gauge} tone="energy" size="sm" />
                 <div>
                   <p className="text-[13px] font-medium text-foreground">{o.label}</p>
-                  <p className="tnum text-[11px] text-subtle">Serial {serial}</p>
+                  <p className="tnum text-[11px] text-muted-foreground/75">Serial {serial}</p>
                 </div>
               </div>
               <Field label={i === 0 ? 'Meter name' : ''} className="flex-1"><Input value={draft.meterNames[o.key] ?? `${draft.name || 'Tenant'} Sub-meter ${i + 1}`} onChange={(e) => set({ meterNames: { ...draft.meterNames, [o.key]: e.target.value } })} /></Field>
@@ -237,7 +237,7 @@ function StepRates({ tariff, baseKw }: { tariff?: import('../../data/types').Tar
     <>
       <StepHead icon={Zap} title="Energy Configuration" subtitle="Applicable, globally-configured rates" />
       <CardBody className="flex flex-col gap-4">
-        <div className="rounded-xl border border-border-subtle bg-surface-inset/50 p-3.5 text-[12px] text-muted">
+        <div className="rounded-xl border border-border bg-muted/50 p-3.5 text-[12px] text-muted-foreground">
           Rates are configured centrally and are not customised per tenant. This tenant will bill against <span className="font-medium text-foreground">{tariff?.name ?? 'the current schedule'}</span>.
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -246,10 +246,10 @@ function StepRates({ tariff, baseKw }: { tariff?: import('../../data/types').Tar
           <RateTile label="Peak" value={rate('peak')} />
           <RateTile label="Off-Peak" value={rate('off_peak')} />
         </div>
-        <div className="rounded-xl border border-border bg-surface p-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle">How charges are calculated</p>
-          <p className="mt-2 text-[13px] text-foreground">Consumption <span className="text-subtle">×</span> Applicable Rate <span className="text-subtle">=</span> Energy Charge</p>
-          <p className="mt-2 text-[12px] text-muted">Estimated monthly usage ≈ <span className="tnum font-medium text-foreground">{num(monthlyKwh)} kWh</span>, roughly <span className="tnum font-medium text-foreground">{currency(monthlyKwh * rate('off_peak'), { compact: true })}</span> at the off-peak rate.</p>
+        <div className="rounded-xl border border-border bg-card p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/75">How charges are calculated</p>
+          <p className="mt-2 text-[13px] text-foreground">Consumption <span className="text-muted-foreground/75">×</span> Applicable Rate <span className="text-muted-foreground/75">=</span> Energy Charge</p>
+          <p className="mt-2 text-[12px] text-muted-foreground">Estimated monthly usage ≈ <span className="tnum font-medium text-foreground">{num(monthlyKwh)} kWh</span>, roughly <span className="tnum font-medium text-foreground">{currency(monthlyKwh * rate('off_peak'), { compact: true })}</span> at the off-peak rate.</p>
         </div>
       </CardBody>
     </>
@@ -258,10 +258,10 @@ function StepRates({ tariff, baseKw }: { tariff?: import('../../data/types').Tar
 
 function RateTile({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-xl border border-border-subtle bg-surface-inset/50 p-3 text-center">
+    <div className="rounded-xl border border-border bg-muted/50 p-3 text-center">
       <p className="tnum text-[18px] font-semibold text-foreground">{value.toFixed(2)}</p>
-      <p className="text-[11px] text-subtle">PKR / kWh</p>
-      <p className="mt-1 text-[11px] font-medium text-muted">{label}</p>
+      <p className="text-[11px] text-muted-foreground/75">PKR / kWh</p>
+      <p className="mt-1 text-[11px] font-medium text-muted-foreground">{label}</p>
     </div>
   );
 }
@@ -273,15 +273,15 @@ function StepAlerts({ draft, set }: { draft: Draft; set: (p: Partial<Draft>) => 
       <StepHead icon={Bell} title="Energy Alerts" subtitle="Enable and tune tenant-level alerts (sensible defaults applied)" />
       <CardBody className="flex flex-col gap-2.5">
         {draft.alerts.map((a, i) => (
-          <div key={a.kind} className="flex items-center gap-4 rounded-xl border border-border-subtle bg-surface p-3">
+          <div key={a.kind} className="flex items-center gap-4 rounded-xl border border-border bg-card p-3">
             <Switch checked={a.enabled} onCheckedChange={(v) => update(i, { enabled: v })} />
             <div className="min-w-0 flex-1">
               <p className="text-[13px] font-medium text-foreground">{ALERT_KIND_LABEL[a.kind]}</p>
-              <p className="text-[11px] text-subtle">Severity: {a.severity}</p>
+              <p className="text-[11px] text-muted-foreground/75">Severity: {a.severity}</p>
             </div>
             <div className="flex items-center gap-2">
               <Input type="number" value={a.threshold} disabled={!a.enabled} onChange={(e) => update(i, { threshold: Number(e.target.value) })} className="h-8 w-28 text-[12px]" />
-              <span className="w-16 text-[11px] text-subtle">{a.unit}</span>
+              <span className="w-16 text-[11px] text-muted-foreground/75">{a.unit}</span>
             </div>
           </div>
         ))}
@@ -295,7 +295,7 @@ function StepPortal({ draft, set }: { draft: Draft; set: (p: Partial<Draft>) => 
     <>
       <StepHead icon={UserRound} title="Portal Access" subtitle="Configure the primary tenant user" />
       <CardBody className="flex flex-col gap-4">
-        <div className="rounded-xl border border-border-subtle bg-surface-inset/50 p-3.5 text-[12px] text-muted">
+        <div className="rounded-xl border border-border bg-muted/50 p-3.5 text-[12px] text-muted-foreground">
           One primary user is configured now. Additional users and roles can be added later without changing the tenant. On activation, an invitation is generated for this user.
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -323,9 +323,9 @@ function StepReview({ draft, validity, totalArea }: { draft: Draft; validity: bo
       <StepHead icon={Check} title="Review & Activate" subtitle="Confirm the configuration before activating" />
       <CardBody className="flex flex-col gap-4">
         {warnings.length > 0 && (
-          <div className="flex items-start gap-2.5 rounded-xl border border-warning/25 bg-warning-dim/40 p-3">
+          <div className="flex items-start gap-2.5 rounded-xl border border-warning/25 bg-muted/40 p-3">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
-            <div className="text-[12px] text-muted">
+            <div className="text-[12px] text-muted-foreground">
               <p className="font-medium text-foreground">Before you activate</p>
               <ul className="mt-1 list-disc pl-4">{warnings.map((w) => <li key={w}>{w}</li>)}</ul>
             </div>
@@ -342,11 +342,11 @@ function StepReview({ draft, validity, totalArea }: { draft: Draft; validity: bo
 
 function ReviewBlock({ title, items }: { title: string; items: Array<[string, string]> }) {
   return (
-    <div className="rounded-xl border border-border-subtle bg-surface-inset/40 p-3.5">
-      <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle">{title}</p>
+    <div className="rounded-xl border border-border bg-muted/40 p-3.5">
+      <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/75">{title}</p>
       <dl className="grid grid-cols-2 gap-x-6 gap-y-2 sm:grid-cols-3">
         {items.map(([k, v]) => (
-          <div key={k}><dt className="text-[11px] text-subtle">{k}</dt><dd className="truncate text-[13px] text-foreground">{v}</dd></div>
+          <div key={k}><dt className="text-[11px] text-muted-foreground/75">{k}</dt><dd className="truncate text-[13px] text-foreground">{v}</dd></div>
         ))}
       </dl>
     </div>
@@ -365,12 +365,12 @@ function PreviewPanel({ draft, totalArea, baseKw, completeness, tariffName }: { 
             <TenantMark name={draft.name || 'New Tenant'} hue={210} size={44} />
             <div className="min-w-0">
               <p className="truncate text-[14px] font-semibold text-foreground">{draft.name || 'New Tenant'}</p>
-              <p className="truncate text-[12px] text-subtle">{draft.code || '—'} · {ORG_TYPE_LABEL[draft.organizationType]}</p>
+              <p className="truncate text-[12px] text-muted-foreground/75">{draft.code || '—'} · {ORG_TYPE_LABEL[draft.organizationType]}</p>
             </div>
           </div>
 
           <div>
-            <div className="flex items-center justify-between text-[12px]"><span className="text-subtle">Configuration</span><span className="tnum font-medium text-foreground">{completeness}%</span></div>
+            <div className="flex items-center justify-between text-[12px]"><span className="text-muted-foreground/75">Configuration</span><span className="tnum font-medium text-foreground">{completeness}%</span></div>
             <ProgressBar value={completeness} tone={completeness === 100 ? 'success' : 'primary'} className="mt-1.5" />
           </div>
 
@@ -392,7 +392,7 @@ function PreviewPanel({ draft, totalArea, baseKw, completeness, tariffName }: { 
 }
 
 function Row({ label, value }: { label: string; value: string }) {
-  return <div className="flex items-baseline justify-between gap-3"><span className="text-subtle">{label}</span><span className="truncate text-right font-medium text-foreground">{value}</span></div>;
+  return <div className="flex items-baseline justify-between gap-3"><span className="text-muted-foreground/75">{label}</span><span className="truncate text-right font-medium text-foreground">{value}</span></div>;
 }
 
 /* ---------------------------------------------------------- validation */

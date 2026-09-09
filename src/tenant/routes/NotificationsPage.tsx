@@ -8,12 +8,12 @@
 import { Bell, CheckCheck, Filter } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Page, StatGrid } from '../components/ui/page';
-import { Card, CardBody, CardHeader } from '../components/ui/card';
+import { Page, StatGrid } from '../components/app/page';
+import { Card, CardBody, CardHeader } from '../components/app/card';
 import { PageHeader, StatCard } from '../components/common';
-import { Button, IconBox } from '../components/ui/primitives';
-import { Segmented } from '../components/ui/tabs';
-import { EmptyState } from '../components/ui/data';
+import { Button, IconBox } from '../components/app/primitives';
+import { Segmented } from '../components/app/tabs';
+import { EmptyState } from '../components/app/data';
 import { MODULE_ICON, MODULE_TONE } from '../components/status';
 import { simulation, useLive } from '../data/live';
 import { useSession } from '../store/session';
@@ -61,7 +61,7 @@ export function NotificationsPage({ scope }: { scope: 'admin' | 'tenant' }) {
               <button
                 key={n.id}
                 onClick={() => { simulation.markNotificationRead(n.id); if (n.href) navigate(n.href.replace('/admin', scope === 'tenant' ? '/portal' : '/admin').replace('/portal/energy/alerts', '/portal/energy/alerts')); }}
-                className={cn('flex items-start gap-3 rounded-xl border p-3.5 text-left transition-colors', n.read ? 'border-border-subtle bg-surface hover:border-border-strong' : 'border-primary/20 bg-primary-muted/20 hover:border-primary/40')}
+                className={cn('flex items-start gap-3 rounded-xl border p-3.5 text-left transition-colors', n.read ? 'border-border bg-card hover:border-ring/40' : 'border-primary/20 bg-primary/10/20 hover:border-primary/40')}
               >
                 <IconBox icon={MODULE_ICON[n.domain]} tone={MODULE_TONE[n.domain]} size="sm" />
                 <div className="min-w-0 flex-1">
@@ -69,8 +69,8 @@ export function NotificationsPage({ scope }: { scope: 'admin' | 'tenant' }) {
                     <p className="truncate text-[13px] font-medium text-foreground">{n.title}</p>
                     {!n.read && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />}
                   </div>
-                  <p className="mt-0.5 text-[12px] leading-relaxed text-muted">{n.body}</p>
-                  <p className="mt-1 text-[11px] text-subtle">{(n as { tenantName?: string }).tenantName && scope === 'admin' ? `${(n as { tenantName?: string }).tenantName} · ` : ''}{ago(n.ts)}</p>
+                  <p className="mt-0.5 text-[12px] leading-relaxed text-muted-foreground">{n.body}</p>
+                  <p className="mt-1 text-[11px] text-muted-foreground/75">{(n as { tenantName?: string }).tenantName && scope === 'admin' ? `${(n as { tenantName?: string }).tenantName} · ` : ''}{ago(n.ts)}</p>
                 </div>
               </button>
             ))
@@ -78,7 +78,7 @@ export function NotificationsPage({ scope }: { scope: 'admin' | 'tenant' }) {
         </CardBody>
       </Card>
 
-      <p className="text-center text-[11px] text-subtle">In-app notifications today. Email, SMS and push channels are architecturally supported and can be enabled per category.</p>
+      <p className="text-center text-[11px] text-muted-foreground/75">In-app notifications today. Email, SMS and push channels are architecturally supported and can be enabled per category.</p>
     </Page>
   );
 }

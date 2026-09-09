@@ -19,7 +19,7 @@ import { Table2, TrendingUp } from 'lucide-react';
 import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
 import { cn, compact, num } from '../lib/utils';
 import { useSession } from '../store/session';
-import { Button } from './ui/primitives';
+import { Button } from './app/primitives';
 
 /* ------------------------------------------------------------- theme bridge */
 
@@ -74,13 +74,13 @@ const AXIS_STYLE = { fontSize: 10.5, fontFamily: 'var(--font-sans)' } as const;
 function ChartTooltip({ active, payload, label, formatter, unit }: { active?: boolean; payload?: Array<{ name?: string; value?: number; color?: string; dataKey?: string | number }>; label?: string | number; formatter?: (v: number, key: string) => string; unit?: string }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="pointer-events-none rounded-lg border border-border bg-surface-overlay px-2.5 py-2 shadow-[var(--shadow-lg)]">
-      <p className="mb-1 text-[11px] font-medium uppercase tracking-[0.08em] text-subtle">{label}</p>
+    <div className="pointer-events-none rounded-lg border border-border bg-popover px-2.5 py-2 shadow-lg">
+      <p className="mb-1 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/75">{label}</p>
       <div className="flex flex-col gap-1">
         {payload.map((p, i) => (
           <div key={i} className="flex items-center gap-2 text-[12px]">
             <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: p.color }} />
-            <span className="text-muted">{p.name}</span>
+            <span className="text-muted-foreground">{p.name}</span>
             <span className="tnum ml-auto pl-3 font-medium text-foreground">
               {formatter ? formatter(p.value ?? 0, String(p.dataKey)) : num(p.value ?? 0)}
               {unit ? ` ${unit}` : ''}
@@ -97,7 +97,7 @@ function LegendRow({ series, theme }: { series: SeriesSpec[]; theme: VizTheme })
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-1 pb-1">
       {series.map((s, i) => (
-        <span key={s.key} className="inline-flex items-center gap-1.5 text-[11px] text-muted">
+        <span key={s.key} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
           <span className="h-2 w-2 rounded-[3px]" style={{ background: s.color ?? theme.series[i % theme.series.length] }} />
           {s.label}
         </span>
@@ -110,18 +110,18 @@ function DataTableView({ data, categoryKey, series }: { data: any[]; categoryKey
   return (
     <div className="max-h-[260px] overflow-auto rounded-lg border border-border">
       <table className="w-full text-left text-[12px]">
-        <thead className="sticky top-0 bg-surface-inset">
+        <thead className="sticky top-0 bg-muted">
           <tr>
-            <th className="px-2.5 py-1.5 font-semibold uppercase tracking-[0.08em] text-subtle">Period</th>
+            <th className="px-2.5 py-1.5 font-semibold uppercase tracking-[0.08em] text-muted-foreground/75">Period</th>
             {series.map((s) => (
-              <th key={s.key} className="px-2.5 py-1.5 text-right font-semibold uppercase tracking-[0.08em] text-subtle">{s.label}</th>
+              <th key={s.key} className="px-2.5 py-1.5 text-right font-semibold uppercase tracking-[0.08em] text-muted-foreground/75">{s.label}</th>
             ))}
           </tr>
         </thead>
         <tbody>
           {data.map((row, i) => (
-            <tr key={i} className="border-t border-border-subtle">
-              <td className="px-2.5 py-1.5 text-muted">{row[categoryKey]}</td>
+            <tr key={i} className="border-t border-border">
+              <td className="px-2.5 py-1.5 text-muted-foreground">{row[categoryKey]}</td>
               {series.map((s) => (
                 <td key={s.key} className="tnum px-2.5 py-1.5 text-right text-foreground">{num(Number(row[s.key] ?? 0))}</td>
               ))}
@@ -306,7 +306,7 @@ export function DonutChart({ data, height = 200, centreLabel, centreValue }: { d
         {(centreValue || centreLabel) && (
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
             <span className="tnum text-[20px] font-semibold tracking-[-0.02em] text-foreground">{centreValue}</span>
-            <span className="text-[11px] uppercase tracking-[0.1em] text-subtle">{centreLabel}</span>
+            <span className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground/75">{centreLabel}</span>
           </div>
         )}
       </div>
@@ -314,9 +314,9 @@ export function DonutChart({ data, height = 200, centreLabel, centreValue }: { d
         {data.map((d, i) => (
           <li key={d.label} className="flex items-center gap-2 text-[12px]">
             <span className="h-2 w-2 shrink-0 rounded-[3px]" style={{ background: d.color ?? theme.series[i % theme.series.length] }} />
-            <span className="truncate text-muted">{d.label}</span>
+            <span className="truncate text-muted-foreground">{d.label}</span>
             <span className="tnum ml-auto font-medium text-foreground">{num(d.value)}</span>
-            <span className="tnum w-11 text-right text-subtle">{total ? ((d.value / total) * 100).toFixed(0) : 0}%</span>
+            <span className="tnum w-11 text-right text-muted-foreground/75">{total ? ((d.value / total) * 100).toFixed(0) : 0}%</span>
           </li>
         ))}
       </ul>

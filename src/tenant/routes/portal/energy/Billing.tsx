@@ -6,11 +6,11 @@
 
 import { Wallet } from 'lucide-react';
 import { useState } from 'react';
-import { StatGrid } from '../../../components/ui/page';
-import { Card, CardBody, CardHeader } from '../../../components/ui/card';
+import { StatGrid } from '../../../components/app/page';
+import { Card, CardBody, CardHeader } from '../../../components/app/card';
 import { StatCard } from '../../../components/common';
-import { Button, IconBox } from '../../../components/ui/primitives';
-import { DataTable, type Column } from '../../../components/ui/data';
+import { Button, IconBox } from '../../../components/app/primitives';
+import { DataTable, type Column } from '../../../components/app/data';
 import { PaymentBadge } from '../../../components/status';
 import { InvoiceDialog } from '../../energyShared';
 import { useSession } from '../../../store/session';
@@ -32,7 +32,7 @@ export default function PortalEnergyBilling() {
     { key: 'period', header: 'Period', cell: (i) => i.periodLabel, sortValue: (i) => i.periodStart },
     { key: 'kwh', header: 'kWh', align: 'right', cell: (i) => <span className="tnum">{num(i.totalKwh)}</span>, hideBelow: 'md' },
     { key: 'total', header: 'Amount', align: 'right', cell: (i) => <span className="tnum font-medium text-foreground">{currency(i.total)}</span>, sortValue: (i) => i.total },
-    { key: 'due', header: 'Due', cell: (i) => <span className="tnum text-muted">{fmtDateFull(i.dueDate)}</span>, hideBelow: 'lg' },
+    { key: 'due', header: 'Due', cell: (i) => <span className="tnum text-muted-foreground">{fmtDateFull(i.dueDate)}</span>, hideBelow: 'lg' },
     { key: 'status', header: 'Status', cell: (i) => <PaymentBadge status={i.paymentStatus} size="sm" /> },
   ];
 
@@ -50,23 +50,23 @@ export default function PortalEnergyBilling() {
           <CardBody>
             <div className="overflow-hidden rounded-xl border border-border">
               <table className="w-full text-left text-[13px]">
-                <thead className="bg-surface-inset"><tr>
-                  <th className="px-3.5 py-2.5 font-semibold uppercase tracking-[0.08em] text-subtle">Component</th>
-                  <th className="px-3.5 py-2.5 text-right font-semibold uppercase tracking-[0.08em] text-subtle">Units (kWh)</th>
-                  <th className="px-3.5 py-2.5 text-right font-semibold uppercase tracking-[0.08em] text-subtle">Rate</th>
-                  <th className="px-3.5 py-2.5 text-right font-semibold uppercase tracking-[0.08em] text-subtle">Amount</th>
+                <thead className="bg-muted"><tr>
+                  <th className="px-3.5 py-2.5 font-semibold uppercase tracking-[0.08em] text-muted-foreground/75">Component</th>
+                  <th className="px-3.5 py-2.5 text-right font-semibold uppercase tracking-[0.08em] text-muted-foreground/75">Units (kWh)</th>
+                  <th className="px-3.5 py-2.5 text-right font-semibold uppercase tracking-[0.08em] text-muted-foreground/75">Rate</th>
+                  <th className="px-3.5 py-2.5 text-right font-semibold uppercase tracking-[0.08em] text-muted-foreground/75">Amount</th>
                 </tr></thead>
                 <tbody>
                   {latest.lines.map((l) => (
-                    <tr key={l.component} className="border-t border-border-subtle">
+                    <tr key={l.component} className="border-t border-border">
                       <td className="px-3.5 py-2.5 capitalize text-foreground">{l.component.replace('_', '-')}</td>
-                      <td className="tnum px-3.5 py-2.5 text-right text-muted">{num(l.units)}</td>
-                      <td className="tnum px-3.5 py-2.5 text-right text-muted">{l.rate.toFixed(2)}</td>
+                      <td className="tnum px-3.5 py-2.5 text-right text-muted-foreground">{num(l.units)}</td>
+                      <td className="tnum px-3.5 py-2.5 text-right text-muted-foreground">{l.rate.toFixed(2)}</td>
                       <td className="tnum px-3.5 py-2.5 text-right font-medium text-foreground">{currency(l.amount)}</td>
                     </tr>
                   ))}
                 </tbody>
-                <tfoot><tr className="border-t border-border bg-surface-inset/50">
+                <tfoot><tr className="border-t border-border bg-muted/50">
                   <td className="px-3.5 py-2.5 font-semibold text-foreground" colSpan={3}>Total</td>
                   <td className="tnum px-3.5 py-2.5 text-right text-[14px] font-semibold text-foreground">{currency(latest.total)}</td>
                 </tr></tfoot>

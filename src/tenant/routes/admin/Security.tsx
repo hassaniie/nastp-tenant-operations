@@ -11,12 +11,12 @@ import { useMemo, useState } from 'react';
 import {
   AlertTriangle, KeyRound, LogIn, LogOut, ShieldAlert, ShieldCheck, UserCog, type LucideIcon,
 } from 'lucide-react';
-import { Page, StatGrid } from '../../components/ui/page';
-import { Card, CardBody, CardHeader } from '../../components/ui/card';
+import { Page, StatGrid } from '../../components/app/page';
+import { Card, CardBody, CardHeader } from '../../components/app/card';
 import { PageHeader, StatCard } from '../../components/common';
-import { IconBox, StatusBadge } from '../../components/ui/primitives';
-import { DataTable, EmptyState, type Column } from '../../components/ui/data';
-import { SimpleSelect } from '../../components/ui/form';
+import { IconBox, StatusBadge } from '../../components/app/primitives';
+import { DataTable, EmptyState, type Column } from '../../components/app/data';
+import { SimpleSelect } from '../../components/app/form';
 import { authEvents } from '../../data/auth';
 import { fmtDateTime, num } from '../../lib/utils';
 import type { AuthEvent, AuthEventKind } from '../../data/types';
@@ -72,9 +72,9 @@ export default function Security() {
       },
     },
     { key: 'email', header: 'Account', cell: (e) => <span className="font-mono text-[12px] text-foreground">{e.email}</span> },
-    { key: 'experience', header: 'Door', cell: (e) => <span className="capitalize text-subtle">{e.experience}</span>, hideBelow: 'md' },
-    { key: 'detail', header: 'Detail', cell: (e) => <span className="text-subtle">{e.detail ?? '—'}</span>, hideBelow: 'lg' },
-    { key: 'ts', header: 'When', cell: (e) => <span className="tnum text-subtle">{fmtDateTime(e.ts)}</span>, sortValue: (e) => e.ts },
+    { key: 'experience', header: 'Door', cell: (e) => <span className="capitalize text-muted-foreground/75">{e.experience}</span>, hideBelow: 'md' },
+    { key: 'detail', header: 'Detail', cell: (e) => <span className="text-muted-foreground/75">{e.detail ?? '—'}</span>, hideBelow: 'lg' },
+    { key: 'ts', header: 'When', cell: (e) => <span className="tnum text-muted-foreground/75">{fmtDateTime(e.ts)}</span>, sortValue: (e) => e.ts },
   ];
 
   return (

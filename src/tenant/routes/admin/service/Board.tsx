@@ -5,7 +5,7 @@
  */
 
 import { useSearchParams } from 'react-router-dom';
-import { PageFull } from '../../../components/ui/page';
+import { PageFull } from '../../../components/app/page';
 import { PageHeader } from '../../../components/common';
 import { PriorityBadge, CATEGORY_ICON } from '../../../components/status';
 import { ServiceRequestDrawer } from '../../serviceShared';
@@ -36,39 +36,39 @@ export default function Board() {
           {SERVICE_BOARD.map((status) => {
             const items = byStatus(status);
             return (
-              <div key={status} className="flex w-[290px] flex-col rounded-2xl border border-border bg-surface/60">
-                <div className="flex items-center justify-between border-b border-border-subtle px-3.5 py-3">
+              <div key={status} className="flex w-[290px] flex-col rounded-2xl border border-border bg-card/60">
+                <div className="flex items-center justify-between border-b border-border px-3.5 py-3">
                   <div className="flex items-center gap-2">
                     <span className={cn('h-2 w-2 rounded-full', TONE_BG[SERVICE_STATUS[status].tone])} />
                     <span className="text-[13px] font-semibold text-foreground">{SERVICE_STATUS[status].label}</span>
                   </div>
-                  <span className="tnum rounded-full bg-surface-inset px-1.5 text-[11px] text-subtle">{items.length}</span>
+                  <span className="tnum rounded-full bg-muted px-1.5 text-[11px] text-muted-foreground/75">{items.length}</span>
                 </div>
                 <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-2.5">
                   {items.length === 0 ? (
-                    <p className="py-6 text-center text-[12px] text-subtle">Empty</p>
+                    <p className="py-6 text-center text-[12px] text-muted-foreground/75">Empty</p>
                   ) : (
                     items.map((r) => {
                       const Icon = CATEGORY_ICON[r.category];
                       const overdue = r.dueAt && r.dueAt < NOW;
                       return (
-                        <button key={r.id} onClick={() => setParams({ open: r.id })} className="flex flex-col gap-2 rounded-xl border border-border-subtle bg-surface p-3 text-left transition-all hover:border-border-strong hover:shadow-[var(--shadow-sm)]">
+                        <button key={r.id} onClick={() => setParams({ open: r.id })} className="flex flex-col gap-2 rounded-xl border border-border bg-card p-3 text-left transition-all hover:border-ring/40 hover:shadow-xs">
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex items-center gap-2 min-w-0">
-                              <Icon className="h-3.5 w-3.5 shrink-0 text-service" />
-                              <span className="tnum text-[11px] text-subtle">{r.reference}</span>
+                              <Icon className="h-3.5 w-3.5 shrink-0 text-module-service" />
+                              <span className="tnum text-[11px] text-muted-foreground/75">{r.reference}</span>
                             </div>
                             <PriorityBadge priority={r.priority} size="sm" />
                           </div>
                           <p className="line-clamp-2 text-[13px] font-medium text-foreground">{r.title}</p>
-                          <div className="flex items-center justify-between text-[11px] text-subtle">
+                          <div className="flex items-center justify-between text-[11px] text-muted-foreground/75">
                             <span className="truncate">{r.tenantName}</span>
-                            <span className={cn('tnum', overdue && 'text-critical')}>{overdue ? 'overdue' : ago(r.updatedAt)}</span>
+                            <span className={cn('tnum', overdue && 'text-destructive')}>{overdue ? 'overdue' : ago(r.updatedAt)}</span>
                           </div>
                           {(r.technicianName || r.status === 'acknowledged') && (
                             <div className="flex items-center gap-1.5 text-[11px]">
                               {r.technicianName ? (
-                                <span className="truncate text-muted">{r.technicianName}</span>
+                                <span className="truncate text-muted-foreground">{r.technicianName}</span>
                               ) : (
                                 <span className="inline-flex items-center gap-1 text-warning"><span className="h-1.5 w-1.5 rounded-full bg-warning" />Unassigned</span>
                               )}
@@ -91,5 +91,5 @@ export default function Board() {
 }
 
 const TONE_BG: Record<string, string> = {
-  info: 'bg-info', primary: 'bg-primary', warning: 'bg-warning', success: 'bg-success', critical: 'bg-critical', neutral: 'bg-neutral', service: 'bg-service',
+  info: 'bg-info', primary: 'bg-primary', warning: 'bg-warning', success: 'bg-success', critical: 'bg-destructive', neutral: 'bg-neutral', service: 'bg-module-service',
 };

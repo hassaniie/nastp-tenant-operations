@@ -6,13 +6,13 @@
 
 import { Activity, Gauge, Layers, Table2, Zap } from 'lucide-react';
 import { useState } from 'react';
-import { Card, CardBody, CardHeader } from '../../../components/ui/card';
-import { StatGrid } from '../../../components/ui/page';
+import { Card, CardBody, CardHeader } from '../../../components/app/card';
+import { StatGrid } from '../../../components/app/page';
 import { StatCard } from '../../../components/common';
-import { IconBox } from '../../../components/ui/primitives';
-import { Segmented } from '../../../components/ui/tabs';
+import { IconBox } from '../../../components/app/primitives';
+import { Segmented } from '../../../components/app/tabs';
 import { TrendChart } from '../../../components/charts';
-import { DefList, DataTable, type Column } from '../../../components/ui/data';
+import { DefList, DataTable, type Column } from '../../../components/app/data';
 import { MeterStatusBadge } from '../../../components/status';
 import { useSession } from '../../../store/session';
 import { useLive } from '../../../data/live';
@@ -71,7 +71,7 @@ export default function PortalEnergyDetails() {
       {section === 'electrical' && (
         <div className="flex flex-col gap-4">
           {meters.length === 0 ? (
-            <Card><CardBody><p className="py-6 text-center text-[13px] text-subtle">No sub-meters configured.</p></CardBody></Card>
+            <Card><CardBody><p className="py-6 text-center text-[13px] text-muted-foreground/75">No sub-meters configured.</p></CardBody></Card>
           ) : meters.map((m) => <ElectricalCard key={m.id} meter={m} />)}
         </div>
       )}

@@ -12,10 +12,10 @@ import {
   AlarmClock, ArrowRight, Bell, Building2, DoorOpen, Gauge, TriangleAlert, UserPlus, Wrench, Zap,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Page, StatGrid, ContentGrid, SplitGrid } from '../../components/ui/page';
-import { Card, CardBody, CardHeader } from '../../components/ui/card';
+import { Page, StatGrid, ContentGrid, SplitGrid } from '../../components/app/page';
+import { Card, CardBody, CardHeader } from '../../components/app/card';
 import { StatCard, PageHeader, Timeline } from '../../components/common';
-import { Button, IconBox, StatusBadge, TenantMark } from '../../components/ui/primitives';
+import { Button, IconBox, StatusBadge, TenantMark } from '../../components/app/primitives';
 import { TrendChart, BarSeriesChart } from '../../components/charts';
 import { useLive } from '../../data/live';
 import { computeAdminKpis, aggregateReadings, tenantSummary } from '../../data/selectors';
@@ -107,21 +107,21 @@ export default function AdminDashboard() {
                 <div className="flex flex-col items-center gap-2 px-4 py-12 text-center">
                   <IconBox icon={Bell} tone="success" size="lg" />
                   <p className="text-[13px] font-medium text-foreground">Nothing needs attention</p>
-                  <p className="text-[12px] text-subtle">All tenants nominal across every domain.</p>
+                  <p className="text-[12px] text-muted-foreground/75">All tenants nominal across every domain.</p>
                 </div>
               ) : (
                 <ul className="flex flex-col gap-1.5">
                   {attention.map((item) => (
                     <li key={item.id}>
-                      <button onClick={() => navigate(item.href)} className="flex w-full items-start gap-3 rounded-xl border border-border-subtle bg-surface-inset/50 p-3 text-left transition-colors hover:border-border-strong hover:bg-surface-raised">
+                      <button onClick={() => navigate(item.href)} className="flex w-full items-start gap-3 rounded-xl border border-border bg-muted/50 p-3 text-left transition-colors hover:border-ring/40 hover:bg-accent">
                         <IconBox icon={item.icon} tone={item.tone} size="sm" />
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-2">
                             <p className="truncate text-[13px] font-medium text-foreground">{item.title}</p>
                             <StatusBadge tone={item.tone} size="sm" dot={false}>{item.tag}</StatusBadge>
                           </div>
-                          <p className="mt-0.5 truncate text-[12px] text-muted">{item.detail}</p>
-                          <p className="mt-1 text-[11px] text-subtle">{item.tenant} · {ago(item.ts)}</p>
+                          <p className="mt-0.5 truncate text-[12px] text-muted-foreground">{item.detail}</p>
+                          <p className="mt-1 text-[11px] text-muted-foreground/75">{item.tenant} · {ago(item.ts)}</p>
                         </div>
                       </button>
                     </li>
@@ -155,7 +155,7 @@ export default function AdminDashboard() {
           <CardHeader title="Upcoming Visitors" subtitle="Next arrivals" icon={<IconBox icon={DoorOpen} tone="visitor" size="sm" />} actions={<Button variant="ghost" size="xs" onClick={() => navigate('/admin/visitors/scheduled')}>All</Button>} />
           <CardBody className="flex flex-col gap-1">
             {upcoming.length === 0 ? (
-              <p className="py-6 text-center text-[12px] text-subtle">No upcoming visitors.</p>
+              <p className="py-6 text-center text-[12px] text-muted-foreground/75">No upcoming visitors.</p>
             ) : (
               upcoming.map((v) => (
                 <VisitorRow key={v.id} name={v.fullName} company={v.company} time={fmtTime(v.expectedArrival)} />
@@ -168,11 +168,11 @@ export default function AdminDashboard() {
           <CardHeader title="Recent Onboarding" subtitle="Newest tenants" icon={<IconBox icon={Building2} tone="primary" size="sm" />} actions={<Button variant="ghost" size="xs" onClick={() => navigate('/admin/tenants')}>All</Button>} />
           <CardBody className="flex flex-col gap-2">
             {recentTenants.map((r) => (
-              <button key={r.tenant.id} onClick={() => navigate(`/admin/tenants/${r.tenant.id}`)} className="flex items-center gap-3 rounded-xl px-1 py-1.5 text-left transition-colors hover:bg-surface-raised">
+              <button key={r.tenant.id} onClick={() => navigate(`/admin/tenants/${r.tenant.id}`)} className="flex items-center gap-3 rounded-xl px-1 py-1.5 text-left transition-colors hover:bg-accent">
                 <TenantMark name={r.tenant.name} hue={r.tenant.brandHue} size={32} />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[13px] font-medium text-foreground">{r.tenant.name}</p>
-                  <p className="truncate text-[11px] text-subtle">{r.buildingName} · {ago(r.tenant.createdAt)}</p>
+                  <p className="truncate text-[11px] text-muted-foreground/75">{r.buildingName} · {ago(r.tenant.createdAt)}</p>
                 </div>
                 <StatusBadge tone={{ active: 'success', suspended: 'critical', draft: 'neutral', pending_configuration: 'warning', pending_activation: 'info', expired: 'neutral', archived: 'neutral' }[r.tenant.status] as never} size="sm">
                   {r.tenant.status.replace('_', ' ')}
@@ -183,7 +183,7 @@ export default function AdminDashboard() {
         </Card>
       </ContentGrid>
 
-      <p className="pb-2 text-center text-[11px] text-subtle">
+      <p className="pb-2 text-center text-[11px] text-muted-foreground/75">
         Live values update every few seconds · {compact(kpis.metersTotal)} meters monitored across the park
       </p>
     </Page>
@@ -195,9 +195,9 @@ function VisitorRow({ name, company, time }: { name: string; company?: string; t
     <div className="flex items-center justify-between gap-3 rounded-lg px-1 py-1.5">
       <div className="min-w-0">
         <p className="truncate text-[13px] font-medium text-foreground">{name}</p>
-        {company && <p className="truncate text-[11px] text-subtle">{company}</p>}
+        {company && <p className="truncate text-[11px] text-muted-foreground/75">{company}</p>}
       </div>
-      <span className="tnum shrink-0 rounded-md bg-surface-inset px-2 py-1 text-[11px] font-medium text-muted">{time}</span>
+      <span className="tnum shrink-0 rounded-md bg-muted px-2 py-1 text-[11px] font-medium text-muted-foreground">{time}</span>
     </div>
   );
 }

@@ -5,12 +5,12 @@
 
 import { Bell, Check, CheckCheck } from 'lucide-react';
 import { useState } from 'react';
-import { Page, StatGrid } from '../../../components/ui/page';
-import { Card, CardBody, CardHeader } from '../../../components/ui/card';
+import { Page, StatGrid } from '../../../components/app/page';
+import { Card, CardBody, CardHeader } from '../../../components/app/card';
 import { PageHeader, StatCard } from '../../../components/common';
-import { Button, IconBox } from '../../../components/ui/primitives';
-import { Segmented } from '../../../components/ui/tabs';
-import { EmptyState } from '../../../components/ui/data';
+import { Button, IconBox } from '../../../components/app/primitives';
+import { Segmented } from '../../../components/app/tabs';
+import { EmptyState } from '../../../components/app/data';
 import { AlertSeverityBadge } from '../../../components/status';
 import { ALERT_KIND_LABEL } from '../../../lib/meta';
 import { simulation, useLive } from '../../../data/live';
@@ -57,16 +57,16 @@ export default function EnergyAlerts() {
 
 function AlertRow({ alert: a, tenantName }: { alert: EnergyAlert; tenantName: string }) {
   return (
-    <div className="flex items-start gap-3 rounded-xl border border-border-subtle bg-surface-inset/40 p-3.5">
+    <div className="flex items-start gap-3 rounded-xl border border-border bg-muted/40 p-3.5">
       <IconBox icon={Bell} tone={a.severity === 'critical' ? 'critical' : a.severity === 'warning' ? 'warning' : 'energy'} size="sm" />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <p className="text-[13px] font-medium text-foreground">{a.title}</p>
           <AlertSeverityBadge severity={a.severity} size="sm" />
-          <span className="rounded bg-surface px-1.5 py-0.5 text-[11px] text-subtle">{ALERT_KIND_LABEL[a.kind]}</span>
+          <span className="rounded bg-card px-1.5 py-0.5 text-[11px] text-muted-foreground/75">{ALERT_KIND_LABEL[a.kind]}</span>
         </div>
-        <p className="mt-0.5 text-[12px] text-muted">{a.description}</p>
-        <p className="mt-1 text-[11px] text-subtle">{tenantName} · {a.source}{a.value !== undefined ? ` · value ${num(a.value)} vs threshold ${num(a.threshold ?? 0)}` : ''} · {ago(a.ts)}</p>
+        <p className="mt-0.5 text-[12px] text-muted-foreground">{a.description}</p>
+        <p className="mt-1 text-[11px] text-muted-foreground/75">{tenantName} · {a.source}{a.value !== undefined ? ` · value ${num(a.value)} vs threshold ${num(a.threshold ?? 0)}` : ''} · {ago(a.ts)}</p>
       </div>
       <div className="flex shrink-0 items-center gap-1.5">
         {a.status === 'active' && (

@@ -14,8 +14,8 @@ import { Link } from 'react-router-dom';
 import { cn, num } from '../lib/utils';
 import type { Tone } from '../lib/meta';
 import { Sparkline } from './charts';
-import { Tooltip } from './ui/overlay';
-import { IconBox, Skeleton, TONE_DOT } from './ui/primitives';
+import { Tooltip } from './app/overlay';
+import { IconBox, Skeleton, TONE_DOT } from './app/primitives';
 
 /* ----------------------------------------------------------------- Delta */
 
@@ -25,7 +25,7 @@ export function Delta({ value, suffix = '', invert, className, showZero }: { val
   const good = invert ? !positive : positive;
   const Icon = value === 0 ? ArrowRight : positive ? ArrowUpRight : ArrowDownRight;
   return (
-    <span className={cn('tnum inline-flex items-center gap-0.5 text-[12px] font-medium', value === 0 ? 'text-subtle' : good ? 'text-success' : 'text-critical', className)}>
+    <span className={cn('tnum inline-flex items-center gap-0.5 text-[12px] font-medium', value === 0 ? 'text-muted-foreground/75' : good ? 'text-success' : 'text-destructive', className)}>
       <Icon className="h-3 w-3" />
       {value > 0 ? '+' : ''}
       {num(value, Number.isInteger(value) ? 0 : 1)}
@@ -75,7 +75,7 @@ export function MetricValue({ value, unit, size = 'md', className }: { value: Re
   return (
     <span className={cn('inline-flex items-baseline gap-1', className)}>
       <span className={cn('tnum font-semibold leading-none tracking-[-0.03em] text-foreground', sizes[size])}>{value}</span>
-      {unit && <span className={cn('font-medium text-subtle', unitSizes[size])}>{unit}</span>}
+      {unit && <span className={cn('font-medium text-muted-foreground/75', unitSizes[size])}>{unit}</span>}
     </span>
   );
 }
@@ -109,12 +109,12 @@ export const StatCard = memo(function StatCard({
   const body = (
     <div
       className={cn(
-        'edge-light group relative flex min-h-[104px] flex-col gap-2 overflow-hidden rounded-[15px] border border-border bg-surface p-3.5 pb-6 transition-all duration-200',
+        'edge-light group relative flex min-h-[104px] flex-col gap-2 overflow-hidden rounded-[15px] border border-border bg-card p-3.5 pb-6 transition-all duration-200',
         // Every tile reserves the same bottom band, whether or not it carries a
         // sparkline. Reserving it only on spark tiles made one KPI row render at
         // three different heights; drawing the spark over the caption instead cost
         // legibility. A uniform reservation buys both.
-        onClick && 'cursor-pointer hover:border-border-strong hover:bg-surface-raised hover:-translate-y-px hover:shadow-[var(--shadow-md)]',
+        onClick && 'cursor-pointer hover:border-ring/40 hover:bg-accent hover:-translate-y-px hover:shadow-md',
         className,
       )}
       onClick={onClick}
@@ -123,7 +123,7 @@ export const StatCard = memo(function StatCard({
       onKeyDown={onClick ? (e) => (e.key === 'Enter' || e.key === ' ') && onClick() : undefined}
     >
       <div className="flex items-start justify-between gap-2">
-        <p className="text-[11px] font-medium uppercase leading-tight tracking-[0.09em] text-subtle">{label}</p>
+        <p className="text-[11px] font-medium uppercase leading-tight tracking-[0.09em] text-muted-foreground/75">{label}</p>
         {Icon && <IconBox icon={Icon} tone={tone} size="sm" />}
       </div>
 
@@ -136,7 +136,7 @@ export const StatCard = memo(function StatCard({
       {(delta !== undefined || caption) && (
         <div className="relative z-10 mt-auto flex items-center gap-2">
           {delta !== undefined && <Delta value={delta} suffix={deltaSuffix} invert={invertDelta} />}
-          {caption && <span className="truncate text-[12px] text-subtle">{caption}</span>}
+          {caption && <span className="truncate text-[12px] text-muted-foreground/75">{caption}</span>}
         </div>
       )}
 
@@ -155,7 +155,7 @@ export const StatCard = memo(function StatCard({
 export function KeyValue({ label, value, mono, className }: { label: ReactNode; value: ReactNode; mono?: boolean; className?: string }) {
   return (
     <div className={cn('flex items-baseline justify-between gap-3 py-1.5', className)}>
-      <span className="shrink-0 text-[12px] text-subtle">{label}</span>
+      <span className="shrink-0 text-[12px] text-muted-foreground/75">{label}</span>
       <span className={cn('truncate text-right text-[13px] font-medium text-foreground', mono && 'font-mono tnum')}>{value}</span>
     </div>
   );
@@ -181,15 +181,15 @@ export function Timeline({ items, className }: { items: TimelineItem[]; classNam
         return (
           <li key={item.id} className="relative flex gap-3 pb-4 last:pb-0">
             {!last && <span className="absolute left-[13px] top-7 bottom-0 w-px bg-border" aria-hidden />}
-            <span className={cn('relative z-10 mt-0.5 flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full border border-border bg-surface', item.tone && TONE_ICON_FROM[item.tone])}>
+            <span className={cn('relative z-10 mt-0.5 flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full border border-border bg-card', item.tone && TONE_ICON_FROM[item.tone])}>
               {Icon ? <Icon className="h-3.5 w-3.5" /> : <span className={cn('h-1.5 w-1.5 rounded-full', item.tone ? TONE_DOT[item.tone] : 'bg-subtle')} />}
             </span>
             <div className="min-w-0 flex-1 pt-0.5">
               <div className="flex items-start justify-between gap-2">
                 <p className="text-[13px] font-medium text-foreground">{item.title}</p>
-                {item.meta && <span className="shrink-0 text-[11px] text-subtle">{item.meta}</span>}
+                {item.meta && <span className="shrink-0 text-[11px] text-muted-foreground/75">{item.meta}</span>}
               </div>
-              {item.detail && <p className="mt-0.5 text-[12px] leading-relaxed text-muted">{item.detail}</p>}
+              {item.detail && <p className="mt-0.5 text-[12px] leading-relaxed text-muted-foreground">{item.detail}</p>}
             </div>
           </li>
         );
@@ -199,9 +199,9 @@ export function Timeline({ items, className }: { items: TimelineItem[]; classNam
 }
 
 const TONE_ICON_FROM: Record<Tone, string> = {
-  neutral: 'text-muted', primary: 'text-primary', success: 'text-success', warning: 'text-warning',
-  critical: 'text-critical', info: 'text-info', energy: 'text-energy', visitor: 'text-visitor',
-  service: 'text-service', online: 'text-online', offline: 'text-muted',
+  neutral: 'text-muted-foreground', primary: 'text-primary', success: 'text-success', warning: 'text-warning',
+  critical: 'text-destructive', info: 'text-info', energy: 'text-module-energy', visitor: 'text-module-visitor',
+  service: 'text-module-service', online: 'text-online', offline: 'text-muted-foreground',
 };
 
 /* ----------------------------------------------------------------- Stepper */
@@ -222,13 +222,13 @@ export function Stepper({ steps, current, onStep, className }: { steps: Array<{ 
                 onClick={reachable ? () => onStep?.(i) : undefined}
                 className={cn(
                   'flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-[12px] font-semibold transition-colors',
-                  active ? 'border-primary bg-primary text-primary-foreground' : done ? 'border-success/40 bg-success-dim text-success' : 'border-border bg-surface-inset text-subtle',
-                  reachable && !active && 'hover:border-border-strong',
+                  active ? 'border-primary bg-primary text-primary-foreground' : done ? 'border-success/40 bg-muted text-success' : 'border-border bg-muted text-muted-foreground/75',
+                  reachable && !active && 'hover:border-ring/40',
                 )}
               >
                 {done ? <Check className="h-3.5 w-3.5" /> : i + 1}
               </button>
-              <span className={cn('hidden text-[12px] font-medium lg:inline', active ? 'text-foreground' : done ? 'text-muted' : 'text-subtle')}>{step.label}</span>
+              <span className={cn('hidden text-[12px] font-medium lg:inline', active ? 'text-foreground' : done ? 'text-muted-foreground' : 'text-muted-foreground/75')}>{step.label}</span>
             </li>
             {i < steps.length - 1 && <span className={cn('h-px w-4 flex-1 lg:w-8', done ? 'bg-success/40' : 'bg-border')} aria-hidden />}
           </Fragment>
@@ -275,7 +275,7 @@ export function PageHeader({ title, description, actions, breadcrumb, className 
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <h1 className="text-[20px] font-semibold tracking-[-0.02em] text-foreground">{title}</h1>
-          {description && <p className="mt-1 text-[13px] text-muted">{description}</p>}
+          {description && <p className="mt-1 text-[13px] text-muted-foreground">{description}</p>}
         </div>
         {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
       </div>
@@ -287,7 +287,7 @@ export function PageHeader({ title, description, actions, breadcrumb, className 
 
 export function Breadcrumb({ items, className }: { items: Array<{ label: ReactNode; to?: string }>; className?: string }) {
   return (
-    <nav className={cn('flex items-center gap-1.5 text-[12px] text-subtle', className)} aria-label="Breadcrumb">
+    <nav className={cn('flex items-center gap-1.5 text-[12px] text-muted-foreground/75', className)} aria-label="Breadcrumb">
       {items.map((item, i) => (
         <Fragment key={i}>
           {item.to ? (
@@ -295,7 +295,7 @@ export function Breadcrumb({ items, className }: { items: Array<{ label: ReactNo
               {item.label}
             </Link>
           ) : (
-            <span className={cn(i === items.length - 1 && 'text-muted')}>{item.label}</span>
+            <span className={cn(i === items.length - 1 && 'text-muted-foreground')}>{item.label}</span>
           )}
           {i < items.length - 1 && <ChevronRight className="h-3 w-3 opacity-60" />}
         </Fragment>

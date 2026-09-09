@@ -9,8 +9,8 @@
 
 import { LogOut, UserRound } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Avatar, Button } from '../components/ui/primitives';
-import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator, MenuTrigger } from '../components/ui/overlay';
+import { Avatar, Button } from '../components/app/primitives';
+import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator, MenuTrigger } from '../components/app/overlay';
 import { useAuth } from '../store/auth';
 import { doorFor } from '../data/auth';
 
@@ -26,7 +26,7 @@ export function UserMenu() {
         <Button variant="ghost" size="sm" className="ml-1 gap-2 pl-2 pr-1.5" aria-label="Account">
           <span className="hidden text-right lg:block">
             <span className="block text-[12px] font-medium leading-tight text-foreground">{subject.name}</span>
-            <span className="block text-[11px] capitalize leading-tight text-subtle">{subject.title}</span>
+            <span className="block text-[11px] capitalize leading-tight text-muted-foreground/75">{subject.title}</span>
           </span>
           <Avatar name={subject.name} seed={subject.name.length * 7} size={30} />
         </Button>
@@ -35,7 +35,7 @@ export function UserMenu() {
       <MenuContent align="end" className="w-[248px]">
         <MenuLabel>
           <span className="block truncate text-foreground">{subject.name}</span>
-          <span className="block truncate font-normal normal-case tracking-normal text-subtle">{subject.email}</span>
+          <span className="block truncate font-normal normal-case tracking-normal text-muted-foreground/75">{subject.email}</span>
         </MenuLabel>
         <MenuSeparator />
         <MenuItem disabled>

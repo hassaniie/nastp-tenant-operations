@@ -9,14 +9,14 @@ import {
   Camera, Check, CheckCheck, CheckCircle2, MessageSquarePlus, Paperclip, PencilLine, RotateCcw, Send, ThumbsUp, UserCog,
 } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
-import { Button, IconBox, Avatar, StatusBadge } from '../components/ui/primitives';
+import { Button, IconBox, Avatar, StatusBadge } from '../components/app/primitives';
 import {
   Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTrigger,
   Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader,
   Popover, PopoverContent, PopoverTrigger,
-} from '../components/ui/overlay';
-import { DefList } from '../components/ui/data';
-import { SimpleSelect, Textarea } from '../components/ui/form';
+} from '../components/app/overlay';
+import { DefList } from '../components/app/data';
+import { SimpleSelect, Textarea } from '../components/app/form';
 import { Timeline, RatingStars, type TimelineItem } from '../components/common';
 import { PriorityBadge, ServiceStatusBadge, CATEGORY_ICON } from '../components/status';
 import { SERVICE_STATUS } from '../lib/meta';
@@ -151,9 +151,9 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
           badge={<div className="flex items-center gap-1.5"><PriorityBadge priority={r.priority} size="sm" /><ServiceStatusBadge status={r.status} size="sm" /></div>}
         />
         <DrawerBody className="flex flex-col gap-5">
-          <div className="flex items-start gap-3 rounded-xl border border-border-subtle bg-surface-inset/50 p-3">
+          <div className="flex items-start gap-3 rounded-xl border border-border bg-muted/50 p-3">
             <IconBox icon={Icon} tone="service" size="md" />
-            <p className="text-[13px] leading-relaxed text-muted">{r.description}</p>
+            <p className="text-[13px] leading-relaxed text-muted-foreground">{r.description}</p>
           </div>
 
           <DefList columns={2} items={[
@@ -178,11 +178,11 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
           ]} />
 
           {mode === 'admin' && !department?.triageOnly && (
-            <div className="flex items-center justify-between gap-3 rounded-xl border border-border-subtle bg-surface-inset/50 p-3">
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-muted/50 p-3">
               <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle">Assignment</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/75">Assignment</p>
                 <p className="mt-1 truncate text-[13px] font-medium text-foreground">{assignee ? assignee.name : 'Unassigned'}</p>
-                <p className="text-[11px] text-subtle">
+                <p className="text-[11px] text-muted-foreground/75">
                   {department?.name ?? 'Unrouted'}{assignee ? ` · ${assignee.availability.replace(/_/g, ' ')}` : ''}
                 </p>
               </div>
@@ -199,11 +199,11 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
           )}
 
           {mode === 'admin' && RECATEGORISABLE_STATUSES.has(r.status) && (
-            <div className="flex items-center justify-between gap-3 rounded-xl border border-border-subtle bg-surface-inset/50 p-3">
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-muted/50 p-3">
               <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle">Category</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/75">Category</p>
                 <p className="mt-1 text-[13px] font-medium text-foreground">{catLabel(r.category)}</p>
-                <p className="text-[11px] text-subtle">Routed to {department?.name ?? 'Unrouted'}</p>
+                <p className="text-[11px] text-muted-foreground/75">Routed to {department?.name ?? 'Unrouted'}</p>
               </div>
               <CategoryOverrideDialog
                 current={r.category}
@@ -216,7 +216,7 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
           {(r.attachments.length > 0 || staff) && (
             <div>
               <div className="mb-2 flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle">Attachments</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/75">Attachments</p>
                 {staff && (
                   <label className="flex cursor-pointer items-center gap-1 text-[11px] font-medium text-primary underline underline-offset-2">
                     <Camera className="h-3.5 w-3.5" />
@@ -233,39 +233,39 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
               {r.attachments.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {r.attachments.map((a) => (
-                    <span key={a.id} className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-inset px-2.5 py-1.5 text-[12px] text-muted">
-                      <Paperclip className="h-3.5 w-3.5" />{a.name} <span className="text-subtle">· {Math.round(a.sizeKb)} KB</span>
+                    <span key={a.id} className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted px-2.5 py-1.5 text-[12px] text-muted-foreground">
+                      <Paperclip className="h-3.5 w-3.5" />{a.name} <span className="text-muted-foreground/75">· {Math.round(a.sizeKb)} KB</span>
                     </span>
                   ))}
                 </div>
               ) : (
-                <p className="text-[12px] text-subtle">No attachments yet.</p>
+                <p className="text-[12px] text-muted-foreground/75">No attachments yet.</p>
               )}
             </div>
           )}
 
           <div>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle">Timeline</p>
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/75">Timeline</p>
             <Timeline items={timeline} />
           </div>
 
           <div>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle">Comments</p>
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/75">Comments</p>
             <div className="flex flex-col gap-3">
-              {visibleComments.length === 0 && <p className="text-[12px] text-subtle">No comments yet.</p>}
+              {visibleComments.length === 0 && <p className="text-[12px] text-muted-foreground/75">No comments yet.</p>}
               {visibleComments.map((c) => (
                 <div key={c.id} className="flex gap-2.5">
                   <Avatar name={c.author} seed={c.author.length} size={28} />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="text-[12px] font-medium text-foreground">{c.author}</span>
-                      <span className="rounded bg-surface-inset px-1.5 py-0.5 text-[11px] text-subtle">
+                      <span className="rounded bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground/75">
                         {c.authorRole === 'admin' ? 'NASTP' : c.authorRole === 'tech' ? 'Technician' : c.authorRole === 'tenant' ? 'Tenant' : 'System'}
                       </span>
                       {c.internal && <StatusBadge tone="warning" size="sm" dot={false}>Internal</StatusBadge>}
-                      <span className="text-[11px] text-subtle">{ago(c.ts)}</span>
+                      <span className="text-[11px] text-muted-foreground/75">{ago(c.ts)}</span>
                     </div>
-                    <p className="mt-0.5 text-[13px] leading-relaxed text-muted">{c.body}</p>
+                    <p className="mt-0.5 text-[13px] leading-relaxed text-muted-foreground">{c.body}</p>
                   </div>
                 </div>
               ))}
@@ -278,7 +278,7 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
                     onClick={() => setVisibleToTenant(true)}
                     className={cn(
                       'rounded-full border px-1 py-1 transition-all',
-                      visibleToTenant ? 'border-success/40 bg-success-dim' : 'border-border bg-surface-inset opacity-60 hover:opacity-100',
+                      visibleToTenant ? 'border-success/40 bg-muted' : 'border-border bg-muted opacity-60 hover:opacity-100',
                     )}
                   >
                     <StatusBadge tone="success" size="sm" dot>Visible to tenant</StatusBadge>
@@ -288,7 +288,7 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
                     onClick={() => setVisibleToTenant(false)}
                     className={cn(
                       'rounded-full border px-1 py-1 transition-all',
-                      !visibleToTenant ? 'border-warning/40 bg-warning-dim' : 'border-border bg-surface-inset opacity-60 hover:opacity-100',
+                      !visibleToTenant ? 'border-warning/40 bg-muted' : 'border-border bg-muted opacity-60 hover:opacity-100',
                     )}
                   >
                     <StatusBadge tone="warning" size="sm" dot>Internal note</StatusBadge>
@@ -309,16 +309,16 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
           </div>
 
           {mode === 'tenant' && r.status === 'resolved' && (
-            <div className="rounded-xl border border-success/25 bg-success-dim/40 p-3.5">
+            <div className="rounded-xl border border-success/25 bg-muted/40 p-3.5">
               <p className="text-[13px] font-medium text-foreground">This request is marked resolved.</p>
-              <p className="mt-0.5 text-[12px] text-muted">Rate the service and confirm, or reopen if the issue persists.</p>
+              <p className="mt-0.5 text-[12px] text-muted-foreground">Rate the service and confirm, or reopen if the issue persists.</p>
               <div className="mt-2.5"><RatingStars value={rating} onChange={setRating} size={20} /></div>
             </div>
           )}
           {r.rating && (
-            <div className="flex items-center gap-2 rounded-xl border border-border-subtle bg-surface-inset/50 p-3">
+            <div className="flex items-center gap-2 rounded-xl border border-border bg-muted/50 p-3">
               <RatingStars value={r.rating.score} size={16} />
-              <span className="text-[12px] text-muted">{r.rating.feedback ?? 'Rated by tenant'}</span>
+              <span className="text-[12px] text-muted-foreground">{r.rating.feedback ?? 'Rated by tenant'}</span>
             </div>
           )}
         </DrawerBody>
@@ -329,7 +329,7 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
               <Button key={t.to} variant={t.to === 'resolved' ? 'success' : 'secondary'} size="sm" onClick={() => transition(t.to, t.label)}>{t.label}</Button>
             ))
           ) : (
-            <span className="text-[12px] text-subtle">
+            <span className="text-[12px] text-muted-foreground/75">
               {r.status === 'acknowledged'
                 ? 'Use Assignment above to dispatch.'
                 : ['resolved', 'confirmed', 'closed'].includes(r.status)
@@ -349,7 +349,7 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
                 />
               )}
               {!TECH_NEXT[r.status]?.length && !TECH_RESOLVABLE.has(r.status) && (
-                <span className="text-[12px] text-subtle">
+                <span className="text-[12px] text-muted-foreground/75">
                   {r.status === 'submitted' || r.status === 'acknowledged' ? 'Not yet dispatched to you.' : 'No further action.'}
                 </span>
               )}
@@ -358,7 +358,7 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
           {mode === 'tenant' && r.status === 'resolved' && (
             <>
               {reopenExpired ? (
-                <span className="text-[12px] text-subtle">Too long ago to reopen — file a new request if the issue persists.</span>
+                <span className="text-[12px] text-muted-foreground/75">Too long ago to reopen — file a new request if the issue persists.</span>
               ) : (
                 <Button variant="ghost" size="sm" onClick={reopen}><RotateCcw className="h-4 w-4" />Reopen</Button>
               )}
@@ -416,15 +416,15 @@ function TechnicianPicker({
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
       <PopoverContent align="end" className="w-[300px] p-0">
         <div className="max-h-[240px] overflow-y-auto p-1.5">
-          {techs.length === 0 && <p className="p-3 text-[12px] text-subtle">No active technicians in this department.</p>}
+          {techs.length === 0 && <p className="p-3 text-[12px] text-muted-foreground/75">No active technicians in this department.</p>}
           {techs.map((t) => (
             <button
               key={t.id}
               type="button"
               onClick={() => setPicked(t.id)}
               className={cn(
-                'flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-surface-raised',
-                picked === t.id && 'bg-primary-muted/40',
+                'flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-accent',
+                picked === t.id && 'bg-primary/10/40',
               )}
             >
               <Avatar name={t.name} seed={t.avatarSeed} size={28} />
@@ -432,18 +432,18 @@ function TechnicianPicker({
                 <p className="truncate text-[12.5px] font-medium text-foreground">
                   {t.name}{t.id === currentId ? ' · current' : ''}
                 </p>
-                <p className="text-[11px] text-subtle">{t.availability.replace(/_/g, ' ')} · {t.load} open</p>
+                <p className="text-[11px] text-muted-foreground/75">{t.availability.replace(/_/g, ' ')} · {t.load} open</p>
               </div>
               {picked === t.id && <Check className="h-4 w-4 shrink-0 text-primary" />}
             </button>
           ))}
         </div>
         {requireReason && (
-          <div className="border-t border-border-subtle p-2.5">
+          <div className="border-t border-border p-2.5">
             <Textarea rows={2} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason for reassignment…" />
           </div>
         )}
-        <div className="flex justify-end gap-2 border-t border-border-subtle p-2.5">
+        <div className="flex justify-end gap-2 border-t border-border p-2.5">
           <Button variant="ghost" size="xs" onClick={() => setOpen(false)}>Cancel</Button>
           <Button variant="primary" size="xs" disabled={!canConfirm} onClick={confirm}>Confirm</Button>
         </div>
@@ -483,7 +483,7 @@ function CategoryOverrideDialog({ current, onSubmit, trigger }: { current: Servi
         <DialogBody className="flex flex-col gap-4">
           <SimpleSelect value={category} onChange={setCategory} options={CATEGORY_OPTIONS} />
           {rerouting && (
-            <p className="text-[12px] text-muted">
+            <p className="text-[12px] text-muted-foreground">
               Will route to <span className="font-medium text-foreground">{target.name}</span>
               {target.triageOnly ? ' — triage only, so it will need re-categorising again before anyone can be assigned' : ''}.
             </p>

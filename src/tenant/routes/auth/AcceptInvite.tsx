@@ -10,9 +10,9 @@
 import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { CheckCircle2, KeyRound, MailWarning } from 'lucide-react';
-import { Button, IconBox } from '../../components/ui/primitives';
-import { Field, Input } from '../../components/ui/form';
-import { Card } from '../../components/ui/card';
+import { Button, IconBox } from '../../components/app/primitives';
+import { Field, Input } from '../../components/app/form';
+import { Card } from '../../components/app/card';
 import { useAuth } from '../../store/auth';
 import { acceptInvite, doorFor, homeFor, lookupToken } from '../../data/auth';
 
@@ -49,7 +49,7 @@ export default function AcceptInvite() {
       <Shell>
         <IconBox icon={MailWarning} tone="warning" size="lg" />
         <h1 className="text-[20px] font-semibold text-foreground">{copy.title}</h1>
-        <p className="max-w-[34ch] text-[13px] text-muted">{copy.body}</p>
+        <p className="max-w-[34ch] text-[13px] text-muted-foreground">{copy.body}</p>
         <Link to={doorFor('portal')} className="text-[13px] font-medium text-primary underline underline-offset-2">
           Go to sign in
         </Link>
@@ -81,7 +81,7 @@ export default function AcceptInvite() {
     <Shell>
       <IconBox icon={KeyRound} tone="primary" size="lg" />
       <h1 className="text-[20px] font-semibold text-foreground">Set your password</h1>
-      <p className="max-w-[34ch] text-[13px] text-muted">
+      <p className="max-w-[34ch] text-[13px] text-muted-foreground">
         For <span className="font-medium text-foreground">{t.email}</span>. This activates your account.
       </p>
 
@@ -93,7 +93,7 @@ export default function AcceptInvite() {
           <Field label="Confirm password" error={confirm && password !== confirm ? 'Passwords do not match.' : undefined}>
             <Input type="password" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
           </Field>
-          {error && <p role="alert" className="text-[12px] text-critical">{error}</p>}
+          {error && <p role="alert" className="text-[12px] text-destructive">{error}</p>}
           <Button type="submit" variant="primary" size="lg" loading={busy} disabled={!valid}>
             <CheckCircle2 className="h-4 w-4" />
             Activate account
@@ -106,7 +106,7 @@ export default function AcceptInvite() {
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen w-full flex-col items-center justify-center gap-3 bg-canvas p-5 text-center">
+    <div className="flex min-h-screen w-full flex-col items-center justify-center gap-3 bg-background p-5 text-center">
       {children}
     </div>
   );

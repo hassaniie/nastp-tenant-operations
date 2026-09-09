@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { ago } from '../lib/utils';
 import { simulation, useLive } from '../data/live';
 import type { AppNotification } from '../data/types';
-import { Button, IconBox } from '../components/ui/primitives';
-import { Popover, PopoverContent, PopoverTrigger, Tooltip } from '../components/ui/overlay';
-import { EmptyState } from '../components/ui/data';
+import { Button, IconBox } from '../components/app/primitives';
+import { Popover, PopoverContent, PopoverTrigger, Tooltip } from '../components/app/overlay';
+import { EmptyState } from '../components/app/data';
 import { MODULE_ICON, MODULE_TONE } from '../components/status';
 import { cn } from '../lib/utils';
 
@@ -34,7 +34,7 @@ export function NotificationBell({ tenantId }: { tenantId?: string }) {
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <div>
             <p className="text-[13px] font-semibold text-foreground">Notifications</p>
-            <p className="text-[11px] text-subtle">{unread} unread</p>
+            <p className="text-[11px] text-muted-foreground/75">{unread} unread</p>
           </div>
           {unread > 0 && (
             <Button variant="ghost" size="xs" onClick={() => simulation.markAllNotificationsRead(tenantId)}>
@@ -63,15 +63,15 @@ function NotificationRow({ notification: n, onOpen }: { notification: AppNotific
   const Icon = MODULE_ICON[n.domain];
   return (
     <li>
-      <button onClick={onOpen} className={cn('flex w-full items-start gap-3 rounded-lg px-2.5 py-2.5 text-left transition-colors hover:bg-surface-raised', !n.read && 'bg-primary-muted/25')}>
+      <button onClick={onOpen} className={cn('flex w-full items-start gap-3 rounded-lg px-2.5 py-2.5 text-left transition-colors hover:bg-accent', !n.read && 'bg-primary/10/25')}>
         <IconBox icon={Icon} tone={MODULE_TONE[n.domain]} size="sm" />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <p className="truncate text-[13px] font-medium text-foreground">{n.title}</p>
             {!n.read && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />}
           </div>
-          <p className="mt-0.5 line-clamp-2 text-[12px] leading-relaxed text-muted">{n.body}</p>
-          <p className="mt-1 text-[11px] text-subtle">{ago(n.ts)}</p>
+          <p className="mt-0.5 line-clamp-2 text-[12px] leading-relaxed text-muted-foreground">{n.body}</p>
+          <p className="mt-1 text-[11px] text-muted-foreground/75">{ago(n.ts)}</p>
         </div>
       </button>
     </li>

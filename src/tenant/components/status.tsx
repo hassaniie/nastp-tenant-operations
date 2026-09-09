@@ -8,7 +8,7 @@ import {
   Accessibility, Boxes, Brush, Building2, Car, Cctv, Fan, Flame, KeyRound, Lightbulb,
   MoveVertical, Plug, ShieldCheck, UserRound, Wifi, Wrench, Zap, type LucideIcon,
 } from 'lucide-react';
-import { StatusBadge } from './ui/primitives';
+import { StatusBadge } from './app/primitives';
 import {
   ALERT_LEVEL, ALERT_SEVERITY, METER_STATUS, PAYMENT_STATUS, SERVICE_PRIORITY, SERVICE_STATUS,
   TENANT_STATUS, VISITOR_STATUS, type Tone,

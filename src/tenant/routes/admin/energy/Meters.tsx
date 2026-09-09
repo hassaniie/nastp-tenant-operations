@@ -7,14 +7,14 @@
 import { Gauge, Building2 } from 'lucide-react';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Page, StatGrid, Toolbar } from '../../../components/ui/page';
-import { Card } from '../../../components/ui/card';
+import { Page, StatGrid, Toolbar } from '../../../components/app/page';
+import { Card } from '../../../components/app/card';
 import { PageHeader, StatCard, KeyValue } from '../../../components/common';
-import { IconBox, StatusBadge } from '../../../components/ui/primitives';
-import { SearchInput } from '../../../components/ui/form';
-import { Segmented } from '../../../components/ui/tabs';
-import { DataTable, DefList, type Column } from '../../../components/ui/data';
-import { Drawer, DrawerBody, DrawerContent, DrawerHeader } from '../../../components/ui/overlay';
+import { IconBox, StatusBadge } from '../../../components/app/primitives';
+import { SearchInput } from '../../../components/app/form';
+import { Segmented } from '../../../components/app/tabs';
+import { DataTable, DefList, type Column } from '../../../components/app/data';
+import { Drawer, DrawerBody, DrawerContent, DrawerHeader } from '../../../components/app/overlay';
 import { MeterStatusBadge } from '../../../components/status';
 import { useLive } from '../../../data/live';
 import { ago, num } from '../../../lib/utils';
@@ -43,7 +43,7 @@ export default function Meters() {
     { key: 'serial', header: 'Serial', cell: (m) => <span className="tnum font-medium text-foreground">{m.serial}</span>, sortValue: (m) => m.serial },
     { key: 'name', header: 'Meter', cell: (m) => <span>{m.name}</span>, hideBelow: 'md' },
     { key: 'kind', header: 'Type', cell: (m) => <StatusBadge tone={m.kind === 'main' ? 'primary' : 'neutral'} size="sm" dot={false}>{m.kind === 'main' ? 'Main' : 'Sub-meter'}</StatusBadge>, sortValue: (m) => m.kind },
-    { key: 'owner', header: 'Assigned to', cell: (m) => <span className={m.kind === 'main' ? 'text-subtle' : 'text-muted'}>{m.tenantName}</span>, hideBelow: 'lg' },
+    { key: 'owner', header: 'Assigned to', cell: (m) => <span className={m.kind === 'main' ? 'text-muted-foreground/75' : 'text-muted-foreground'}>{m.tenantName}</span>, hideBelow: 'lg' },
     { key: 'load', header: 'Load', align: 'right', cell: (m) => <span className="tnum">{num(m.live.powerKw, 1)} kW</span>, sortValue: (m) => m.live.powerKw },
     { key: 'pf', header: 'PF', align: 'right', cell: (m) => <span className="tnum">{m.live.powerFactor.toFixed(2)}</span>, hideBelow: 'xl' },
     { key: 'status', header: 'Status', cell: (m) => <MeterStatusBadge status={m.status} size="sm" /> },
@@ -61,7 +61,7 @@ export default function Meters() {
       </StatGrid>
 
       <Card>
-        <div className="border-b border-border-subtle p-4">
+        <div className="border-b border-border p-4">
           <Toolbar>
             <SearchInput value={search} onChange={setSearch} placeholder="Search by serial, name or tenant…" className="w-full sm:w-[300px]" />
             <div className="flex-1" />
@@ -89,16 +89,16 @@ export default function Meters() {
                 badge={<MeterStatusBadge status={open.status} size="sm" />}
               />
               <DrawerBody className="flex flex-col gap-5">
-                <div className="flex items-center gap-3 rounded-xl border border-border-subtle bg-surface-inset/50 p-3">
+                <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/50 p-3">
                   <IconBox icon={open.kind === 'main' ? Building2 : Gauge} tone={open.kind === 'main' ? 'primary' : 'energy'} size="md" />
                   <div>
                     <p className="text-[13px] font-medium text-foreground">{open.kind === 'main' ? 'Floor main incomer' : `Tenant sub-meter · ${open.tenantName}`}</p>
-                    <p className="text-[12px] text-subtle">Last reading {ago(open.lastReadingAt)}</p>
+                    <p className="text-[12px] text-muted-foreground/75">Last reading {ago(open.lastReadingAt)}</p>
                   </div>
                 </div>
 
                 <div>
-                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle">Live electrical snapshot</p>
+                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/75">Live electrical snapshot</p>
                   <DefList columns={2} items={[
                     { label: 'Active power', value: `${num(open.live.powerKw, 1)} kW` },
                     { label: 'Apparent power', value: `${num(open.live.apparentKva, 1)} kVA` },
@@ -112,7 +112,7 @@ export default function Meters() {
                 </div>
 
                 <div>
-                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle">Registers & metadata</p>
+                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/75">Registers & metadata</p>
                   <KeyValue label="Cumulative import" value={`${num(open.totalKwh)} kWh`} mono />
                   <KeyValue label="CT ratio" value={open.ctRatio} />
                   <KeyValue label="Model" value={open.model} />

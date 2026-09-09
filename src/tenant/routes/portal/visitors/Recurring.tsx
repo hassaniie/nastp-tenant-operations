@@ -6,11 +6,11 @@
 
 import { Info, Pause, Play, Plus, Repeat, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { Card, CardBody, CardHeader } from '../../../components/ui/card';
-import { EmptyState } from '../../../components/ui/data';
-import { Button, IconBox, StatusBadge } from '../../../components/ui/primitives';
-import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader } from '../../../components/ui/overlay';
-import { Field, Input, SimpleSelect } from '../../../components/ui/form';
+import { Card, CardBody, CardHeader } from '../../../components/app/card';
+import { EmptyState } from '../../../components/app/data';
+import { Button, IconBox, StatusBadge } from '../../../components/app/primitives';
+import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader } from '../../../components/app/overlay';
+import { Field, Input, SimpleSelect } from '../../../components/app/form';
 import { useSession } from '../../../store/session';
 import { simulation, useLive } from '../../../data/live';
 import { fmtDateFull } from '../../../lib/utils';
@@ -38,7 +38,7 @@ export default function RecurringVisitors() {
           actions={<Button variant="primary" size="sm" onClick={() => setAdding(true)}><Plus className="h-4 w-4" />Add recurring</Button>}
         />
         <CardBody className="flex flex-col gap-2.5">
-          <div className="flex items-start gap-2.5 rounded-xl border border-border-subtle bg-surface-inset/50 p-3 text-[12px] text-muted">
+          <div className="flex items-start gap-2.5 rounded-xl border border-border bg-muted/50 p-3 text-[12px] text-muted-foreground">
             <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-info" />
             <span>Each recurrence generates individual visit instances at reception. Pausing stops future instances; past visits are unaffected.</span>
           </div>
@@ -46,20 +46,20 @@ export default function RecurringVisitors() {
             <EmptyState title="No recurring visitors" description="Set up a recurring schedule for vendors or contractors." icon={<Repeat className="h-5 w-5" />} />
           ) : (
             schedules.map((s) => (
-              <div key={s.id} className="flex items-center gap-3 rounded-xl border border-border-subtle bg-surface p-3.5">
+              <div key={s.id} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3.5">
                 <IconBox icon={Repeat} tone={s.active ? 'visitor' : 'neutral'} size="sm" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <p className="truncate text-[13px] font-medium text-foreground">{s.visitorName}</p>
                     <StatusBadge tone={s.active ? 'success' : 'neutral'} size="sm">{s.active ? 'Active' : 'Paused'}</StatusBadge>
                   </div>
-                  <p className="truncate text-[12px] text-subtle">{s.company ?? s.purpose} · {s.recurrence} · {s.startTime}–{s.endTime} · from {fmtDateFull(s.startsOn)}</p>
+                  <p className="truncate text-[12px] text-muted-foreground/75">{s.company ?? s.purpose} · {s.recurrence} · {s.startTime}–{s.endTime} · from {fmtDateFull(s.startsOn)}</p>
                 </div>
                 <div className="flex shrink-0 items-center gap-1.5">
                   <Button variant="ghost" size="xs" onClick={() => { simulation.setScheduleActive(s.id, !s.active); toast({ title: s.active ? 'Recurrence paused' : 'Recurrence resumed', variant: s.active ? 'warning' : 'success' }); }}>
                     {s.active ? <><Pause className="h-3.5 w-3.5" />Pause</> : <><Play className="h-3.5 w-3.5" />Resume</>}
                   </Button>
-                  <Button variant="ghost" size="icon-sm" className="text-subtle hover:text-critical" onClick={() => { simulation.removeSchedule(s.id); toast({ title: 'Recurrence cancelled', variant: 'default' }); }} aria-label="Cancel"><Trash2 className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon-sm" className="text-muted-foreground/75 hover:text-destructive" onClick={() => { simulation.removeSchedule(s.id); toast({ title: 'Recurrence cancelled', variant: 'default' }); }} aria-label="Cancel"><Trash2 className="h-4 w-4" /></Button>
                 </div>
               </div>
             ))

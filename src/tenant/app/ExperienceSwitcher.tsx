@@ -2,8 +2,8 @@ import { ArrowLeftRight, Check, ChevronDown, LayoutGrid, Store } from 'lucide-re
 import { useNavigate } from 'react-router-dom';
 import { useLive } from '../data/live';
 import { useSession } from '../store/session';
-import { Button, TenantMark } from '../components/ui/primitives';
-import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator, MenuTrigger } from '../components/ui/overlay';
+import { Button, TenantMark } from '../components/app/primitives';
+import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator, MenuTrigger } from '../components/app/overlay';
 import { cn } from '../lib/utils';
 
 /**
@@ -32,7 +32,7 @@ export function ExperienceSwitcher() {
               <span className="hidden max-w-[120px] truncate sm:inline">{current?.name ?? 'Portal'}</span>
             </>
           )}
-          <ChevronDown className="h-3.5 w-3.5 text-subtle" />
+          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/75" />
         </Button>
       </MenuTrigger>
       <MenuContent align="end" className="w-[280px]">

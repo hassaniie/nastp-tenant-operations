@@ -134,6 +134,13 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     document.documentElement.dataset.theme = prefs.theme;
     document.documentElement.dataset.density = prefs.density;
+    // The shadcn preset scopes its whole style layer to `.style-rhea` and keys
+    // dark mode off a `.dark` class. Both must sit on <html>, not on a wrapper:
+    // dialogs, popovers, menus and tooltips portal to document.body and would
+    // otherwise render completely unstyled. `data-theme` is kept so the stored
+    // preference API is unchanged.
+    document.documentElement.classList.add('style-rhea');
+    document.documentElement.classList.toggle('dark', prefs.theme === 'dark');
   }, [prefs.theme, prefs.density]);
 
   useEffect(() => {

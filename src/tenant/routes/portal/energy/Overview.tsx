@@ -8,10 +8,10 @@
 import { Bell, Gauge, TrendingUp, Wallet, Zap } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { StatGrid, SplitGrid } from '../../../components/ui/page';
-import { Card, CardBody, CardHeader } from '../../../components/ui/card';
+import { StatGrid, SplitGrid } from '../../../components/app/page';
+import { Card, CardBody, CardHeader } from '../../../components/app/card';
 import { StatCard } from '../../../components/common';
-import { IconBox } from '../../../components/ui/primitives';
+import { IconBox } from '../../../components/app/primitives';
 import { TrendChart, DonutChart } from '../../../components/charts';
 import { useSession } from '../../../store/session';
 import { useLive } from '../../../data/live';

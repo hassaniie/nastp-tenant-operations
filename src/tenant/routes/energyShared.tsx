@@ -6,9 +6,9 @@
 
 import { Download, Printer } from 'lucide-react';
 import { useState } from 'react';
-import { Segmented } from '../components/ui/tabs';
-import { Button } from '../components/ui/primitives';
-import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader } from '../components/ui/overlay';
+import { Segmented } from '../components/app/tabs';
+import { Button } from '../components/app/primitives';
+import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader } from '../components/app/overlay';
 import { PaymentBadge } from '../components/status';
 import { currency, downloadBlob, fmtDateFull, num, toCsv } from '../lib/utils';
 import type { Invoice, MeterReading } from '../data/types';
@@ -93,26 +93,26 @@ export function InvoiceDialog({ invoice, open, onOpenChange, tenantName }: { inv
 
           <div className="mt-5 overflow-hidden rounded-xl border border-border">
             <table className="w-full text-left text-[13px]">
-              <thead className="bg-surface-inset">
+              <thead className="bg-muted">
                 <tr>
-                  <th className="px-3.5 py-2.5 font-semibold uppercase tracking-[0.08em] text-subtle">Component</th>
-                  <th className="px-3.5 py-2.5 text-right font-semibold uppercase tracking-[0.08em] text-subtle">Units (kWh)</th>
-                  <th className="px-3.5 py-2.5 text-right font-semibold uppercase tracking-[0.08em] text-subtle">Rate</th>
-                  <th className="px-3.5 py-2.5 text-right font-semibold uppercase tracking-[0.08em] text-subtle">Amount</th>
+                  <th className="px-3.5 py-2.5 font-semibold uppercase tracking-[0.08em] text-muted-foreground/75">Component</th>
+                  <th className="px-3.5 py-2.5 text-right font-semibold uppercase tracking-[0.08em] text-muted-foreground/75">Units (kWh)</th>
+                  <th className="px-3.5 py-2.5 text-right font-semibold uppercase tracking-[0.08em] text-muted-foreground/75">Rate</th>
+                  <th className="px-3.5 py-2.5 text-right font-semibold uppercase tracking-[0.08em] text-muted-foreground/75">Amount</th>
                 </tr>
               </thead>
               <tbody>
                 {inv.lines.map((l) => (
-                  <tr key={l.component} className="border-t border-border-subtle">
+                  <tr key={l.component} className="border-t border-border">
                     <td className="px-3.5 py-2.5 capitalize text-foreground">{l.component.replace('_', '-')}</td>
-                    <td className="tnum px-3.5 py-2.5 text-right text-muted">{num(l.units)}</td>
-                    <td className="tnum px-3.5 py-2.5 text-right text-muted">{l.rate.toFixed(2)}</td>
+                    <td className="tnum px-3.5 py-2.5 text-right text-muted-foreground">{num(l.units)}</td>
+                    <td className="tnum px-3.5 py-2.5 text-right text-muted-foreground">{l.rate.toFixed(2)}</td>
                     <td className="tnum px-3.5 py-2.5 text-right font-medium text-foreground">{currency(l.amount)}</td>
                   </tr>
                 ))}
               </tbody>
               <tfoot>
-                <tr className="border-t border-border bg-surface-inset/50">
+                <tr className="border-t border-border bg-muted/50">
                   <td className="px-3.5 py-2.5 font-semibold text-foreground" colSpan={3}>Total</td>
                   <td className="tnum px-3.5 py-2.5 text-right text-[14px] font-semibold text-foreground">{currency(inv.total)}</td>
                 </tr>
@@ -137,13 +137,13 @@ export function InvoiceDialog({ invoice, open, onOpenChange, tenantName }: { inv
 
 function Metric({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-border-subtle bg-surface-inset/50 p-3">
-      <p className="text-[11px] uppercase tracking-[0.08em] text-subtle">{label}</p>
+    <div className="rounded-xl border border-border bg-muted/50 p-3">
+      <p className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground/75">{label}</p>
       <p className="tnum mt-1 text-[15px] font-semibold text-foreground">{value}</p>
     </div>
   );
 }
 
 function KV({ label, value }: { label: string; value: string }) {
-  return <div><p className="text-[11px] text-subtle">{label}</p><p className="text-[13px] font-medium text-foreground">{value}</p></div>;
+  return <div><p className="text-[11px] text-muted-foreground/75">{label}</p><p className="text-[13px] font-medium text-foreground">{value}</p></div>;
 }

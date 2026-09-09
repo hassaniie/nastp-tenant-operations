@@ -12,9 +12,9 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { CheckCircle2, KeyRound, Mail, MailWarning, ShieldCheck } from 'lucide-react';
-import { Button, IconBox } from '../../components/ui/primitives';
-import { Field, Input } from '../../components/ui/form';
-import { Card } from '../../components/ui/card';
+import { Button, IconBox } from '../../components/app/primitives';
+import { Field, Input } from '../../components/app/form';
+import { Card } from '../../components/app/card';
 import { completeReset, doorFor, lookupToken, requestPasswordReset } from '../../data/auth';
 import type { Experience } from '../../data/types';
 
@@ -22,7 +22,7 @@ const DOOR_LABEL: Record<Experience, string> = { admin: 'Administrator', portal:
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen w-full flex-col items-center justify-center gap-3 bg-canvas p-5 text-center">
+    <div className="flex min-h-screen w-full flex-col items-center justify-center gap-3 bg-background p-5 text-center">
       {children}
     </div>
   );
@@ -53,7 +53,7 @@ export function RequestReset() {
       <Shell>
         <IconBox icon={Mail} tone="primary" size="lg" />
         <h1 className="text-[20px] font-semibold text-foreground">Check your email</h1>
-        <p className="max-w-[36ch] text-[13px] text-muted">
+        <p className="max-w-[36ch] text-[13px] text-muted-foreground">
           If an account exists for <span className="font-medium text-foreground">{email}</span>, a reset
           link is on its way. It will expire in an hour.
         </p>
@@ -68,12 +68,12 @@ export function RequestReset() {
             link this build would otherwise send. */}
         {demoLink && (
           <Card className="mt-4 w-full max-w-[420px] p-4 text-left">
-            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-subtle">Demo tools</p>
-            <p className="mt-1 text-[11px] text-subtle">
+            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/75">Demo tools</p>
+            <p className="mt-1 text-[11px] text-muted-foreground/75">
               No mail server exists in this build, so the link that would have been emailed is shown here.
             </p>
-            <div className="mt-2 flex items-center gap-2 rounded-lg border border-border bg-surface-inset px-3 py-2">
-              <code className="flex-1 truncate text-[11px] text-muted">{demoLink}</code>
+            <div className="mt-2 flex items-center gap-2 rounded-lg border border-border bg-muted px-3 py-2">
+              <code className="flex-1 truncate text-[11px] text-muted-foreground">{demoLink}</code>
               <Button variant="secondary" size="xs" onClick={() => navigator.clipboard.writeText(demoLink)}>Copy</Button>
             </div>
           </Card>
@@ -86,7 +86,7 @@ export function RequestReset() {
     <Shell>
       <IconBox icon={KeyRound} tone="primary" size="lg" />
       <h1 className="text-[20px] font-semibold text-foreground">Reset your password</h1>
-      <p className="max-w-[34ch] text-[13px] text-muted">
+      <p className="max-w-[34ch] text-[13px] text-muted-foreground">
         Enter the email for your {DOOR_LABEL[door].toLowerCase()} account and we’ll send a reset link.
       </p>
       <Card className="w-full max-w-[380px] p-5">
@@ -97,7 +97,7 @@ export function RequestReset() {
           <Button type="submit" variant="primary" size="lg" loading={busy} disabled={!email}>Send reset link</Button>
         </form>
       </Card>
-      <Link to={doorFor(door)} className="text-[12px] text-subtle underline underline-offset-2 hover:text-foreground">
+      <Link to={doorFor(door)} className="text-[12px] text-muted-foreground/75 underline underline-offset-2 hover:text-foreground">
         Back to sign in
       </Link>
     </Shell>
@@ -132,7 +132,7 @@ export function CompleteReset() {
       <Shell>
         <IconBox icon={MailWarning} tone="warning" size="lg" />
         <h1 className="text-[20px] font-semibold text-foreground">{copy.title}</h1>
-        <p className="max-w-[34ch] text-[13px] text-muted">{copy.body}</p>
+        <p className="max-w-[34ch] text-[13px] text-muted-foreground">{copy.body}</p>
         <Link to="/reset" className="text-[13px] font-medium text-primary underline underline-offset-2">Request a new link</Link>
       </Shell>
     );
@@ -144,7 +144,7 @@ export function CompleteReset() {
       <Shell>
         <IconBox icon={CheckCircle2} tone="success" size="lg" />
         <h1 className="text-[20px] font-semibold text-foreground">Password updated</h1>
-        <p className="max-w-[34ch] text-[13px] text-muted">
+        <p className="max-w-[34ch] text-[13px] text-muted-foreground">
           Sign in with your new password. For your security this did not sign you in automatically.
         </p>
         <Button variant="primary" onClick={() => navigate(doorFor(door as Experience))}>Go to sign in</Button>
@@ -172,7 +172,7 @@ export function CompleteReset() {
     <Shell>
       <IconBox icon={ShieldCheck} tone="primary" size="lg" />
       <h1 className="text-[20px] font-semibold text-foreground">Choose a new password</h1>
-      {t && <p className="max-w-[34ch] text-[13px] text-muted">For <span className="font-medium text-foreground">{t.email}</span>.</p>}
+      {t && <p className="max-w-[34ch] text-[13px] text-muted-foreground">For <span className="font-medium text-foreground">{t.email}</span>.</p>}
       <Card className="w-full max-w-[380px] p-5">
         <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
           <Field label="New password" hint="At least 8 characters.">
@@ -181,7 +181,7 @@ export function CompleteReset() {
           <Field label="Confirm password" error={confirm && password !== confirm ? 'Passwords do not match.' : undefined}>
             <Input type="password" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
           </Field>
-          {error && <p role="alert" className="text-[12px] text-critical">{error}</p>}
+          {error && <p role="alert" className="text-[12px] text-destructive">{error}</p>}
           <Button type="submit" variant="primary" size="lg" loading={busy} disabled={!valid}>Update password</Button>
         </form>
       </Card>

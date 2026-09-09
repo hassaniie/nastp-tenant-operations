@@ -4,10 +4,10 @@
  */
 
 import { Building2, Gauge, Layers } from 'lucide-react';
-import { Page, StatGrid, ContentGrid } from '../../components/ui/page';
-import { Card, CardBody, CardHeader } from '../../components/ui/card';
+import { Page, StatGrid, ContentGrid } from '../../components/app/page';
+import { Card, CardBody, CardHeader } from '../../components/app/card';
 import { PageHeader, StatCard } from '../../components/common';
-import { IconBox, ProgressBar, StatusBadge } from '../../components/ui/primitives';
+import { IconBox, ProgressBar, StatusBadge } from '../../components/app/primitives';
 import { useLive } from '../../data/live';
 import { area, num } from '../../lib/utils';
 
@@ -63,20 +63,20 @@ export default function Buildings() {
                   <Mini label="Load" value={`${num(b.load, 0)} kW`} />
                 </div>
                 <div>
-                  <div className="flex items-center justify-between text-[12px]"><span className="text-subtle">Occupancy</span><span className="tnum font-medium text-foreground">{b.occupied}/{b.officeCount} offices</span></div>
+                  <div className="flex items-center justify-between text-[12px]"><span className="text-muted-foreground/75">Occupancy</span><span className="tnum font-medium text-foreground">{b.occupied}/{b.officeCount} offices</span></div>
                   <ProgressBar value={occPct} tone={occPct > 85 ? 'warning' : 'success'} className="mt-1.5" />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   {b.floors.map((f) => (
-                    <div key={f.floor.id} className="flex items-center justify-between gap-3 rounded-xl border border-border-subtle bg-surface-inset/50 px-3 py-2.5">
+                    <div key={f.floor.id} className="flex items-center justify-between gap-3 rounded-xl border border-border bg-muted/50 px-3 py-2.5">
                       <div className="flex items-center gap-2.5">
-                        <Layers className="h-4 w-4 text-subtle" />
+                        <Layers className="h-4 w-4 text-muted-foreground/75" />
                         <div>
                           <p className="text-[13px] font-medium text-foreground">{f.floor.name}</p>
-                          <p className="text-[11px] text-subtle">{f.offices.length} offices · {area(f.floor.netLeasableSqft)} leasable</p>
+                          <p className="text-[11px] text-muted-foreground/75">{f.offices.length} offices · {area(f.floor.netLeasableSqft)} leasable</p>
                         </div>
                       </div>
-                      <span className="inline-flex items-center gap-1.5 rounded-lg bg-surface px-2 py-1 text-[11px] text-muted"><Gauge className="h-3 w-3 text-energy" />Main {f.mainSerial}</span>
+                      <span className="inline-flex items-center gap-1.5 rounded-lg bg-card px-2 py-1 text-[11px] text-muted-foreground"><Gauge className="h-3 w-3 text-module-energy" />Main {f.mainSerial}</span>
                     </div>
                   ))}
                 </div>
@@ -91,9 +91,9 @@ export default function Buildings() {
 
 function Mini({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-border-subtle bg-surface-inset/50 p-2.5 text-center">
+    <div className="rounded-xl border border-border bg-muted/50 p-2.5 text-center">
       <p className="tnum text-[16px] font-semibold text-foreground">{value}</p>
-      <p className="text-[11px] uppercase tracking-[0.08em] text-subtle">{label}</p>
+      <p className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground/75">{label}</p>
     </div>
   );
 }

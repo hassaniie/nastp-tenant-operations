@@ -7,10 +7,10 @@
 import { AlarmClock, CalendarClock, DoorOpen, History as HistoryIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Page, Toolbar } from '../../../components/ui/page';
-import { Card } from '../../../components/ui/card';
+import { Page, Toolbar } from '../../../components/app/page';
+import { Card } from '../../../components/app/card';
 import { PageHeader } from '../../../components/common';
-import { SearchInput, SimpleSelect } from '../../../components/ui/form';
+import { SearchInput, SimpleSelect } from '../../../components/app/form';
 import { VisitorTable, VisitorDrawer } from '../../visitorsShared';
 import { useLive } from '../../../data/live';
 import type { Visitor, VisitorStatus } from '../../../data/types';
@@ -50,7 +50,7 @@ export function AdminVisitorList({ kind }: { kind: VisitorListKind }) {
     <Page>
       <PageHeader title={meta.title} description={meta.description} />
       <Card>
-        <div className="border-b border-border-subtle p-4">
+        <div className="border-b border-border p-4">
           <Toolbar>
             <SearchInput value={search} onChange={setSearch} placeholder="Search visitors…" className="w-full sm:w-[280px]" />
             <SimpleSelect value={tenantFilter} onChange={setTenantFilter} options={[{ value: 'all', label: 'All tenants' }, ...data.tenants.map((t) => ({ value: t.id, label: t.name }))]} className="w-[200px]" />

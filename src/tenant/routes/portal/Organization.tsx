@@ -5,11 +5,11 @@
  */
 
 import { Building2, Gauge, Mail, Phone, UserRound } from 'lucide-react';
-import { Page, ContentGrid } from '../../components/ui/page';
-import { Card, CardBody, CardHeader } from '../../components/ui/card';
+import { Page, ContentGrid } from '../../components/app/page';
+import { Card, CardBody, CardHeader } from '../../components/app/card';
 import { PageHeader, KeyValue } from '../../components/common';
-import { Avatar, IconBox, StatusBadge, TenantMark } from '../../components/ui/primitives';
-import { DefList } from '../../components/ui/data';
+import { Avatar, IconBox, StatusBadge, TenantMark } from '../../components/app/primitives';
+import { DefList } from '../../components/app/data';
 import { TenantStatusBadge, MeterStatusBadge } from '../../components/status';
 import { USER_ROLE } from '../../lib/meta';
 import { ORG_TYPE_LABEL } from '../../data/catalog';
@@ -46,8 +46,8 @@ export default function Organization() {
               <h2 className="text-[20px] font-semibold tracking-[-0.02em] text-foreground">{t.name}</h2>
               <TenantStatusBadge status={t.status} />
             </div>
-            <p className="mt-0.5 text-[13px] text-muted">{t.legalName} · {ORG_TYPE_LABEL[t.organizationType]}</p>
-            <p className="mt-1 text-[12px] text-subtle">{data.building} · {data.floors.join(', ')}</p>
+            <p className="mt-0.5 text-[13px] text-muted-foreground">{t.legalName} · {ORG_TYPE_LABEL[t.organizationType]}</p>
+            <p className="mt-1 text-[12px] text-muted-foreground/75">{data.building} · {data.floors.join(', ')}</p>
           </div>
         </div>
       </Card>
@@ -84,10 +84,10 @@ export default function Organization() {
             {data.offices.map((o) => {
               const meter = data.meters.find((m) => m.id === o.meterId);
               return (
-                <div key={o.id} className="flex items-center justify-between gap-3 rounded-xl border border-border-subtle bg-surface-inset/50 p-3">
+                <div key={o.id} className="flex items-center justify-between gap-3 rounded-xl border border-border bg-muted/50 p-3">
                   <div>
                     <p className="text-[13px] font-medium text-foreground">{o.label} · {o.code}</p>
-                    <p className="text-[11px] text-subtle">{area(o.areaSqft)}{meter ? ` · ${meter.serial}` : ' · not metered'}</p>
+                    <p className="text-[11px] text-muted-foreground/75">{area(o.areaSqft)}{meter ? ` · ${meter.serial}` : ' · not metered'}</p>
                   </div>
                   {meter && <MeterStatusBadge status={meter.status} size="sm" />}
                 </div>
@@ -99,11 +99,11 @@ export default function Organization() {
           <CardHeader title="Users" subtitle={`${data.users.length} users`} icon={<IconBox icon={UserRound} tone="visitor" size="sm" />} />
           <CardBody className="flex flex-col gap-2">
             {data.users.map((u) => (
-              <div key={u.id} className="flex items-center gap-3 rounded-xl border border-border-subtle bg-surface-inset/50 p-3">
+              <div key={u.id} className="flex items-center gap-3 rounded-xl border border-border bg-muted/50 p-3">
                 <Avatar name={u.name} seed={u.avatarSeed} size={32} />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[13px] font-medium text-foreground">{u.name}</p>
-                  <p className="truncate text-[11px] text-subtle">{USER_ROLE[u.role]} · {u.lastActiveAt ? `active ${ago(u.lastActiveAt)}` : u.status}</p>
+                  <p className="truncate text-[11px] text-muted-foreground/75">{USER_ROLE[u.role]} · {u.lastActiveAt ? `active ${ago(u.lastActiveAt)}` : u.status}</p>
                 </div>
                 <StatusBadge tone={u.status === 'active' ? 'success' : u.status === 'invited' ? 'info' : 'neutral'} size="sm">{u.status}</StatusBadge>
               </div>

@@ -6,12 +6,12 @@
  */
 
 import { Activity, Gauge, Moon, Palette, Sun } from 'lucide-react';
-import { Page } from '../../components/ui/page';
-import { Card, CardBody, CardHeader } from '../../components/ui/card';
+import { Page } from '../../components/app/page';
+import { Card, CardBody, CardHeader } from '../../components/app/card';
 import { PageHeader } from '../../components/common';
-import { IconBox, StatusBadge, Button } from '../../components/ui/primitives';
-import { SettingRow, Switch, SimpleSelect } from '../../components/ui/form';
-import { Segmented } from '../../components/ui/tabs';
+import { IconBox, StatusBadge, Button } from '../../components/app/primitives';
+import { SettingRow, Switch, SimpleSelect } from '../../components/app/form';
+import { Segmented } from '../../components/app/tabs';
 import { useSession } from '../../store/session';
 
 export default function Settings() {
@@ -80,7 +80,7 @@ export default function Settings() {
           <div className="flex items-center justify-between py-3.5">
             <div>
               <p className="text-[13px] font-medium text-foreground">Quick presets</p>
-              <p className="text-[12px] text-subtle">Jump to a scenario to test.</p>
+              <p className="text-[12px] text-muted-foreground/75">Jump to a scenario to test.</p>
             </div>
             <div className="flex gap-2">
               <Button variant="secondary" size="sm" onClick={() => setPrefs({ failureRate: 0, latencyProfile: 'normal' })}>Healthy</Button>

@@ -6,10 +6,10 @@
 
 import { Gauge, TrendingUp, Wallet, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Page, StatGrid, SplitGrid } from '../../../components/ui/page';
-import { Card, CardBody, CardHeader } from '../../../components/ui/card';
+import { Page, StatGrid, SplitGrid } from '../../../components/app/page';
+import { Card, CardBody, CardHeader } from '../../../components/app/card';
 import { PageHeader, StatCard } from '../../../components/common';
-import { Button, IconBox } from '../../../components/ui/primitives';
+import { Button, IconBox } from '../../../components/app/primitives';
 import { MeterStatusBadge } from '../../../components/status';
 import { TrendChart, BarSeriesChart, DonutChart } from '../../../components/charts';
 import { useLive } from '../../../data/live';
@@ -76,13 +76,13 @@ export default function EnergyOverview() {
           <CardHeader title="Offline Meters" subtitle={`${offlineMeters.length} not reporting`} icon={<IconBox icon={Gauge} tone={offlineMeters.length ? 'critical' : 'success'} size="sm" />} />
           <CardBody className="flex flex-col gap-2">
             {offlineMeters.length === 0 ? (
-              <p className="py-6 text-center text-[13px] text-subtle">Every meter is reporting.</p>
+              <p className="py-6 text-center text-[13px] text-muted-foreground/75">Every meter is reporting.</p>
             ) : (
               offlineMeters.map((m) => (
-                <button key={m.id} onClick={() => navigate('/admin/energy/meters')} className="flex items-center justify-between gap-3 rounded-xl border border-border-subtle bg-surface-inset/50 p-3 text-left transition-colors hover:border-border-strong">
+                <button key={m.id} onClick={() => navigate('/admin/energy/meters')} className="flex items-center justify-between gap-3 rounded-xl border border-border bg-muted/50 p-3 text-left transition-colors hover:border-ring/40">
                   <div className="min-w-0">
                     <p className="truncate text-[13px] font-medium text-foreground">{m.name}</p>
-                    <p className="tnum truncate text-[11px] text-subtle">{m.serial}</p>
+                    <p className="tnum truncate text-[11px] text-muted-foreground/75">{m.serial}</p>
                   </div>
                   <MeterStatusBadge status={m.status} size="sm" />
                 </button>

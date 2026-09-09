@@ -7,9 +7,9 @@
  */
 
 import { CalendarClock, Car, DoorClosed, DoorOpen, Mail, Phone, ShieldCheck, XCircle } from 'lucide-react';
-import { Button, IconBox } from '../components/ui/primitives';
-import { Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader } from '../components/ui/overlay';
-import { DataTable, DefList, type Column } from '../components/ui/data';
+import { Button, IconBox } from '../components/app/primitives';
+import { Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader } from '../components/app/overlay';
+import { DataTable, DefList, type Column } from '../components/app/data';
 import { Timeline, type TimelineItem } from '../components/common';
 import { VisitorStatusBadge } from '../components/status';
 import { simulation } from '../data/live';
@@ -19,7 +19,7 @@ import type { Visitor } from '../data/types';
 
 export function visitorColumns(opts: { showTenant?: (v: Visitor) => string } = {}): Column<Visitor>[] {
   const cols: Column<Visitor>[] = [
-    { key: 'name', header: 'Visitor', cell: (v) => <div><p className="font-medium text-foreground">{v.fullName}</p><p className="text-[11px] text-subtle">{v.company ?? v.purpose}</p></div>, sortValue: (v) => v.fullName },
+    { key: 'name', header: 'Visitor', cell: (v) => <div><p className="font-medium text-foreground">{v.fullName}</p><p className="text-[11px] text-muted-foreground/75">{v.company ?? v.purpose}</p></div>, sortValue: (v) => v.fullName },
   ];
   if (opts.showTenant) cols.push({ key: 'tenant', header: 'Host tenant', cell: (v) => opts.showTenant!(v), hideBelow: 'lg' });
   cols.push(
@@ -88,9 +88,9 @@ export function VisitorDrawer({ visitor, open, onOpenChange, mode = 'admin', ten
             { label: <span className="inline-flex items-center gap-1"><Car className="h-3 w-3" />Vehicle</span>, value: v.vehicleNo ?? '—' },
             { label: 'Host', value: v.host, span: true },
           ]} />
-          {v.notes && <div className="rounded-xl border border-border-subtle bg-surface-inset/50 p-3 text-[12px] text-muted">{v.notes}</div>}
+          {v.notes && <div className="rounded-xl border border-border bg-muted/50 p-3 text-[12px] text-muted-foreground">{v.notes}</div>}
           <div>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle">Visit timeline</p>
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/75">Visit timeline</p>
             <Timeline items={timeline} />
           </div>
         </DrawerBody>
@@ -105,7 +105,7 @@ export function VisitorDrawer({ visitor, open, onOpenChange, mode = 'admin', ten
             <Button variant="secondary" size="sm" onClick={checkOut}><DoorClosed className="h-4 w-4" />Check out</Button>
           )}
           {(v.status === 'checked_out' || v.status === 'cancelled' || v.status === 'no_show') && (
-            <span className="text-[12px] text-subtle">This visit is closed.</span>
+            <span className="text-[12px] text-muted-foreground/75">This visit is closed.</span>
           )}
         </DrawerFooter>
       </DrawerContent>

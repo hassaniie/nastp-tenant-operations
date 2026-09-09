@@ -9,14 +9,14 @@
 import { Building2, LayoutGrid, Rows3, Store, UserPlus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Page, StatGrid, Toolbar } from '../../components/ui/page';
-import { Card, CardBody } from '../../components/ui/card';
+import { Page, StatGrid, Toolbar } from '../../components/app/page';
+import { Card, CardBody } from '../../components/app/card';
 import { PageHeader, StatCard } from '../../components/common';
-import { Button, ProgressBar, TenantMark } from '../../components/ui/primitives';
-import { SearchInput, SimpleSelect } from '../../components/ui/form';
-import { Segmented } from '../../components/ui/tabs';
-import { DataTable, type Column } from '../../components/ui/data';
-import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from '../../components/ui/overlay';
+import { Button, ProgressBar, TenantMark } from '../../components/app/primitives';
+import { SearchInput, SimpleSelect } from '../../components/app/form';
+import { Segmented } from '../../components/app/tabs';
+import { DataTable, type Column } from '../../components/app/data';
+import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from '../../components/app/overlay';
 import { TenantStatusBadge, AlertLevelBadge } from '../../components/status';
 import { adminApi } from '../../data/api';
 import { simulation } from '../../data/live';
@@ -85,19 +85,19 @@ export default function Tenants() {
           <TenantMark name={r.tenant.name} hue={r.tenant.brandHue} size={32} />
           <div className="min-w-0">
             <p className="truncate text-[13px] font-medium text-foreground">{r.tenant.name}</p>
-            <p className="tnum truncate text-[11px] text-subtle">{r.tenant.code}</p>
+            <p className="tnum truncate text-[11px] text-muted-foreground/75">{r.tenant.code}</p>
           </div>
         </div>
       ),
       sortValue: (r) => r.tenant.name,
     },
-    { key: 'building', header: 'Location', cell: (r) => <span>{r.buildingName}<span className="text-subtle"> · {r.floorNames.join(', ')}</span></span>, sortValue: (r) => r.buildingName, hideBelow: 'lg' },
+    { key: 'building', header: 'Location', cell: (r) => <span>{r.buildingName}<span className="text-muted-foreground/75"> · {r.floorNames.join(', ')}</span></span>, sortValue: (r) => r.buildingName, hideBelow: 'lg' },
     { key: 'offices', header: 'Offices', align: 'right', cell: (r) => <span className="tnum">{r.officeCount}</span>, sortValue: (r) => r.officeCount, hideBelow: 'md' },
     { key: 'area', header: 'Area', align: 'right', cell: (r) => <span className="tnum">{area(r.totalAreaSqft, prefs.areaUnit)}</span>, sortValue: (r) => r.totalAreaSqft, hideBelow: 'md' },
     { key: 'meters', header: 'Sub-meters', align: 'right', cell: (r) => <span className="tnum">{r.meterCount}</span>, sortValue: (r) => r.meterCount, hideBelow: 'xl' },
     { key: 'status', header: 'Status', cell: (r) => <TenantStatusBadge status={r.tenant.status} size="sm" />, sortValue: (r) => r.tenant.status },
     { key: 'energy', header: 'Energy', cell: (r) => <AlertLevelBadge level={energyLevel(r)} size="sm" />, hideBelow: 'lg' },
-    { key: 'open', header: 'Open', align: 'right', cell: (r) => (r.openRequests ? <span className="tnum font-medium text-foreground">{r.openRequests}</span> : <span className="text-subtle">—</span>), sortValue: (r) => r.openRequests, hideBelow: 'xl' },
+    { key: 'open', header: 'Open', align: 'right', cell: (r) => (r.openRequests ? <span className="tnum font-medium text-foreground">{r.openRequests}</span> : <span className="text-muted-foreground/75">—</span>), sortValue: (r) => r.openRequests, hideBelow: 'xl' },
     {
       key: 'actions',
       header: '',
@@ -122,7 +122,7 @@ export default function Tenants() {
       </StatGrid>
 
       <Card>
-        <div className="border-b border-border-subtle p-4">
+        <div className="border-b border-border p-4">
           <Toolbar>
             <SearchInput value={search} onChange={setSearch} placeholder="Search tenants by name or code…" className="w-full sm:w-[300px]" />
             <SimpleSelect value={status} onChange={setStatus} options={STATUS_OPTIONS} className="w-[190px]" />
@@ -157,10 +157,10 @@ export default function Tenants() {
           <CardBody>
             {tenants.status === 'loading' ? (
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-[168px] animate-pulse rounded-2xl bg-surface-raised" />)}
+                {Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-[168px] animate-pulse rounded-2xl bg-accent" />)}
               </div>
             ) : rows.length === 0 ? (
-              <p className="py-10 text-center text-[13px] text-subtle">No tenants match your filters.</p>
+              <p className="py-10 text-center text-[13px] text-muted-foreground/75">No tenants match your filters.</p>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {rows.map((r) => <TenantCard key={r.tenant.id} summary={r} onOpen={() => navigate(`/admin/tenants/${r.tenant.id}`)} areaUnit={prefs.areaUnit} />)}
@@ -206,35 +206,35 @@ function RowActions({ summary, onOpen }: { summary: TenantSummary; onOpen: () =>
 function TenantCard({ summary: r, onOpen, areaUnit }: { summary: TenantSummary; onOpen: () => void; areaUnit: 'sqft' | 'sqm' }) {
   const configPct = Math.round(r.tenant.configScore * 100);
   return (
-    <button onClick={onOpen} className="edge-light group flex flex-col gap-3 rounded-2xl border border-border bg-surface p-4 text-left transition-all hover:border-border-strong hover:shadow-[var(--shadow-md)] hover:-translate-y-px">
+    <button onClick={onOpen} className="edge-light group flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 text-left transition-all hover:border-ring/40 hover:shadow-md hover:-translate-y-px">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <TenantMark name={r.tenant.name} hue={r.tenant.brandHue} size={40} />
           <div className="min-w-0">
             <p className="truncate text-[14px] font-semibold text-foreground">{r.tenant.name}</p>
-            <p className="truncate text-[12px] text-subtle">{r.buildingName}</p>
+            <p className="truncate text-[12px] text-muted-foreground/75">{r.buildingName}</p>
           </div>
         </div>
         <TenantStatusBadge status={r.tenant.status} size="sm" />
       </div>
 
       {r.tenant.status === 'active' ? (
-        <div className="grid grid-cols-3 gap-2 rounded-xl border border-border-subtle bg-surface-inset/50 p-2.5">
+        <div className="grid grid-cols-3 gap-2 rounded-xl border border-border bg-muted/50 p-2.5">
           <MiniFact label="Offices" value={String(r.officeCount)} />
           <MiniFact label="Load" value={`${num(r.currentLoadKw)} kW`} />
           <MiniFact label="Open" value={String(r.openRequests)} />
         </div>
       ) : (
-        <div className="rounded-xl border border-border-subtle bg-surface-inset/50 p-2.5">
+        <div className="rounded-xl border border-border bg-muted/50 p-2.5">
           <div className="flex items-center justify-between text-[11px]">
-            <span className="text-subtle">Configuration</span>
+            <span className="text-muted-foreground/75">Configuration</span>
             <span className="tnum font-medium text-foreground">{configPct}%</span>
           </div>
           <ProgressBar value={configPct} tone={configPct === 100 ? 'success' : 'warning'} className="mt-1.5" height={5} />
         </div>
       )}
 
-      <div className="flex items-center justify-between text-[12px] text-subtle">
+      <div className="flex items-center justify-between text-[12px] text-muted-foreground/75">
         <span>{area(r.totalAreaSqft, areaUnit)}</span>
         <AlertLevelBadge level={energyLevel(r)} size="sm" />
       </div>
@@ -246,7 +246,7 @@ function MiniFact({ label, value }: { label: string; value: string }) {
   return (
     <div className="text-center">
       <p className="tnum text-[14px] font-semibold text-foreground">{value}</p>
-      <p className="text-[11px] uppercase tracking-[0.08em] text-subtle">{label}</p>
+      <p className="text-[11px] uppercase tracking-[0.08em] text-muted-foreground/75">{label}</p>
     </div>
   );
 }

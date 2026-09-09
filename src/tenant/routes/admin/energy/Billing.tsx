@@ -6,11 +6,11 @@
 
 import { Wallet } from 'lucide-react';
 import { useState } from 'react';
-import { Page, StatGrid, Toolbar } from '../../../components/ui/page';
-import { Card } from '../../../components/ui/card';
+import { Page, StatGrid, Toolbar } from '../../../components/app/page';
+import { Card } from '../../../components/app/card';
 import { PageHeader, StatCard } from '../../../components/common';
-import { SearchInput, SimpleSelect } from '../../../components/ui/form';
-import { DataTable, type Column } from '../../../components/ui/data';
+import { SearchInput, SimpleSelect } from '../../../components/app/form';
+import { DataTable, type Column } from '../../../components/app/data';
 import { PaymentBadge } from '../../../components/status';
 import { InvoiceDialog } from '../../energyShared';
 import { useLive } from '../../../data/live';
@@ -40,7 +40,7 @@ export default function Billing() {
     { key: 'period', header: 'Period', cell: (i) => i.periodLabel, hideBelow: 'md' },
     { key: 'kwh', header: 'kWh', align: 'right', cell: (i) => <span className="tnum">{num(i.totalKwh)}</span>, sortValue: (i) => i.totalKwh, hideBelow: 'lg' },
     { key: 'total', header: 'Amount', align: 'right', cell: (i) => <span className="tnum font-medium text-foreground">{currency(i.total)}</span>, sortValue: (i) => i.total },
-    { key: 'due', header: 'Due', cell: (i) => <span className="tnum text-muted">{fmtDateFull(i.dueDate)}</span>, hideBelow: 'xl' },
+    { key: 'due', header: 'Due', cell: (i) => <span className="tnum text-muted-foreground">{fmtDateFull(i.dueDate)}</span>, hideBelow: 'xl' },
     { key: 'status', header: 'Status', cell: (i) => <PaymentBadge status={i.paymentStatus} size="sm" /> },
   ];
 
@@ -56,7 +56,7 @@ export default function Billing() {
       </StatGrid>
 
       <Card>
-        <div className="border-b border-border-subtle p-4">
+        <div className="border-b border-border p-4">
           <Toolbar>
             <SearchInput value={search} onChange={setSearch} placeholder="Search by tenant or invoice…" className="w-full sm:w-[300px]" />
             <SimpleSelect value={status} onChange={setStatus} options={[{ value: 'all', label: 'All statuses' }, { value: 'paid', label: 'Paid' }, { value: 'due', label: 'Due' }, { value: 'overdue', label: 'Overdue' }]} className="w-[170px]" />

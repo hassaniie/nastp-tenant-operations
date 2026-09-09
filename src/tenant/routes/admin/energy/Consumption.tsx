@@ -5,12 +5,12 @@
 
 import { BarChart3, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Page } from '../../../components/ui/page';
-import { Card, CardBody, CardHeader } from '../../../components/ui/card';
+import { Page } from '../../../components/app/page';
+import { Card, CardBody, CardHeader } from '../../../components/app/card';
 import { PageHeader } from '../../../components/common';
-import { IconBox } from '../../../components/ui/primitives';
+import { IconBox } from '../../../components/app/primitives';
 import { BarSeriesChart, MultiLineChart } from '../../../components/charts';
-import { DataTable, type Column } from '../../../components/ui/data';
+import { DataTable, type Column } from '../../../components/app/data';
 import { AlertLevelBadge } from '../../../components/status';
 import { useLive } from '../../../data/live';
 import { alertLevelForTenant, tenantSummary } from '../../../data/selectors';

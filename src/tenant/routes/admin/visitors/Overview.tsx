@@ -6,10 +6,10 @@
 import { AlarmClock, CalendarClock, DoorClosed, DoorOpen } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Page, StatGrid, ContentGrid } from '../../../components/ui/page';
-import { Card, CardBody, CardHeader } from '../../../components/ui/card';
+import { Page, StatGrid, ContentGrid } from '../../../components/app/page';
+import { Card, CardBody, CardHeader } from '../../../components/app/card';
 import { PageHeader, StatCard } from '../../../components/common';
-import { Button, IconBox } from '../../../components/ui/primitives';
+import { Button, IconBox } from '../../../components/app/primitives';
 import { VisitorStatusBadge } from '../../../components/status';
 import { VisitorDrawer } from '../../visitorsShared';
 import { useLive } from '../../../data/live';
@@ -57,13 +57,13 @@ function QuickList({ title, icon, tone, visitors, nameFor, onOpen, onAll, empty 
       <CardHeader title={title} subtitle={`${visitors.length}`} icon={<IconBox icon={icon} tone={tone} size="sm" />} actions={<Button variant="ghost" size="xs" onClick={onAll}>All</Button>} />
       <CardBody className="flex flex-col gap-1.5">
         {visitors.length === 0 ? (
-          <p className="py-6 text-center text-[12px] text-subtle">{empty}</p>
+          <p className="py-6 text-center text-[12px] text-muted-foreground/75">{empty}</p>
         ) : (
           visitors.slice(0, 6).map((v) => (
-            <button key={v.id} onClick={() => onOpen(v)} className="flex items-center justify-between gap-3 rounded-lg px-2 py-2 text-left transition-colors hover:bg-surface-raised">
+            <button key={v.id} onClick={() => onOpen(v)} className="flex items-center justify-between gap-3 rounded-lg px-2 py-2 text-left transition-colors hover:bg-accent">
               <div className="min-w-0">
                 <p className="truncate text-[13px] font-medium text-foreground">{v.fullName}</p>
-                <p className="truncate text-[11px] text-subtle">{nameFor(v.tenantId)} · {fmtTime(v.expectedArrival)}</p>
+                <p className="truncate text-[11px] text-muted-foreground/75">{nameFor(v.tenantId)} · {fmtTime(v.expectedArrival)}</p>
               </div>
               <VisitorStatusBadge status={v.status} size="sm" />
             </button>

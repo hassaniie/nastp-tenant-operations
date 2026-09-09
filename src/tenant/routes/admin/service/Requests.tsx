@@ -7,11 +7,11 @@
 import { Wrench } from 'lucide-react';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Page, StatGrid, Toolbar } from '../../../components/ui/page';
-import { Card } from '../../../components/ui/card';
+import { Page, StatGrid, Toolbar } from '../../../components/app/page';
+import { Card } from '../../../components/app/card';
 import { PageHeader, StatCard } from '../../../components/common';
-import { SearchInput, SimpleSelect } from '../../../components/ui/form';
-import { DataTable, type Column } from '../../../components/ui/data';
+import { SearchInput, SimpleSelect } from '../../../components/app/form';
+import { DataTable, type Column } from '../../../components/app/data';
 import { PriorityBadge, ServiceStatusBadge, CATEGORY_ICON } from '../../../components/status';
 import { ServiceRequestDrawer } from '../../serviceShared';
 import { SERVICE_CATEGORY_LABEL, departmentById } from '../../../data/catalog';
@@ -69,8 +69,8 @@ export default function Requests() {
   const avgResolution = resolvedTimes.length ? resolvedTimes.reduce((s, x) => s + x, 0) / resolvedTimes.length : 0;
 
   const columns: Column<(typeof data.requests)[number]>[] = [
-    { key: 'ref', header: 'Ref', cell: (r) => <span className="tnum text-subtle">{r.reference}</span>, sortValue: (r) => r.reference, hideBelow: 'md' },
-    { key: 'title', header: 'Request', cell: (r) => { const Icon = CATEGORY_ICON[r.category]; return <div className="flex items-center gap-2.5"><Icon className="h-4 w-4 shrink-0 text-service" /><div className="min-w-0"><p className="truncate font-medium text-foreground">{r.title}</p><p className="truncate text-[11px] text-subtle">{r.tenantName}</p></div></div>; }, sortValue: (r) => r.title },
+    { key: 'ref', header: 'Ref', cell: (r) => <span className="tnum text-muted-foreground/75">{r.reference}</span>, sortValue: (r) => r.reference, hideBelow: 'md' },
+    { key: 'title', header: 'Request', cell: (r) => { const Icon = CATEGORY_ICON[r.category]; return <div className="flex items-center gap-2.5"><Icon className="h-4 w-4 shrink-0 text-module-service" /><div className="min-w-0"><p className="truncate font-medium text-foreground">{r.title}</p><p className="truncate text-[11px] text-muted-foreground/75">{r.tenantName}</p></div></div>; }, sortValue: (r) => r.title },
     { key: 'priority', header: 'Priority', cell: (r) => <PriorityBadge priority={r.priority} size="sm" />, sortValue: (r) => ({ critical: 0, high: 1, medium: 2, low: 3 } as Record<ServicePriority, number>)[r.priority], hideBelow: 'sm' },
     { key: 'status', header: 'Status', cell: (r) => <ServiceStatusBadge status={r.status} size="sm" /> },
     {
@@ -79,20 +79,20 @@ export default function Requests() {
       cell: (r) => r.technicianName ? (
         <div className="min-w-0">
           <p className="truncate text-foreground">{r.technicianName}</p>
-          <p className="truncate text-[11px] text-subtle">{r.departmentName}</p>
+          <p className="truncate text-[11px] text-muted-foreground/75">{r.departmentName}</p>
         </div>
       ) : r.status === 'acknowledged' ? (
         <span className="inline-flex items-center gap-1.5 text-[12px] text-warning">
           <span className="h-1.5 w-1.5 rounded-full bg-warning" />Unassigned
         </span>
       ) : (
-        <span className="text-subtle">—</span>
+        <span className="text-muted-foreground/75">—</span>
       ),
       sortValue: (r) => r.technicianName ?? '',
       hideBelow: 'lg',
     },
-    { key: 'due', header: 'Due', cell: (r) => r.dueAt && r.dueAt < NOW && isOpen(r.status) ? <span className="text-critical">Overdue</span> : <span className="tnum text-subtle">{r.dueAt ? ago(r.dueAt) : '—'}</span>, hideBelow: 'lg' },
-    { key: 'updated', header: 'Updated', cell: (r) => <span className="tnum text-subtle">{ago(r.updatedAt)}</span>, sortValue: (r) => r.updatedAt, hideBelow: 'xl' },
+    { key: 'due', header: 'Due', cell: (r) => r.dueAt && r.dueAt < NOW && isOpen(r.status) ? <span className="text-destructive">Overdue</span> : <span className="tnum text-muted-foreground/75">{r.dueAt ? ago(r.dueAt) : '—'}</span>, hideBelow: 'lg' },
+    { key: 'updated', header: 'Updated', cell: (r) => <span className="tnum text-muted-foreground/75">{ago(r.updatedAt)}</span>, sortValue: (r) => r.updatedAt, hideBelow: 'xl' },
   ];
 
   return (
@@ -108,7 +108,7 @@ export default function Requests() {
       </StatGrid>
 
       <Card>
-        <div className="border-b border-border-subtle p-4">
+        <div className="border-b border-border p-4">
           <Toolbar>
             <SearchInput value={search} onChange={setSearch} placeholder="Search requests…" className="w-full sm:w-[240px]" />
             <SimpleSelect value={status} onChange={setStatus} options={STATUS_OPTS} className="w-[170px]" />

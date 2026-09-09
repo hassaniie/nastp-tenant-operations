@@ -15,8 +15,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Clock } from 'lucide-react';
-import { Button, IconBox } from '../components/ui/primitives';
-import { Dialog, DialogContent, DialogHeader, DialogBody, DialogFooter } from '../components/ui/overlay';
+import { Button, IconBox } from '../components/app/primitives';
+import { Dialog, DialogContent, DialogHeader, DialogBody, DialogFooter } from '../components/app/overlay';
 import { useAuth } from '../store/auth';
 import { doorFor } from '../data/auth';
 
@@ -83,14 +83,14 @@ export function IdleMonitor() {
 
   return (
     <Dialog open={warn} onOpenChange={(open) => !open && extend()}>
-      <DialogContent size="sm">
+      <DialogContent>
         <DialogHeader
           title="Still there?"
           description="You’ve been idle for a while. For your security this session will end soon."
           icon={<IconBox icon={Clock} tone="warning" size="sm" />}
         />
         <DialogBody>
-          <p className="text-[13px] text-muted">
+          <p className="text-[13px] text-muted-foreground">
             Signing out in <span className="tnum font-medium text-foreground">{Math.max(0, Math.ceil(remainingMs / 1000))}s</span>.
             Anything unsaved on this page is kept as a draft where the page supports it.
           </p>

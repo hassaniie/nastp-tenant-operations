@@ -12,13 +12,13 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Page, ContentGrid, SplitGrid } from '../../components/ui/page';
-import { Card, CardBody, CardHeader } from '../../components/ui/card';
+import { Page, ContentGrid, SplitGrid } from '../../components/app/page';
+import { Card, CardBody, CardHeader } from '../../components/app/card';
 import { Breadcrumb, KeyValue, MetricValue, Timeline } from '../../components/common';
-import { Button, IconBox, ProgressBar, Separator, StatusBadge, TenantMark } from '../../components/ui/primitives';
-import { TabBar } from '../../components/ui/tabs';
-import { DataTable, DefList, LoadingState, ErrorState, type Column } from '../../components/ui/data';
-import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger, Dialog, DialogContent, DialogHeader, DialogBody } from '../../components/ui/overlay';
+import { Button, IconBox, ProgressBar, Separator, StatusBadge, TenantMark } from '../../components/app/primitives';
+import { TabBar } from '../../components/app/tabs';
+import { DataTable, DefList, LoadingState, ErrorState, type Column } from '../../components/app/data';
+import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger, Dialog, DialogContent, DialogHeader, DialogBody } from '../../components/app/overlay';
 import { TrendChart } from '../../components/charts';
 import {
   TenantStatusBadge, MeterStatusBadge, PriorityBadge, ServiceStatusBadge, VisitorStatusBadge, AlertLevelBadge,
@@ -93,8 +93,8 @@ export default function TenantDetail() {
                 <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-foreground">{t.name}</h1>
                 <TenantStatusBadge status={t.status} />
               </div>
-              <p className="mt-0.5 text-[13px] text-muted">{t.legalName} · {ORG_TYPE_LABEL[t.organizationType]}</p>
-              <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-subtle">
+              <p className="mt-0.5 text-[13px] text-muted-foreground">{t.legalName} · {ORG_TYPE_LABEL[t.organizationType]}</p>
+              <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-muted-foreground/75">
                 <span className="inline-flex items-center gap-1.5"><Building2 className="h-3.5 w-3.5" />{s.buildingName} · {s.floorNames.join(', ')}</span>
                 <span className="inline-flex items-center gap-1.5"><UserRound className="h-3.5 w-3.5" />{t.primaryContact.name}</span>
               </div>
@@ -130,7 +130,7 @@ export default function TenantDetail() {
       {tab === 'configuration' && <Configuration tenant={t} meters={meters.data ?? []} />}
       {tab === 'activity' && (
         <Card><CardHeader title="Activity" subtitle="Unified chronological timeline" /><CardBody>
-          {(activity.data ?? []).length === 0 ? <p className="py-6 text-center text-[13px] text-subtle">No activity recorded.</p> : (
+          {(activity.data ?? []).length === 0 ? <p className="py-6 text-center text-[13px] text-muted-foreground/75">No activity recorded.</p> : (
             <Timeline items={(activity.data ?? []).map((a) => ({ id: a.id, icon: ACTIVITY_ICON[a.kind], tone: a.domain === 'energy' ? 'energy' : a.domain === 'visitor' ? 'visitor' : a.domain === 'service' ? 'service' : 'primary', title: a.title, detail: `${a.detail} · ${a.actor}`, meta: ago(a.ts) }))} />
           )}
         </CardBody></Card>
@@ -193,9 +193,9 @@ function Overview({ summary: s, areaUnit, readings, activity, openReqs, activeVi
           <Card>
             <CardHeader title="Open service requests" subtitle={`${openReqs.length} open`} icon={<IconBox icon={Wrench} tone="service" size="sm" />} />
             <CardBody className="flex flex-col gap-2">
-              {openReqs.length === 0 ? <p className="py-4 text-center text-[12px] text-subtle">No open requests.</p> : openReqs.slice(0, 5).map((r) => (
+              {openReqs.length === 0 ? <p className="py-4 text-center text-[12px] text-muted-foreground/75">No open requests.</p> : openReqs.slice(0, 5).map((r) => (
                 <div key={r.id} className="flex items-center justify-between gap-2">
-                  <span className="min-w-0 truncate text-[13px] text-muted">{r.title}</span>
+                  <span className="min-w-0 truncate text-[13px] text-muted-foreground">{r.title}</span>
                   <PriorityBadge priority={r.priority} size="sm" />
                 </div>
               ))}
@@ -204,9 +204,9 @@ function Overview({ summary: s, areaUnit, readings, activity, openReqs, activeVi
           <Card>
             <CardHeader title="Visitors inside" subtitle={`${activeVisitors.length} present`} icon={<IconBox icon={UserRound} tone="visitor" size="sm" />} />
             <CardBody className="flex flex-col gap-2">
-              {activeVisitors.length === 0 ? <p className="py-4 text-center text-[12px] text-subtle">No visitors inside.</p> : activeVisitors.slice(0, 5).map((v) => (
+              {activeVisitors.length === 0 ? <p className="py-4 text-center text-[12px] text-muted-foreground/75">No visitors inside.</p> : activeVisitors.slice(0, 5).map((v) => (
                 <div key={v.id} className="flex items-center justify-between gap-2">
-                  <span className="min-w-0 truncate text-[13px] text-muted">{v.fullName}</span>
+                  <span className="min-w-0 truncate text-[13px] text-muted-foreground">{v.fullName}</span>
                   <VisitorStatusBadge status={v.status} size="sm" />
                 </div>
               ))}
@@ -243,7 +243,7 @@ function Overview({ summary: s, areaUnit, readings, activity, openReqs, activeVi
 function Stat({ label, value, unit }: { label: string; value: string; unit?: string }) {
   return (
     <div>
-      <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-subtle">{label}</p>
+      <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground/75">{label}</p>
       <div className="mt-1.5"><MetricValue value={value} unit={unit} size="md" /></div>
     </div>
   );
@@ -258,7 +258,7 @@ function Spaces({ offices, meters, loading, areaUnit, totalArea }: { offices: Of
     { key: 'label', header: 'Label', cell: (o) => o.label, hideBelow: 'sm' },
     { key: 'area', header: 'Area', align: 'right', cell: (o) => <span className="tnum">{area(o.areaSqft, areaUnit)}</span>, sortValue: (o) => o.areaSqft },
     { key: 'status', header: 'Status', cell: (o) => <StatusBadge tone={o.status === 'occupied' ? 'success' : 'neutral'} size="sm">{o.status}</StatusBadge> },
-    { key: 'meter', header: 'Sub-meter', cell: (o) => { const m = meterFor(o.meterId); return m ? <span className="tnum text-muted">{m.serial}</span> : <span className="text-subtle">Not wired</span>; } },
+    { key: 'meter', header: 'Sub-meter', cell: (o) => { const m = meterFor(o.meterId); return m ? <span className="tnum text-muted-foreground">{m.serial}</span> : <span className="text-muted-foreground/75">Not wired</span>; } },
   ];
   return (
     <div className="flex flex-col gap-4">
@@ -286,7 +286,7 @@ function Energy({ meters, readings, loading, summary: s, tenantId }: { meters: M
   return (
     <div className="flex flex-col gap-4">
       <Card>
-        <CardHeader title="Consumption" subtitle="Daily, last 30 days" icon={<IconBox icon={Zap} tone="energy" size="sm" />} actions={<span className="tnum text-[12px] text-muted">{currency(s.periodCharges, { compact: true })} this period</span>} />
+        <CardHeader title="Consumption" subtitle="Daily, last 30 days" icon={<IconBox icon={Zap} tone="energy" size="sm" />} actions={<span className="tnum text-[12px] text-muted-foreground">{currency(s.periodCharges, { compact: true })} this period</span>} />
         <CardBody><TrendChart data={readings} series={[{ key: 'kwh', label: 'kWh' }, { key: 'peakKwh', label: 'Peak kWh' }]} height={200} unit="kWh" valueFormatter={(v) => `${num(v)} kWh`} /></CardBody>
       </Card>
       <Card>
@@ -301,7 +301,7 @@ function Energy({ meters, readings, loading, summary: s, tenantId }: { meters: M
 
 function Visitors({ visitors, loading }: { visitors: Visitor[]; loading: boolean }) {
   const columns: Column<Visitor>[] = [
-    { key: 'name', header: 'Visitor', cell: (v) => <div><p className="font-medium text-foreground">{v.fullName}</p><p className="text-[11px] text-subtle">{v.company}</p></div>, sortValue: (v) => v.fullName },
+    { key: 'name', header: 'Visitor', cell: (v) => <div><p className="font-medium text-foreground">{v.fullName}</p><p className="text-[11px] text-muted-foreground/75">{v.company}</p></div>, sortValue: (v) => v.fullName },
     { key: 'purpose', header: 'Purpose', cell: (v) => v.purpose, hideBelow: 'md' },
     { key: 'arrival', header: 'Expected', cell: (v) => <span className="tnum">{fmtDate(v.visitDate)} · {fmtTime(v.expectedArrival)}</span>, sortValue: (v) => v.expectedArrival, hideBelow: 'sm' },
     { key: 'status', header: 'Status', cell: (v) => <VisitorStatusBadge status={v.status} size="sm" /> },
@@ -318,11 +318,11 @@ function Visitors({ visitors, loading }: { visitors: Visitor[]; loading: boolean
 
 function ServiceTab({ requests, loading }: { requests: ServiceRequest[]; loading: boolean }) {
   const columns: Column<ServiceRequest>[] = [
-    { key: 'ref', header: 'Ref', cell: (r) => <span className="tnum text-subtle">{r.reference}</span>, sortValue: (r) => r.reference, hideBelow: 'sm' },
+    { key: 'ref', header: 'Ref', cell: (r) => <span className="tnum text-muted-foreground/75">{r.reference}</span>, sortValue: (r) => r.reference, hideBelow: 'sm' },
     { key: 'title', header: 'Title', cell: (r) => <span className="font-medium text-foreground">{r.title}</span>, sortValue: (r) => r.title },
     { key: 'priority', header: 'Priority', cell: (r) => <PriorityBadge priority={r.priority} size="sm" />, hideBelow: 'md' },
     { key: 'status', header: 'Status', cell: (r) => <ServiceStatusBadge status={r.status} size="sm" /> },
-    { key: 'updated', header: 'Updated', cell: (r) => <span className="tnum text-subtle">{ago(r.updatedAt)}</span>, sortValue: (r) => r.updatedAt, hideBelow: 'lg' },
+    { key: 'updated', header: 'Updated', cell: (r) => <span className="tnum text-muted-foreground/75">{ago(r.updatedAt)}</span>, sortValue: (r) => r.updatedAt, hideBelow: 'lg' },
   ];
   return (
     <Card>
@@ -356,10 +356,10 @@ function Users({ users, loading }: { users: TenantUser[]; loading: boolean }) {
   };
 
   const columns: Column<TenantUser>[] = [
-    { key: 'name', header: 'User', cell: (u) => <div><p className="font-medium text-foreground">{u.name}</p><p className="text-[11px] text-subtle">{u.email}</p></div>, sortValue: (u) => u.name },
+    { key: 'name', header: 'User', cell: (u) => <div><p className="font-medium text-foreground">{u.name}</p><p className="text-[11px] text-muted-foreground/75">{u.email}</p></div>, sortValue: (u) => u.name },
     { key: 'role', header: 'Role', cell: (u) => <StatusBadge tone={u.role === 'primary' ? 'primary' : 'neutral'} size="sm" dot={false}>{USER_ROLE[u.role]}</StatusBadge>, sortValue: (u) => u.role },
     { key: 'status', header: 'Status', cell: (u) => <StatusBadge tone={u.status === 'active' ? 'success' : u.status === 'invited' ? 'info' : 'neutral'} size="sm">{u.status}</StatusBadge> },
-    { key: 'last', header: 'Last active', cell: (u) => <span className="text-subtle">{u.lastActiveAt ? ago(u.lastActiveAt) : '—'}</span>, hideBelow: 'md' },
+    { key: 'last', header: 'Last active', cell: (u) => <span className="text-muted-foreground/75">{u.lastActiveAt ? ago(u.lastActiveAt) : '—'}</span>, hideBelow: 'md' },
     {
       key: 'invite',
       header: '',
@@ -385,12 +385,12 @@ function Users({ users, loading }: { users: TenantUser[]; loading: boolean }) {
             icon={<IconBox icon={LinkIcon} tone="primary" size="sm" />}
           />
           <DialogBody className="flex flex-col gap-3">
-            <p className="text-[12px] text-muted">
+            <p className="text-[12px] text-muted-foreground">
               There is no mail server in this build, so the link is generated here instead of sent.
               Share it with the tenant to let them set a password and activate the account.
             </p>
-            <div className="flex items-center gap-2 rounded-lg border border-border bg-surface-inset px-3 py-2">
-              <code className="flex-1 truncate text-[11.5px] text-muted">{linkFor?.url}</code>
+            <div className="flex items-center gap-2 rounded-lg border border-border bg-muted px-3 py-2">
+              <code className="flex-1 truncate text-[11.5px] text-muted-foreground">{linkFor?.url}</code>
               <Button variant="secondary" size="xs" onClick={() => linkFor && copy(linkFor.url)}>Copy</Button>
             </div>
           </DialogBody>
@@ -430,7 +430,7 @@ function Configuration({ tenant, meters }: { tenant: import('../../data/types').
           <KeyValue label={<span className="inline-flex items-center gap-1"><Phone className="h-3 w-3" />Phone</span>} value={c.phone} mono />
           <Separator className="my-2" />
           <div>
-            <div className="flex items-center justify-between text-[12px]"><span className="text-subtle">Configuration completeness</span><span className="tnum font-medium text-foreground">{pct}%</span></div>
+            <div className="flex items-center justify-between text-[12px]"><span className="text-muted-foreground/75">Configuration completeness</span><span className="tnum font-medium text-foreground">{pct}%</span></div>
             <ProgressBar value={pct} tone={pct === 100 ? 'success' : 'warning'} className="mt-1.5" />
           </div>
         </CardBody>

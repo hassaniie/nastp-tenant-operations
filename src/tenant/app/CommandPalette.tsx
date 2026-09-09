@@ -13,8 +13,8 @@ import { useNavigate } from 'react-router-dom';
 import { simulation } from '../data/live';
 import { useSession } from '../store/session';
 import { ADMIN_NAV } from './nav';
-import { Dialog, DialogContent } from '../components/ui/overlay';
-import { Kbd, TenantMark } from '../components/ui/primitives';
+import { Dialog, DialogContent } from '../components/app/overlay';
+import { Kbd, TenantMark } from '../components/app/primitives';
 import { TenantStatusBadge, ServiceStatusBadge, VisitorStatusBadge } from '../components/status';
 
 export function CommandPalette() {
@@ -43,21 +43,21 @@ export function CommandPalette() {
 
   return (
     <Dialog open={paletteOpen} onOpenChange={setPaletteOpen}>
-      <DialogContent size="lg" className="top-[18%] max-w-2xl translate-y-0 p-0">
+      <DialogContent className="top-[18%] max-w-2xl translate-y-0 p-0">
         <Command shouldFilter={false} className="cmd-group">
           <div className="flex items-center gap-2.5 border-b border-border px-4">
-            <Search className="h-4 w-4 shrink-0 text-subtle" />
+            <Search className="h-4 w-4 shrink-0 text-muted-foreground/75" />
             <Command.Input
               value={query}
               onValueChange={setQuery}
               autoFocus
               placeholder="Search tenants, requests, visitors, meters…"
-              className="h-12 w-full bg-transparent text-[14px] text-foreground outline-none placeholder:text-subtle"
+              className="h-12 w-full bg-transparent text-[14px] text-foreground outline-none placeholder:text-muted-foreground/75"
             />
             <Kbd>Esc</Kbd>
           </div>
           <Command.List className="max-h-[420px] overflow-y-auto p-2">
-            <Command.Empty className="px-3 py-8 text-center text-[13px] text-subtle">
+            <Command.Empty className="px-3 py-8 text-center text-[13px] text-muted-foreground/75">
               {query ? 'No matches found.' : 'Start typing to search the ecosystem.'}
             </Command.Empty>
 
@@ -77,8 +77,8 @@ export function CommandPalette() {
               <Command.Group heading="Service Requests">
                 {results.requests.map((r) => (
                   <Command.Item key={r.id} value={`req-${r.id}`} onSelect={() => go(`/admin/service?open=${r.id}`)} className="cmd-item">
-                    <Wrench className="h-4 w-4 text-service" />
-                    <span className="tnum shrink-0 text-subtle">{r.reference}</span>
+                    <Wrench className="h-4 w-4 text-module-service" />
+                    <span className="tnum shrink-0 text-muted-foreground/75">{r.reference}</span>
                     <span className="flex-1 truncate text-foreground">{r.title}</span>
                     <ServiceStatusBadge status={r.status} size="sm" />
                   </Command.Item>
@@ -90,7 +90,7 @@ export function CommandPalette() {
               <Command.Group heading="Visitors">
                 {results.visitors.map((v) => (
                   <Command.Item key={v.id} value={`vis-${v.id}`} onSelect={() => go(`/admin/visitors/history?open=${v.id}`)} className="cmd-item">
-                    <UserRound className="h-4 w-4 text-visitor" />
+                    <UserRound className="h-4 w-4 text-module-visitor" />
                     <span className="flex-1 truncate text-foreground">{v.fullName}</span>
                     <VisitorStatusBadge status={v.status} size="sm" />
                   </Command.Item>
@@ -102,8 +102,8 @@ export function CommandPalette() {
               <Command.Group heading="Meters">
                 {results.meters.map((m) => (
                   <Command.Item key={m.id} value={`mtr-${m.id}`} onSelect={() => go(`/admin/energy/meters?open=${m.id}`)} className="cmd-item">
-                    <Gauge className="h-4 w-4 text-energy" />
-                    <span className="tnum shrink-0 text-subtle">{m.serial}</span>
+                    <Gauge className="h-4 w-4 text-module-energy" />
+                    <span className="tnum shrink-0 text-muted-foreground/75">{m.serial}</span>
                     <span className="flex-1 truncate text-foreground">{m.name}</span>
                   </Command.Item>
                 ))}
@@ -114,9 +114,9 @@ export function CommandPalette() {
               <Command.Group heading="Go to">
                 {navItems.slice(0, 8).map((n) => (
                   <Command.Item key={n.id} value={`nav-${n.id}`} onSelect={() => go(n.path)} className="cmd-item">
-                    <n.icon className="h-4 w-4 text-subtle" />
+                    <n.icon className="h-4 w-4 text-muted-foreground/75" />
                     <span className="flex-1 text-foreground">{n.label}</span>
-                    <CornerDownLeft className="h-3.5 w-3.5 text-subtle" />
+                    <CornerDownLeft className="h-3.5 w-3.5 text-muted-foreground/75" />
                   </Command.Item>
                 ))}
               </Command.Group>

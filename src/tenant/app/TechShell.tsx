@@ -8,9 +8,9 @@
 
 import { Outlet } from 'react-router-dom';
 import { Moon, Sun, Wrench } from 'lucide-react';
-import { Button, IconBox } from '../components/ui/primitives';
-import { Tooltip, TooltipProvider } from '../components/ui/overlay';
-import { Toaster } from '../components/ui/toast';
+import { Button, IconBox } from '../components/app/primitives';
+import { Tooltip, TooltipProvider } from '../components/app/overlay';
+import { Toaster } from '../components/app/toast';
 import { useSession } from '../store/session';
 import { UserMenu } from './UserMenu';
 import { IdleMonitor } from './IdleMonitor';
@@ -20,13 +20,13 @@ export function TechShell() {
 
   return (
     <TooltipProvider>
-      <div className="flex h-screen w-full flex-col bg-canvas text-foreground">
+      <div className="flex h-screen w-full flex-col bg-background text-foreground">
         <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background px-4 lg:px-6">
           <div className="flex items-center gap-2.5">
             <IconBox icon={Wrench} tone="service" size="sm" />
             <div className="leading-tight">
               <p className="text-[13px] font-semibold text-foreground">NASTP Service</p>
-              <p className="text-[11px] text-subtle">Technician workspace</p>
+              <p className="text-[11px] text-muted-foreground/75">Technician workspace</p>
             </div>
           </div>
 

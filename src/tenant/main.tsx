@@ -10,7 +10,7 @@ import { homeFor } from './data/auth';
 import { AdminLogin, PortalLogin, TechLogin } from './routes/auth/Login';
 import AcceptInvite from './routes/auth/AcceptInvite';
 import { RequestReset, CompleteReset } from './routes/auth/ResetPassword';
-import { LoadingState } from './components/ui/data';
+import { LoadingState } from './components/app/data';
 import { AdminVisitorList } from './routes/admin/visitors/List';
 import { PortalVisitorList } from './routes/portal/visitors/List';
 import { PortalServiceList } from './routes/portal/service/List';

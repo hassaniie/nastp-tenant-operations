@@ -8,10 +8,10 @@
 
 import { ArrowRight, CalendarPlus, DoorOpen, FilePlus2, Wrench, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Page, ContentGrid, SplitGrid } from '../../components/ui/page';
-import { Card, CardBody, CardHeader } from '../../components/ui/card';
+import { Page, ContentGrid, SplitGrid } from '../../components/app/page';
+import { Card, CardBody, CardHeader } from '../../components/app/card';
 import { StatCard, PageHeader, Timeline, MetricValue } from '../../components/common';
-import { Button, IconBox, StatusBadge } from '../../components/ui/primitives';
+import { Button, IconBox, StatusBadge } from '../../components/app/primitives';
 import { Sparkline } from '../../components/charts';
 import { useSession } from '../../store/session';
 import { useLive } from '../../data/live';
@@ -58,7 +58,7 @@ export default function PortalHome() {
             <SnapshotStat label="Active Alerts" value={num(snap.activeAlerts)} tone={snap.activeAlerts ? 'warning' : 'success'} />
             <div className="col-span-2 sm:col-span-4">
               <Sparkline data={spark} height={56} color="var(--module-energy)" />
-              <p className="mt-1 text-[11px] text-subtle">Daily consumption, last 14 days · {snap.activeMeters}/{snap.totalMeters} meters online</p>
+              <p className="mt-1 text-[11px] text-muted-foreground/75">Daily consumption, last 14 days · {snap.activeMeters}/{snap.totalMeters} meters online</p>
             </div>
           </CardBody>
         </Card>
@@ -72,19 +72,19 @@ export default function PortalHome() {
               <MiniStat label="Next" value={snap.nextVisitor ? fmtTime(snap.nextVisitor.expectedArrival) : '—'} tone="neutral" small />
             </div>
             {snap.nextVisitor ? (
-              <div className="rounded-xl border border-border-subtle bg-surface-inset/50 p-3">
-                <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-subtle">Next visitor</p>
+              <div className="rounded-xl border border-border bg-muted/50 p-3">
+                <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground/75">Next visitor</p>
                 <p className="mt-1 text-[13px] font-medium text-foreground">{snap.nextVisitor.fullName}</p>
-                <p className="text-[12px] text-muted">{snap.nextVisitor.company ?? snap.nextVisitor.purpose} · {fmtTime(snap.nextVisitor.expectedArrival)}</p>
+                <p className="text-[12px] text-muted-foreground">{snap.nextVisitor.company ?? snap.nextVisitor.purpose} · {fmtTime(snap.nextVisitor.expectedArrival)}</p>
               </div>
             ) : (
-              <p className="rounded-xl border border-border-subtle bg-surface-inset/50 p-3 text-[12px] text-subtle">No upcoming visitors scheduled.</p>
+              <p className="rounded-xl border border-border bg-muted/50 p-3 text-[12px] text-muted-foreground/75">No upcoming visitors scheduled.</p>
             )}
             {inside.length > 0 && (
               <div className="flex flex-col gap-1.5">
                 {inside.map((v) => (
                   <div key={v.id} className="flex items-center justify-between gap-2">
-                    <span className="truncate text-[12px] text-muted">{v.fullName}</span>
+                    <span className="truncate text-[12px] text-muted-foreground">{v.fullName}</span>
                     <VisitorStatusBadge status={v.status} size="sm" />
                   </div>
                 ))}
@@ -105,7 +105,7 @@ export default function PortalHome() {
         <CardHeader title="Recent Activity" subtitle="Your organization's timeline" />
         <CardBody>
           {activity.length === 0 ? (
-            <p className="py-6 text-center text-[12px] text-subtle">No recent activity.</p>
+            <p className="py-6 text-center text-[12px] text-muted-foreground/75">No recent activity.</p>
           ) : (
             <Timeline
               items={activity.map((a) => ({
@@ -127,7 +127,7 @@ export default function PortalHome() {
 function SnapshotStat({ label, value, unit, tone }: { label: string; value: string; unit?: string; tone?: 'success' | 'warning' }) {
   return (
     <div>
-      <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-subtle">{label}</p>
+      <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground/75">{label}</p>
       <div className="mt-1.5">
         <MetricValue value={value} unit={unit} size="lg" className={tone === 'warning' ? '[&>span:first-child]:text-warning' : ''} />
       </div>
@@ -137,9 +137,9 @@ function SnapshotStat({ label, value, unit, tone }: { label: string; value: stri
 
 function MiniStat({ label, value, tone, small }: { label: string; value: number | string; tone: 'info' | 'success' | 'neutral'; small?: boolean }) {
   return (
-    <div className="rounded-xl border border-border-subtle bg-surface-inset/50 p-2.5 text-center">
+    <div className="rounded-xl border border-border bg-muted/50 p-2.5 text-center">
       <p className={cn('tnum font-semibold text-foreground', small ? 'text-[15px]' : 'text-[22px]')}>{value}</p>
-      <p className="mt-0.5 text-[11px] uppercase tracking-[0.08em] text-subtle">{label}</p>
+      <p className="mt-0.5 text-[11px] uppercase tracking-[0.08em] text-muted-foreground/75">{label}</p>
       <StatusBadge tone={tone} size="sm" className="mt-1.5" dot={false}>{tone === 'info' ? 'today' : tone === 'success' ? 'now' : 'ETA'}</StatusBadge>
     </div>
   );

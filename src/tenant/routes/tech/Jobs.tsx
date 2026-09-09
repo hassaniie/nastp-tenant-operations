@@ -14,11 +14,11 @@
 
 import { useMemo, useState } from 'react';
 import { AlarmClock, CheckCircle2, Wrench } from 'lucide-react';
-import { Page, StatGrid } from '../../components/ui/page';
-import { Card, CardBody, CardHeader } from '../../components/ui/card';
+import { Page, StatGrid } from '../../components/app/page';
+import { Card, CardBody, CardHeader } from '../../components/app/card';
 import { StatCard, PageHeader } from '../../components/common';
-import { IconBox, StatusBadge } from '../../components/ui/primitives';
-import { EmptyState } from '../../components/ui/data';
+import { IconBox, StatusBadge } from '../../components/app/primitives';
+import { EmptyState } from '../../components/app/data';
 import { PriorityBadge, ServiceStatusBadge, CATEGORY_ICON } from '../../components/status';
 import { ServiceRequestDrawer } from '../serviceShared';
 import { useLive } from '../../data/live';
@@ -140,7 +140,7 @@ function JobRow({ request: r, tenantName, onOpen }: { request: ServiceRequest; t
     <button
       type="button"
       onClick={onOpen}
-      className="flex items-start gap-3 rounded-xl border border-border-subtle bg-surface-inset/50 p-3 text-left transition-colors hover:border-border-strong hover:bg-surface-inset"
+      className="flex items-start gap-3 rounded-xl border border-border bg-muted/50 p-3 text-left transition-colors hover:border-ring/40 hover:bg-muted"
     >
       <IconBox icon={Icon} tone="service" size="sm" />
       <div className="min-w-0 flex-1">
@@ -151,14 +151,14 @@ function JobRow({ request: r, tenantName, onOpen }: { request: ServiceRequest; t
             <ServiceStatusBadge status={r.status} size="sm" />
           </div>
         </div>
-        <p className="mt-0.5 truncate text-[12px] text-muted">
+        <p className="mt-0.5 truncate text-[12px] text-muted-foreground">
           {r.reference} · {SERVICE_CATEGORY_LABEL[r.category]} · {tenantName}
         </p>
-        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-subtle">
+        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground/75">
           <span>{r.location ?? 'Location not given'}</span>
           <span>Raised {ago(r.createdAt)}</span>
           {r.dueAt && (
-            <span className={isOverdue ? 'font-medium text-critical' : undefined}>
+            <span className={isOverdue ? 'font-medium text-destructive' : undefined}>
               {isOverdue ? 'Overdue since ' : 'Due '}
               {fmtDateTime(r.dueAt)}
             </span>

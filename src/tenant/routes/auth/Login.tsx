@@ -13,9 +13,9 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Building2, ShieldCheck, Wrench, type LucideIcon } from 'lucide-react';
-import { Button, IconBox } from '../../components/ui/primitives';
-import { Field, Input } from '../../components/ui/form';
-import { Card } from '../../components/ui/card';
+import { Button, IconBox } from '../../components/app/primitives';
+import { Field, Input } from '../../components/app/form';
+import { Card } from '../../components/app/card';
 import { useAuth } from '../../store/auth';
 import { DEMO_PASSWORD, SIGN_IN_MESSAGE, doorFor, lockoutRemainingMs } from '../../data/auth';
 import { technicianOpenLoad } from '../../data/catalog';
@@ -135,19 +135,19 @@ function LoginScreen({ door }: { door: Experience }) {
   }
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-canvas p-5">
+    <div className="flex min-h-screen w-full items-center justify-center bg-background p-5">
       <div className="flex w-full max-w-[420px] flex-col gap-5">
         <div className="flex flex-col items-center gap-3 text-center">
           <IconBox icon={config.icon} tone={config.tone} size="lg" />
           <div className="flex flex-col gap-1">
-            <p className="text-[11px] font-medium uppercase tracking-[0.13em] text-subtle">{config.eyebrow}</p>
+            <p className="text-[11px] font-medium uppercase tracking-[0.13em] text-muted-foreground/75">{config.eyebrow}</p>
             <h1 className="text-[24px] font-semibold tracking-[-0.02em] text-foreground">{config.title}</h1>
-            <p className="mx-auto max-w-[34ch] text-[13px] text-muted">{config.blurb}</p>
+            <p className="mx-auto max-w-[34ch] text-[13px] text-muted-foreground">{config.blurb}</p>
           </div>
         </div>
 
         {idleSignOut && (
-          <p className="rounded-[10px] border border-info/25 bg-info-dim px-3 py-2 text-center text-[12px] text-info">
+          <p className="rounded-[10px] border border-info/25 bg-muted px-3 py-2 text-center text-[12px] text-info">
             You were signed out after a period of inactivity. Sign in again to continue.
           </p>
         )}
@@ -187,7 +187,7 @@ function LoginScreen({ door }: { door: Experience }) {
             </Field>
 
             {error && (
-              <p role="alert" className="rounded-[10px] border border-critical/25 bg-critical-dim px-3 py-2 text-[12px] text-critical">
+              <p role="alert" className="rounded-[10px] border border-critical/25 bg-muted px-3 py-2 text-[12px] text-destructive">
                 {error}
               </p>
             )}
@@ -208,9 +208,9 @@ function LoginScreen({ door }: { door: Experience }) {
           <Card className="flex flex-col gap-2.5 p-4">
             <div className="flex flex-col gap-0.5">
               <p className="text-[12px] font-medium text-foreground">Seeded accounts</p>
-              <p className="text-[11px] text-subtle">
+              <p className="text-[11px] text-muted-foreground/75">
                 This build runs on simulated data with no mail server, so the accounts are listed
-                here. Password for all of them is <span className="font-mono text-muted">{DEMO_PASSWORD}</span>.
+                here. Password for all of them is <span className="font-mono text-muted-foreground">{DEMO_PASSWORD}</span>.
               </p>
             </div>
             <div className="flex flex-col gap-1">
@@ -225,23 +225,23 @@ function LoginScreen({ door }: { door: Experience }) {
                   }}
                   className={cn(
                     'flex items-center justify-between gap-3 rounded-lg px-2.5 py-1.5 text-left transition-colors',
-                    'hover:bg-surface-raised',
+                    'hover:bg-accent',
                   )}
                 >
-                  <span className="truncate font-mono text-[11.5px] text-muted">{a.email}</span>
-                  <span className="shrink-0 text-[11px] text-subtle">{a.label}</span>
+                  <span className="truncate font-mono text-[11.5px] text-muted-foreground">{a.email}</span>
+                  <span className="shrink-0 text-[11px] text-muted-foreground/75">{a.label}</span>
                 </button>
               ))}
             </div>
           </Card>
         )}
 
-        <p className="text-center text-[11px] text-subtle">
+        <p className="text-center text-[11px] text-muted-foreground/75">
           Not the right door?{' '}
           {config.otherDoors.map((other, i) => (
             <span key={other}>
               {i > 0 && ' · '}
-              <Link to={doorFor(other)} className="text-muted underline underline-offset-2 hover:text-foreground">
+              <Link to={doorFor(other)} className="text-muted-foreground underline underline-offset-2 hover:text-foreground">
                 {DOOR_LABEL[other]}
               </Link>
             </span>

@@ -8,8 +8,8 @@
 
 import { Link } from 'react-router-dom';
 import { Compass } from 'lucide-react';
-import { IconBox } from '../components/ui/primitives';
-import { Card } from '../components/ui/card';
+import { IconBox } from '../components/app/primitives';
+import { Card } from '../components/app/card';
 import { useAuth } from '../store/auth';
 import { doorFor, homeFor } from '../data/auth';
 import type { Experience } from '../data/types';
@@ -24,12 +24,12 @@ export default function NotFound() {
   const { session } = useAuth();
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-canvas p-5">
+    <div className="flex min-h-screen w-full items-center justify-center bg-background p-5">
       <div className="flex w-full max-w-[440px] flex-col items-center gap-5 text-center">
         <IconBox icon={Compass} tone="neutral" size="lg" />
         <div className="flex flex-col gap-1.5">
           <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-foreground">This page does not exist</h1>
-          <p className="text-[13px] text-muted">
+          <p className="text-[13px] text-muted-foreground">
             The link may be out of date, or the address mistyped.
           </p>
         </div>
@@ -38,7 +38,7 @@ export default function NotFound() {
           {session ? (
             <Link
               to={homeFor(session.experience)}
-              className="rounded-lg px-3 py-2.5 text-left text-[13px] font-medium text-foreground transition-colors hover:bg-surface-raised"
+              className="rounded-lg px-3 py-2.5 text-left text-[13px] font-medium text-foreground transition-colors hover:bg-accent"
             >
               Back to {LABEL[session.experience]}
             </Link>
@@ -47,7 +47,7 @@ export default function NotFound() {
               <Link
                 key={exp}
                 to={doorFor(exp)}
-                className="rounded-lg px-3 py-2.5 text-left text-[13px] font-medium text-foreground transition-colors hover:bg-surface-raised"
+                className="rounded-lg px-3 py-2.5 text-left text-[13px] font-medium text-foreground transition-colors hover:bg-accent"
               >
                 Sign in — {LABEL[exp]}
               </Link>
