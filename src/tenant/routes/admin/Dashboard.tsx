@@ -1,27 +1,30 @@
 /**
  * Admin — Ecosystem Operations Dashboard (§8).
  *
- * Not a generic KPI grid. Top: the global operational summary. Main-left:
- * energy intelligence. Main-right: an "Operational Attention" action center
- * that answers *what needs attention right now* — the highest-signal items
- * across energy, visitors and the service center, ranked by urgency. Lower:
- * live tenant operations. Reads the live world synchronously.
+ * Not a generic KPI grid. Top: the global operational summary, ranked — four
+ * primary figures over a dense strip of supporting totals. Main-left: energy
+ * intelligence, both charts in one panel because they answer one question.
+ * Main-right: an "Operational Attention" action center that answers *what
+ * needs attention right now* — the highest-signal items across energy,
+ * visitors and the service center, ranked by urgency. Lower: live tenant
+ * operations. Reads the live world synchronously.
  */
 
 import {
-  AlarmClock, ArrowRight, Bell, Building2, DoorOpen, Gauge, TriangleAlert, UserPlus, Wrench, Zap,
+  AlarmClock, ArrowRight, Bell, Building2, DoorOpen, Gauge, UserPlus, Wrench, Zap,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Page, StatGrid, ContentGrid, SplitGrid } from '../../components/ui/page';
-import { Card, CardBody, CardHeader } from '../../components/ui/card';
-import { StatCard, PageHeader, Timeline } from '../../components/common';
-import { Button, IconBox, StatusBadge, TenantMark } from '../../components/ui/primitives';
+import { PageHeader, Timeline } from '../../components/common';
+import { Button, IconBox, TenantMark } from '../../components/ui/primitives';
 import { TrendChart, BarSeriesChart } from '../../components/charts';
+import { Panel, PanelBody, PanelHeader, PanelSection } from '../../components/dashboard/Panel';
+import { KpiTile, MetricStrip } from '../../components/dashboard/metrics';
 import { useLive } from '../../data/live';
 import { computeAdminKpis, aggregateReadings, tenantSummary } from '../../data/selectors';
 import { ago, compact, currency, energy, fmtTime, num } from '../../lib/utils';
 import { ACTIVITY_ICON } from '../../lib/activityMeta';
-import { CATEGORY_ICON } from '../../components/status';
+import { CATEGORY_ICON, TenantStatusBadge } from '../../components/status';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -34,7 +37,6 @@ export default function AdminDashboard() {
   const recentTenants = useLive((w) => [...w.tenants].sort((a, b) => b.createdAt - a.createdAt).slice(0, 6).map((t) => tenantSummary(w, t.id)));
 
   const consumptionSpark = daily.slice(-14).map((d) => d.kwh);
-  const chargeSpark = daily.slice(-14).map((d) => d.kwh * 45);
 
   return (
     <Page>
@@ -44,65 +46,72 @@ export default function AdminDashboard() {
         actions={<Button variant="primary" size="sm" onClick={() => navigate('/admin/tenants/new')}><UserPlus className="h-4 w-4" />Add Tenant</Button>}
       />
 
-      {/* TOP — global operational summary */}
-      <StatGrid cols={4}>
-        <StatCard label="Active Tenants" value={num(kpis.tenantsActive)} icon={Building2} tone="primary" caption={`${kpis.tenantsPending} pending · ${kpis.tenantsSuspended} suspended`} onClick={() => navigate('/admin/tenants')} />
-        <StatCard label="Current Load" value={energy(kpis.currentLoadKw, 'kW').value} unit={energy(kpis.currentLoadKw, 'kW').unit} icon={Zap} tone="energy" spark={consumptionSpark} sparkColor="var(--module-energy)" caption={`Peak ${num(kpis.peakDemandKw)} kW`} onClick={() => navigate('/admin/energy')} />
-        <StatCard label="Visitors Inside" value={num(kpis.visitorsInside)} icon={DoorOpen} tone="visitor" caption={`${kpis.visitorsScheduledToday} scheduled today`} onClick={() => navigate('/admin/visitors/inside')} />
-        <StatCard label="Open Requests" value={num(kpis.requestsOpen)} icon={Wrench} tone="service" caption={`${kpis.requestsCritical} critical · ${kpis.requestsOverdue} overdue`} onClick={() => navigate('/admin/service')} />
-      </StatGrid>
+      {/* TOP — the global operational summary, ranked. Four primary figures
+          carry the park's live state; the supporting totals sit beneath them
+          in one strip rather than competing as a second row of tiles. */}
+      <div className="flex flex-col gap-3">
+        <StatGrid cols={4}>
+          <KpiTile label="Active Tenants" value={num(kpis.tenantsActive)} icon={Building2} tone="primary" caption={`${kpis.tenantsPending} pending · ${kpis.tenantsSuspended} suspended`} onClick={() => navigate('/admin/tenants')} />
+          <KpiTile label="Current Load" value={energy(kpis.currentLoadKw, 'kW').value} unit={energy(kpis.currentLoadKw, 'kW').unit} icon={Zap} tone="energy" spark={consumptionSpark} sparkColor="var(--module-energy)" caption={`Peak ${num(kpis.peakDemandKw)} kW`} onClick={() => navigate('/admin/energy')} />
+          <KpiTile label="Visitors Inside" value={num(kpis.visitorsInside)} icon={DoorOpen} tone="visitor" caption={`${kpis.visitorsScheduledToday} scheduled today`} onClick={() => navigate('/admin/visitors/inside')} />
+          <KpiTile label="Open Requests" value={num(kpis.requestsOpen)} icon={Wrench} tone="service" caption={`${kpis.requestsCritical} critical · ${kpis.requestsOverdue} overdue`} onClick={() => navigate('/admin/service')} />
+        </StatGrid>
 
-      <StatGrid cols={4}>
-        <StatCard label="Month Consumption" value={energy(kpis.totalConsumptionKwh).value} unit={energy(kpis.totalConsumptionKwh).unit} icon={Gauge} tone="neutral" caption="All active tenants" />
-        <StatCard label="Month Charges" value={currency(kpis.totalChargesMonth, { compact: true })} icon={Zap} tone="energy" spark={chargeSpark} sparkColor="var(--module-energy)" />
-        <StatCard label="Overstaying" value={num(kpis.visitorsOverstaying)} icon={AlarmClock} tone={kpis.visitorsOverstaying ? 'critical' : 'success'} caption={kpis.visitorsOverstaying ? 'Needs attention' : 'None right now'} onClick={() => navigate('/admin/visitors/overstaying')} />
-        <StatCard label="Offline Meters" value={num(kpis.offlineMeters)} icon={Gauge} tone={kpis.offlineMeters ? 'critical' : 'success'} caption={`${kpis.metersTotal} total`} onClick={() => navigate('/admin/energy/meters')} />
-      </StatGrid>
+        <MetricStrip
+          items={[
+            { label: 'Month Consumption', value: energy(kpis.totalConsumptionKwh).value, unit: energy(kpis.totalConsumptionKwh).unit, caption: 'All active tenants' },
+            { label: 'Month Charges', value: currency(kpis.totalChargesMonth, { compact: true }), caption: 'Billing period to date' },
+            { label: 'Overstaying', value: num(kpis.visitorsOverstaying), tone: kpis.visitorsOverstaying ? 'critical' : 'success', caption: kpis.visitorsOverstaying ? 'Needs attention' : 'None right now', onClick: () => navigate('/admin/visitors/overstaying') },
+            { label: 'Offline Meters', value: num(kpis.offlineMeters), tone: kpis.offlineMeters ? 'critical' : 'success', caption: `${kpis.metersTotal} total`, onClick: () => navigate('/admin/energy/meters') },
+          ]}
+        />
+      </div>
 
       {/* MAIN — energy intelligence + operational attention */}
       <SplitGrid>
-        <div className="flex flex-col gap-4">
-          <Card>
-            <CardHeader title="Consumption & Peak Demand" subtitle="Park-wide, last 30 days" icon={<IconBox icon={Zap} tone="energy" size="sm" />} actions={<Button variant="ghost" size="xs" onClick={() => navigate('/admin/energy')}>Energy<ArrowRight className="h-3.5 w-3.5" /></Button>} />
-            <CardBody>
-              <TrendChart
-                data={daily}
-                series={[{ key: 'kwh', label: 'Consumption (kWh)' }]}
-                unit="kWh"
-                height={220}
-                valueFormatter={(v) => `${num(v)} kWh`}
-              />
-            </CardBody>
-          </Card>
-
-          <Card>
-            <CardHeader title="Highest Consuming Tenants" subtitle="This billing period" icon={<IconBox icon={Building2} tone="primary" size="sm" />} />
-            <CardBody>
-              <BarSeriesChart
-                data={ranking.map((r) => ({ label: r.tenant.code, kwh: r.periodKwh }))}
-                series={[{ key: 'kwh', label: 'kWh' }]}
-                horizontal
-                height={200}
-                valueFormatter={(v) => `${num(v)} kWh`}
-              />
-            </CardBody>
-          </Card>
-        </div>
+        {/* Both charts answer one question — where the park's energy goes — so
+            they share a panel instead of floating in two. */}
+        <Panel>
+          <PanelHeader
+            title="Energy Intelligence"
+            subtitle="Park-wide, last 30 days"
+            accent="energy"
+            actions={<Button variant="ghost" size="xs" onClick={() => navigate('/admin/energy')}>Energy<ArrowRight className="h-3.5 w-3.5" /></Button>}
+          />
+          <PanelSection title="Consumption & Peak Demand">
+            <TrendChart
+              data={daily}
+              series={[{ key: 'kwh', label: 'Consumption (kWh)' }]}
+              unit="kWh"
+              height={230}
+              valueFormatter={(v) => `${num(v)} kWh`}
+            />
+          </PanelSection>
+          <PanelSection title="Highest Consuming Tenants · This billing period">
+            <BarSeriesChart
+              data={ranking.map((r) => ({ label: r.tenant.code, kwh: r.periodKwh }))}
+              series={[{ key: 'kwh', label: 'kWh' }]}
+              horizontal
+              height={190}
+              valueFormatter={(v) => `${num(v)} kWh`}
+            />
+          </PanelSection>
+        </Panel>
 
         {/* Operational attention — what needs attention right now.
-            The queue is unbounded, so in the two-column layout the card is
+            The queue is unbounded, so in the two-column layout the panel is
             taken out of flow: the cell then contributes no intrinsic height,
             the energy column sizes the row, and the list scrolls inside
             whatever height that yields. Left in flow it grew to 1230px and
             stranded ~480px of empty space beside the charts. */}
         <div className="relative">
-          <Card className="min-h-0 xl:absolute xl:inset-0">
-            <CardHeader
+          <Panel className="min-h-0 xl:absolute xl:inset-0">
+            <PanelHeader
               title="Operational Attention"
               subtitle={`${attention.length} item${attention.length === 1 ? '' : 's'} need review`}
-              icon={<IconBox icon={TriangleAlert} tone={attention.length ? 'warning' : 'success'} size="sm" />}
+              accent={attention.length ? 'warning' : 'success'}
             />
-            <div className="min-h-0 flex-1 overflow-y-auto p-2.5">
+            <div className="min-h-0 flex-1 overflow-y-auto p-2">
               {attention.length === 0 ? (
                 <div className="flex flex-col items-center gap-2 px-4 py-12 text-center">
                   <IconBox icon={Bell} tone="success" size="lg" />
@@ -110,18 +119,25 @@ export default function AdminDashboard() {
                   <p className="text-[12px] text-subtle">All tenants nominal across every domain.</p>
                 </div>
               ) : (
-                <ul className="flex flex-col gap-1.5">
+                <ul className="flex flex-col gap-0.5">
                   {attention.map((item) => (
                     <li key={item.id}>
-                      <button onClick={() => navigate(item.href)} className="flex w-full items-start gap-3 rounded-xl border border-border-subtle bg-surface-inset/50 p-3 text-left transition-colors hover:border-border-strong hover:bg-surface-raised">
+                      {/* The row carries no border or fill of its own — twelve
+                          bordered boxes inside a bordered panel was the noisiest
+                          thing on the page. Tone lives in the icon, and the tag
+                          keeps it readable without a second coloured pill. */}
+                      <button
+                        onClick={() => navigate(item.href)}
+                        className="flex w-full items-start gap-3 rounded-lg px-2.5 py-2.5 text-left transition-colors duration-150 hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-inset"
+                      >
                         <IconBox icon={item.icon} tone={item.tone} size="sm" />
                         <div className="min-w-0 flex-1">
-                          <div className="flex items-center justify-between gap-2">
-                            <p className="truncate text-[13px] font-medium text-foreground">{item.title}</p>
-                            <StatusBadge tone={item.tone} size="sm" dot={false}>{item.tag}</StatusBadge>
+                          <div className="flex items-baseline justify-between gap-2">
+                            <p className="truncate text-[13px] font-medium leading-tight text-foreground">{item.title}</p>
+                            <span className="shrink-0 text-[10px] font-semibold uppercase leading-none tracking-[0.09em] text-subtle">{item.tag}</span>
                           </div>
-                          <p className="mt-0.5 truncate text-[12px] text-muted">{item.detail}</p>
-                          <p className="mt-1 text-[11px] text-subtle">{item.tenant} · {ago(item.ts)}</p>
+                          <p className="mt-1 truncate text-[12px] leading-tight text-muted">{item.detail}</p>
+                          <p className="mt-1 truncate text-[11px] leading-tight text-subtle">{item.tenant} · {ago(item.ts)}</p>
                         </div>
                       </button>
                     </li>
@@ -129,15 +145,15 @@ export default function AdminDashboard() {
                 </ul>
               )}
             </div>
-          </Card>
+          </Panel>
         </div>
       </SplitGrid>
 
       {/* LOWER — tenant operations */}
       <ContentGrid cols={3} align="start">
-        <Card>
-          <CardHeader title="Recent Activity" subtitle="Across all tenants" />
-          <CardBody>
+        <Panel>
+          <PanelHeader title="Recent Activity" subtitle="Across all tenants" />
+          <PanelBody>
             <Timeline
               items={activity.map((a) => ({
                 id: a.id,
@@ -148,12 +164,17 @@ export default function AdminDashboard() {
                 meta: ago(a.ts),
               }))}
             />
-          </CardBody>
-        </Card>
+          </PanelBody>
+        </Panel>
 
-        <Card>
-          <CardHeader title="Upcoming Visitors" subtitle="Next arrivals" icon={<IconBox icon={DoorOpen} tone="visitor" size="sm" />} actions={<Button variant="ghost" size="xs" onClick={() => navigate('/admin/visitors/scheduled')}>All</Button>} />
-          <CardBody className="flex flex-col gap-1">
+        <Panel>
+          <PanelHeader
+            title="Upcoming Visitors"
+            subtitle="Next arrivals"
+            accent="visitor"
+            actions={<Button variant="ghost" size="xs" onClick={() => navigate('/admin/visitors/scheduled')}>All</Button>}
+          />
+          <PanelBody className="flex flex-col gap-0.5 p-2">
             {upcoming.length === 0 ? (
               <p className="py-6 text-center text-[12px] text-subtle">No upcoming visitors.</p>
             ) : (
@@ -161,26 +182,33 @@ export default function AdminDashboard() {
                 <VisitorRow key={v.id} name={v.fullName} company={v.company} time={fmtTime(v.expectedArrival)} />
               ))
             )}
-          </CardBody>
-        </Card>
+          </PanelBody>
+        </Panel>
 
-        <Card>
-          <CardHeader title="Recent Onboarding" subtitle="Newest tenants" icon={<IconBox icon={Building2} tone="primary" size="sm" />} actions={<Button variant="ghost" size="xs" onClick={() => navigate('/admin/tenants')}>All</Button>} />
-          <CardBody className="flex flex-col gap-2">
+        <Panel>
+          <PanelHeader
+            title="Recent Onboarding"
+            subtitle="Newest tenants"
+            accent="primary"
+            actions={<Button variant="ghost" size="xs" onClick={() => navigate('/admin/tenants')}>All</Button>}
+          />
+          <PanelBody className="flex flex-col gap-0.5 p-2">
             {recentTenants.map((r) => (
-              <button key={r.tenant.id} onClick={() => navigate(`/admin/tenants/${r.tenant.id}`)} className="flex items-center gap-3 rounded-xl px-1 py-1.5 text-left transition-colors hover:bg-surface-raised">
+              <button
+                key={r.tenant.id}
+                onClick={() => navigate(`/admin/tenants/${r.tenant.id}`)}
+                className="flex items-center gap-3 rounded-lg px-2 py-1.5 text-left transition-colors duration-150 hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-inset"
+              >
                 <TenantMark name={r.tenant.name} hue={r.tenant.brandHue} size={32} />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[13px] font-medium text-foreground">{r.tenant.name}</p>
-                  <p className="truncate text-[11px] text-subtle">{r.buildingName} · {ago(r.tenant.createdAt)}</p>
+                  <p className="truncate text-[13px] font-medium leading-tight text-foreground">{r.tenant.name}</p>
+                  <p className="mt-0.5 truncate text-[11px] leading-tight text-subtle">{r.buildingName} · {ago(r.tenant.createdAt)}</p>
                 </div>
-                <StatusBadge tone={{ active: 'success', suspended: 'critical', draft: 'neutral', pending_configuration: 'warning', pending_activation: 'info', expired: 'neutral', archived: 'neutral' }[r.tenant.status] as never} size="sm">
-                  {r.tenant.status.replace('_', ' ')}
-                </StatusBadge>
+                <TenantStatusBadge status={r.tenant.status} size="sm" />
               </button>
             ))}
-          </CardBody>
-        </Card>
+          </PanelBody>
+        </Panel>
       </ContentGrid>
 
       <p className="pb-2 text-center text-[11px] text-subtle">
@@ -192,12 +220,12 @@ export default function AdminDashboard() {
 
 function VisitorRow({ name, company, time }: { name: string; company?: string; time: string }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-lg px-1 py-1.5">
+    <div className="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5">
       <div className="min-w-0">
-        <p className="truncate text-[13px] font-medium text-foreground">{name}</p>
-        {company && <p className="truncate text-[11px] text-subtle">{company}</p>}
+        <p className="truncate text-[13px] font-medium leading-tight text-foreground">{name}</p>
+        {company && <p className="mt-0.5 truncate text-[11px] leading-tight text-subtle">{company}</p>}
       </div>
-      <span className="tnum shrink-0 rounded-md bg-surface-inset px-2 py-1 text-[11px] font-medium text-muted">{time}</span>
+      <span className="tnum shrink-0 text-[11.5px] font-medium text-muted">{time}</span>
     </div>
   );
 }
