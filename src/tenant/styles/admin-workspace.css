@@ -1,31 +1,5 @@
 /* Admin shell and dashboard only. The other product screens retain their styles. */
-.ops-shell {
-  --ops-paper: #151718;
-  --ops-rail: #101213;
-  --ops-ink: #f2f3f2;
-  --ops-muted: #929997;
-  --ops-line: #2b3030;
-  --ops-hover: #202525;
-  --ops-accent: #a3c9b3;
-  --ops-chart: #a0bcb0;
-  --ops-danger: #f19489;
-  --ops-success: #91c3a6;
-  --ops-warning: #d6b581;
-  background: var(--ops-paper);
-}
-[data-theme="light"] .ops-shell {
-  --ops-paper: #fff;
-  --ops-rail: #f7f8f7;
-  --ops-ink: #202725;
-  --ops-muted: #68726d;
-  --ops-line: #e3e7e4;
-  --ops-hover: #f1f4f2;
-  --ops-accent: #376b53;
-  --ops-chart: #537764;
-  --ops-danger: #b44035;
-  --ops-success: #35724e;
-  --ops-warning: #956421;
-}
+.ops-shell { background: var(--surface); }
 .ops-shell .ops-topbar {
   background: var(--ops-rail);
   border-color: var(--ops-line);

@@ -1,24 +1,6 @@
 @import 'tailwindcss';
 
-/**
- * NASTP Tenant Operations — design system.
- *
- * This is a *peer* of the Nexus PMS command-centre system, not a copy. Both
- * modules share the same design language — Inter + JetBrains Mono, shadcn token
- * semantics, a validated data-viz ramp — but Tenant Operations is deliberately
- * calmer and less dense. Where PMS is tuned for a dim control room on a long
- * shift, this is tuned for an office workspace: more air, softer elevation, a
- * distinct indigo brand, and module identities for Energy, Visitors and the
- * Service Center so the three tenant domains stay legible at a glance.
- *
- * Every semantic token is defined twice. Dark is the platform default so the
- * two products feel like one suite; light is a full peer, engineered — not
- * inverted — for the daylight office context most tenants live in.
- *
- * Naming follows shadcn semantics (background / foreground / muted / border)
- * so the primitive layer in `components/ui` stays portable, with an operations
- * layer on top (module-energy, module-visitor, lifecycle states, online…).
- */
+
 
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
@@ -26,180 +8,187 @@
 [data-theme='dark'] {
   color-scheme: dark;
 
-  /* Surfaces — a cool slate, one step warmer and lighter than PMS's near-black,
-   * so a data-dense workspace still reads as calm rather than industrial. */
-  --canvas: #0a0d14;
-  --background: #0d1119;
-  --surface: #141924;
-  --surface-raised: #1a2130;
-  --surface-overlay: #1f2736;
-  --surface-inset: #0f131c;
-  --surface-subtle: #11161f;
+  
+  --canvas: #151718;
+  --background: #101213;
+  --surface: #151718;
+  --surface-raised: #202525;
+  --surface-overlay: #1b1f1e;
+  --surface-inset: #101213;
+  --surface-subtle: #181c1a;
 
-  /* Type */
-  --foreground: #eef2f8;
-  --foreground-muted: #9aa8bd;
-  --foreground-subtle: #6b7a91;
-  --foreground-disabled: #495770;
+  
+  --foreground: #f2f3f2;
+  --foreground-muted: #b4bcb8;
+  --foreground-subtle: #929997;
+  --foreground-disabled: #69726d;
 
-  /* Lines */
-  --border: #222b3a;
-  --border-strong: #303c4e;
-  --border-subtle: #191f2b;
+  
+  --border: #2b3030;
+  --border-strong: #59635d;
+  --border-subtle: #262c29;
 
-  /* Brand — indigo, the tenant identity. Interactive intent only. */
-  --primary: #6366f1;
-  --primary-hover: #818cf8;
-  --primary-active: #4f46e5;
-  --primary-foreground: #ffffff;
-  --primary-muted: #1e1f45;
-  --secondary: #334155;
-  --ring: #6366f1;
+  
+  --primary: #a3c9b3;
+  --primary-hover: #c0ddce;
+  --primary-active: #88ae98;
+  --primary-foreground: #151718;
+  --primary-muted: #24332b;
+  --secondary: #202525;
+  --ring: #a3c9b3;
 
-  /* Status — semantic, reserved for state. Never used as a chart series. */
-  --success: #22c55e;
-  --success-dim: #0f2e1c;
-  --warning: #f59e0b;
-  --warning-dim: #35250a;
-  --critical: #f43f5e;
-  --critical-dim: #3a1020;
-  --info: #38bdf8;
-  --info-dim: #082f3f;
-  --neutral: #64748b;
-  --neutral-dim: #1a212c;
+  
+  --success: #91c3a6;
+  --success-dim: #203329;
+  --warning: #d6b581;
+  --warning-dim: #342c20;
+  --critical: #f19489;
+  --critical-dim: #3b2523;
+  --info: #9bbcd3;
+  --info-dim: #20303b;
+  --neutral: #929997;
+  --neutral-dim: #202525;
 
-  /* Connectivity */
-  --online: #22c55e;
-  --online-dim: #0f2e1c;
-  --offline: #64748b;
-  --offline-dim: #1a212c;
+  
+  --online: #91c3a6;
+  --online-dim: #203329;
+  --offline: #929997;
+  --offline-dim: #202525;
 
-  /* Module identities — the three tenant domains get a reserved hue each so the
-   * eye can tell Energy from Visitors from Service without reading a label. */
-  --module-energy: #f5a524;
-  --module-energy-dim: #35270a;
-  --module-visitor: #14b8a6;
-  --module-visitor-dim: #082f2b;
-  --module-service: #a78bfa;
-  --module-service-dim: #241a45;
+  
+  --module-energy: #d6b581;
+  --module-energy-dim: #342c20;
+  --module-visitor: #8dc4ba;
+  --module-visitor-dim: #20332f;
+  --module-service: #b9abd1;
+  --module-service-dim: #2e2838;
 
-  /*
-   * Data-viz categorical ramp — the same validated sequence PMS ships, so a
-   * chart reads identically across the suite. Slot order is the colour-blind
-   * safety mechanism: assign in order, never cycle past slot 6, never borrow a
-   * status or module hue for a series.
-   */
-  --viz-1: #3987e5; /* blue */
-  --viz-2: #d95926; /* orange */
-  --viz-3: #199e70; /* aqua */
-  --viz-4: #c98500; /* yellow */
-  --viz-5: #d55181; /* magenta */
-  --viz-6: #9085e9; /* violet */
-  --viz-grid: #222b3a;
-  --viz-axis: #6b7a91;
-  --viz-surface: #141924;
+  
+  --viz-1: #a0bcb0; 
+  --viz-2: #9bbcd3; 
+  --viz-3: #c0aed3; 
+  --viz-4: #d6b581; 
+  --viz-5: #cb9da9; 
+  --viz-6: #9da9c9; 
+  --viz-grid: var(--border);
+  --viz-axis: var(--foreground-subtle);
+  --viz-surface: var(--surface-overlay);
 
-  /* Sequential ramp (single hue, light→dark) for heatmap magnitude. */
-  --seq-1: #0d366b;
-  --seq-2: #184f95;
-  --seq-3: #256abf;
-  --seq-4: #3987e5;
-  --seq-5: #6da7ec;
-  --seq-6: #9ec5f4;
-  --seq-7: #cde2fb;
+  
+  --seq-1: #203329;
+  --seq-2: #344c3e;
+  --seq-3: #4c6858;
+  --seq-4: #698b77;
+  --seq-5: #8aab98;
+  --seq-6: #b4cfbf;
+  --seq-7: #dceae2;
 
-  /* Glass — command palette, overlays, floating rails. Used sparingly. */
-  --glass-bg: rgba(26, 33, 48, 0.72);
-  --glass-border: rgba(255, 255, 255, 0.06);
-  --glass-blur: 22px;
+  
+  --glass-bg: var(--surface-overlay);
+  --glass-border: var(--border);
+  --glass-blur: 0px;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
   --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.32), 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 20px 44px rgba(0, 0, 0, 0.48), 0 2px 8px rgba(0, 0, 0, 0.32);
-  --shadow-glow: 0 0 0 1px rgba(99, 102, 241, 0.35), 0 0 26px rgba(99, 102, 241, 0.18);
+  --shadow-glow: none;
 }
 
 [data-theme='light'] {
   color-scheme: light;
 
-  /* A soft, warm-tinted paper — an office daylight surface, not stark white. */
-  --canvas: #eceef3;
-  --background: #f4f6fa;
+  
+  --canvas: #ffffff;
+  --background: #f7f8f7;
   --surface: #ffffff;
-  --surface-raised: #ffffff;
+  --surface-raised: #f1f4f2;
   --surface-overlay: #ffffff;
-  --surface-inset: #f1f4f9;
-  --surface-subtle: #f7f9fc;
+  --surface-inset: #f7f8f7;
+  --surface-subtle: #fafbfa;
 
-  --foreground: #0f1626;
-  --foreground-muted: #52607a;
-  --foreground-subtle: #78859c;
-  --foreground-disabled: #a6b0c1;
+  --foreground: #202725;
+  --foreground-muted: #4d5c54;
+  --foreground-subtle: #68726d;
+  --foreground-disabled: #87918b;
 
-  --border: #e4e8ef;
-  --border-strong: #ccd4e0;
-  --border-subtle: #eef1f6;
+  --border: #e3e7e4;
+  --border-strong: #a2ada6;
+  --border-subtle: #edf0ed;
 
-  --primary: #4f46e5;
-  --primary-hover: #4338ca;
-  --primary-active: #3730a3;
+  --primary: #376b53;
+  --primary-hover: #2e5a46;
+  --primary-active: #264b3a;
   --primary-foreground: #ffffff;
-  --primary-muted: #e9e9fd;
-  --secondary: #e2e8f0;
-  --ring: #4f46e5;
+  --primary-muted: #e7f0ea;
+  --secondary: #f1f4f2;
+  --ring: #376b53;
 
-  --success: #15a34a;
-  --success-dim: #dcfce7;
-  --warning: #d97706;
-  --warning-dim: #fef3c7;
-  --critical: #e11d48;
-  --critical-dim: #ffe4e6;
-  --info: #0284c7;
-  --info-dim: #e0f2fe;
-  --neutral: #64748b;
-  --neutral-dim: #eef1f6;
+  --success: #35724e;
+  --success-dim: #e8f2ec;
+  --warning: #956421;
+  --warning-dim: #faf0df;
+  --critical: #b44035;
+  --critical-dim: #fbece9;
+  --info: #386b8c;
+  --info-dim: #e8f0f6;
+  --neutral: #68726d;
+  --neutral-dim: #f1f4f2;
 
-  --online: #15a34a;
-  --online-dim: #dcfce7;
-  --offline: #94a3b8;
-  --offline-dim: #eef1f6;
+  --online: #35724e;
+  --online-dim: #e8f2ec;
+  --offline: #68726d;
+  --offline-dim: #f1f4f2;
 
-  --module-energy: #c2770a;
-  --module-energy-dim: #fdf0d5;
-  --module-visitor: #0d9488;
-  --module-visitor-dim: #d5f4ef;
-  --module-service: #7c3aed;
-  --module-service-dim: #ede7fd;
+  --module-energy: #956421;
+  --module-energy-dim: #faf0df;
+  --module-visitor: #377c71;
+  --module-visitor-dim: #e8f2ef;
+  --module-service: #766087;
+  --module-service-dim: #f0ebf6;
 
-  /* Same eight hues, stepped for the light surface — a selected palette, not an
-   * automatic flip. Three slots sit under 3:1 on white, so light-mode charts
-   * always ship a legend with visible labels plus the table view. */
-  --viz-1: #2a78d6;
-  --viz-2: #eb6834;
-  --viz-3: #1baf7a;
-  --viz-4: #eda100;
-  --viz-5: #e87ba4;
-  --viz-6: #4a3aa7;
-  --viz-grid: #e4e8ef;
-  --viz-axis: #78859c;
-  --viz-surface: #ffffff;
+  
+  --viz-1: #537764;
+  --viz-2: #527c97;
+  --viz-3: #89739c;
+  --viz-4: #987233;
+  --viz-5: #a0687c;
+  --viz-6: #69769b;
+  --viz-grid: var(--border);
+  --viz-axis: var(--foreground-subtle);
+  --viz-surface: var(--surface-overlay);
 
-  --seq-1: #cde2fb;
-  --seq-2: #9ec5f4;
-  --seq-3: #6da7ec;
-  --seq-4: #3987e5;
-  --seq-5: #256abf;
-  --seq-6: #184f95;
-  --seq-7: #0d366b;
+  --seq-1: #dceae2;
+  --seq-2: #b4cfbf;
+  --seq-3: #8aab98;
+  --seq-4: #698b77;
+  --seq-5: #4c6858;
+  --seq-6: #344c3e;
+  --seq-7: #203329;
 
-  --glass-bg: rgba(255, 255, 255, 0.82);
-  --glass-border: rgba(15, 22, 38, 0.07);
-  --glass-blur: 22px;
+  --glass-bg: var(--surface-overlay);
+  --glass-border: var(--border);
+  --glass-blur: 0px;
 
   --shadow-sm: 0 1px 2px rgba(15, 22, 38, 0.06);
   --shadow-md: 0 6px 16px rgba(15, 22, 38, 0.08), 0 1px 2px rgba(15, 22, 38, 0.04);
   --shadow-lg: 0 20px 44px rgba(15, 22, 38, 0.13), 0 2px 8px rgba(15, 22, 38, 0.06);
-  --shadow-glow: 0 0 0 1px rgba(79, 70, 229, 0.32), 0 0 26px rgba(79, 70, 229, 0.12);
+  --shadow-glow: none;
+}
+
+/* Shared scale and compatibility aliases; no per-screen palette. */
+:root {
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px;
+  --text-caption: 12px; --text-body: 14px; --text-section: 16px; --text-title: 30px;
+  --radius-control: 6px; --radius-surface: 8px; --radius-overlay: 10px;
+  --control-sm: 32px; --control-md: 36px; --control-lg: 44px;
+  --motion-fast: 150ms; --motion-enter: 180ms;
+}
+:root, [data-theme] {
+  --ops-paper: var(--surface); --ops-rail: var(--background); --ops-ink: var(--foreground);
+  --ops-muted: var(--foreground-subtle); --ops-line: var(--border); --ops-hover: var(--surface-raised);
+  --ops-accent: var(--primary); --ops-chart: var(--viz-1); --ops-danger: var(--critical);
+  --ops-success: var(--success); --ops-warning: var(--warning);
 }
 
 @theme inline {
@@ -261,9 +250,9 @@
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
-  /* Softer radii than PMS — the calmer, more premium tenant feel. */
-  --radius-card: 16px;
-  --radius-panel: 20px;
+  /* Components use the same compact radius scale. */
+  --radius-card: 8px;
+  --radius-panel: 10px;
 
   --shadow-elevated: var(--shadow-md);
   --shadow-floating: var(--shadow-lg);
@@ -407,27 +396,9 @@
 @layer components {
   .glass {
     background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur)) saturate(150%);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
-    border: 1px solid var(--glass-border);
-  }
 
-  /* The hairline top-light that gives cards their soft elevation. */
-  .edge-light {
-    position: relative;
-  }
-  .edge-light::before {
-    content: '';
-    position: absolute;
-    inset: 0 0 auto 0;
-    height: 1px;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      color-mix(in srgb, var(--foreground) 10%, transparent),
-      transparent
-    );
-    pointer-events: none;
+
+    border: 1px solid var(--glass-border);
   }
 
   .cmd-group [cmdk-group-heading] {
