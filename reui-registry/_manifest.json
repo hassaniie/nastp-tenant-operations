@@ -1,0 +1,148 @@
+{
+  "fetchedAt": "2026-09-09T09:19:24.453Z",
+  "style": "radix-nova",
+  "registry": "https://reui.io/r/radix-nova/{name}.json",
+  "seeds": [
+    "frame",
+    "badge",
+    "alert",
+    "icon-tile",
+    "button",
+    "card",
+    "separator",
+    "dropdown-menu",
+    "scroll-area",
+    "tooltip",
+    "tabs",
+    "avatar",
+    "input",
+    "progress",
+    "skeleton",
+    "c-card-15",
+    "c-alert-13",
+    "c-alert-17",
+    "c-accordion-9"
+  ],
+  "items": {
+    "frame": {
+      "source": "reui",
+      "deps": [],
+      "files": 1
+    },
+    "badge": {
+      "source": "reui",
+      "deps": [],
+      "files": 1
+    },
+    "alert": {
+      "source": "reui",
+      "deps": [],
+      "files": 1
+    },
+    "icon-tile": {
+      "source": "reui",
+      "deps": [],
+      "files": 1
+    },
+    "button": {
+      "source": "shadcn",
+      "deps": [],
+      "files": 1
+    },
+    "card": {
+      "source": "shadcn",
+      "deps": [],
+      "files": 1
+    },
+    "separator": {
+      "source": "shadcn",
+      "deps": [],
+      "files": 1
+    },
+    "dropdown-menu": {
+      "source": "shadcn",
+      "deps": [],
+      "files": 1
+    },
+    "scroll-area": {
+      "source": "shadcn",
+      "deps": [],
+      "files": 1
+    },
+    "tooltip": {
+      "source": "shadcn",
+      "deps": [],
+      "files": 1
+    },
+    "tabs": {
+      "source": "shadcn",
+      "deps": [],
+      "files": 1
+    },
+    "avatar": {
+      "source": "shadcn",
+      "deps": [],
+      "files": 1
+    },
+    "input": {
+      "source": "shadcn",
+      "deps": [],
+      "files": 1
+    },
+    "progress": {
+      "source": "shadcn",
+      "deps": [],
+      "files": 1
+    },
+    "skeleton": {
+      "source": "shadcn",
+      "deps": [],
+      "files": 1
+    },
+    "c-card-15": {
+      "source": "reui",
+      "deps": [
+        "@reui/badge",
+        "button",
+        "card",
+        "dropdown-menu",
+        "separator"
+      ],
+      "files": 1
+    },
+    "c-alert-13": {
+      "source": "reui",
+      "deps": [
+        "@reui/alert",
+        "button",
+        "@reui/frame"
+      ],
+      "files": 1
+    },
+    "c-alert-17": {
+      "source": "reui",
+      "deps": [
+        "@reui/alert",
+        "button",
+        "@reui/frame"
+      ],
+      "files": 1
+    },
+    "c-accordion-9": {
+      "source": "reui",
+      "deps": [
+        "accordion",
+        "avatar",
+        "@reui/badge",
+        "@reui/frame"
+      ],
+      "files": 1
+    },
+    "accordion": {
+      "source": "shadcn",
+      "deps": [],
+      "files": 1
+    }
+  },
+  "failed": []
+}
