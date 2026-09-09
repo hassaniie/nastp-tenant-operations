@@ -23,6 +23,7 @@ import { ExperienceSwitcher } from './ExperienceSwitcher';
 import { UserMenu } from './UserMenu';
 import { CommandPalette } from './CommandPalette';
 import { IdleMonitor } from './IdleMonitor';
+import { AdminShellNext } from './AdminShell';
 
 type Badges = { alerts: number; overstaying: number; openRequests: number; notifications: number };
 
@@ -236,8 +237,13 @@ export function Shell({ experience }: { experience: 'admin' | 'portal' }) {
   );
 }
 
+/**
+ * The admin experience renders the ReUI-native shell. `Shell` above is
+ * untouched and still serves the Tenant Portal, so this pilot moves one
+ * experience without disturbing the other.
+ */
 export function AdminShell() {
-  return <Shell experience="admin" />;
+  return <AdminShellNext />;
 }
 
 export function PortalShell(): ReactNode {

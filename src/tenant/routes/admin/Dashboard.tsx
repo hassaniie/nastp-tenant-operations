@@ -1,30 +1,57 @@
 /**
  * Admin — Ecosystem Operations Dashboard (§8).
  *
- * Not a generic KPI grid. Top: the global operational summary, ranked — four
- * primary figures over a dense strip of supporting totals. Main-left: energy
- * intelligence, both charts in one panel because they answer one question.
- * Main-right: an "Operational Attention" action center that answers *what
- * needs attention right now* — the highest-signal items across energy,
- * visitors and the service center, ranked by urgency. Lower: live tenant
- * operations. Reads the live world synchronously.
+ * Rebuilt on ReUI's Frame language. The page is no longer a field of floating
+ * cards: related figures share one `Frame`, and each `FramePanel` nests inside
+ * it with a concentric radius, so grouping is carried by the surface itself
+ * rather than by whitespace between boxes.
+ *
+ * Composition follows the registry's own examples — `c-alert-17` (status rows
+ * stacked inside a Frame) for the attention feed, `c-card-15` (metric with a
+ * quiet label above a dominant figure) for the KPI band.
+ *
+ * Not a generic KPI grid: the top band is the park's live state, the middle is
+ * energy intelligence beside what needs attention right now, the lower band is
+ * tenant operations. Reads the live world synchronously.
  */
 
 import {
   AlarmClock, ArrowRight, Bell, Building2, DoorOpen, Gauge, UserPlus, Wrench, Zap,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Page, StatGrid, ContentGrid, SplitGrid } from '../../components/ui/page';
-import { PageHeader, Timeline } from '../../components/common';
-import { Button, IconBox, TenantMark } from '../../components/ui/primitives';
-import { TrendChart, BarSeriesChart } from '../../components/charts';
-import { Panel, PanelBody, PanelHeader, PanelSection } from '../../components/dashboard/Panel';
-import { KpiTile, MetricStrip } from '../../components/dashboard/metrics';
+import { Frame, FrameDescription, FrameHeader, FramePanel, FrameTitle } from '../../components/reui/frame';
+import { Badge } from '../../components/reui/badge';
+import { IconTile } from '../../components/reui/icon-tile';
+import { Alert, AlertDescription, AlertTitle } from '../../components/reui/alert';
+import { Button } from '../../components/shadcn/button';
+import { ScrollArea } from '../../components/shadcn/scroll-area';
+import { TrendChart, BarSeriesChart, Sparkline } from '../../components/charts';
 import { useLive } from '../../data/live';
 import { computeAdminKpis, aggregateReadings, tenantSummary } from '../../data/selectors';
-import { ago, compact, currency, energy, fmtTime, num } from '../../lib/utils';
+import { ago, cn, compact, currency, energy, fmtTime, num } from '../../lib/utils';
 import { ACTIVITY_ICON } from '../../lib/activityMeta';
-import { CATEGORY_ICON, TenantStatusBadge } from '../../components/status';
+import { CATEGORY_ICON } from '../../components/status';
+import { TENANT_STATUS } from '../../lib/meta';
+
+/** Attention tones map onto ReUI's alert vocabulary. Severity still reads from
+ *  the tag text, so colour is never the only signal. */
+const ALERT_VARIANT: Record<AttentionItem['tone'], 'destructive' | 'warning' | 'info'> = {
+  critical: 'destructive',
+  warning: 'warning',
+  energy: 'warning',
+  visitor: 'info',
+  service: 'info',
+};
+
+/** Tenant lifecycle tones map onto ReUI's badge vocabulary, still sourced from
+ *  lib/meta so the status vocabulary stays single-origin. */
+const BADGE_VARIANT: Record<string, 'success-light' | 'destructive-light' | 'warning-light' | 'info-light' | 'secondary'> = {
+  success: 'success-light',
+  critical: 'destructive-light',
+  warning: 'warning-light',
+  info: 'info-light',
+  neutral: 'secondary',
+};
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -39,194 +66,333 @@ export default function AdminDashboard() {
   const consumptionSpark = daily.slice(-14).map((d) => d.kwh);
 
   return (
-    <Page>
-      <PageHeader
-        title="Ecosystem Operations"
-        description="Live command view across tenants, energy, visitors and the service center."
-        actions={<Button variant="primary" size="sm" onClick={() => navigate('/admin/tenants/new')}><UserPlus className="h-4 w-4" />Add Tenant</Button>}
-      />
-
-      {/* TOP — the global operational summary, ranked. Four primary figures
-          carry the park's live state; the supporting totals sit beneath them
-          in one strip rather than competing as a second row of tiles. */}
-      <div className="flex flex-col gap-3">
-        <StatGrid cols={4}>
-          <KpiTile label="Active Tenants" value={num(kpis.tenantsActive)} icon={Building2} tone="primary" caption={`${kpis.tenantsPending} pending · ${kpis.tenantsSuspended} suspended`} onClick={() => navigate('/admin/tenants')} />
-          <KpiTile label="Current Load" value={energy(kpis.currentLoadKw, 'kW').value} unit={energy(kpis.currentLoadKw, 'kW').unit} icon={Zap} tone="energy" spark={consumptionSpark} sparkColor="var(--module-energy)" caption={`Peak ${num(kpis.peakDemandKw)} kW`} onClick={() => navigate('/admin/energy')} />
-          <KpiTile label="Visitors Inside" value={num(kpis.visitorsInside)} icon={DoorOpen} tone="visitor" caption={`${kpis.visitorsScheduledToday} scheduled today`} onClick={() => navigate('/admin/visitors/inside')} />
-          <KpiTile label="Open Requests" value={num(kpis.requestsOpen)} icon={Wrench} tone="service" caption={`${kpis.requestsCritical} critical · ${kpis.requestsOverdue} overdue`} onClick={() => navigate('/admin/service')} />
-        </StatGrid>
-
-        <MetricStrip
-          items={[
-            { label: 'Month Consumption', value: energy(kpis.totalConsumptionKwh).value, unit: energy(kpis.totalConsumptionKwh).unit, caption: 'All active tenants' },
-            { label: 'Month Charges', value: currency(kpis.totalChargesMonth, { compact: true }), caption: 'Billing period to date' },
-            { label: 'Overstaying', value: num(kpis.visitorsOverstaying), tone: kpis.visitorsOverstaying ? 'critical' : 'success', caption: kpis.visitorsOverstaying ? 'Needs attention' : 'None right now', onClick: () => navigate('/admin/visitors/overstaying') },
-            { label: 'Offline Meters', value: num(kpis.offlineMeters), tone: kpis.offlineMeters ? 'critical' : 'success', caption: `${kpis.metersTotal} total`, onClick: () => navigate('/admin/energy/meters') },
-          ]}
-        />
+    <div className="mx-auto flex max-w-[1600px] flex-col gap-4 p-4 lg:gap-5 lg:p-6">
+      {/* ------------------------------------------------------- page header */}
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-[19px] font-semibold tracking-[-0.02em] text-foreground">Ecosystem Operations</h1>
+          <p className="mt-1 text-[13px] text-muted-foreground">
+            Live command view across tenants, energy, visitors and the service center.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge variant="success-light" size="sm" className="gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden />
+            Live
+          </Badge>
+          <Button size="sm" onClick={() => navigate('/admin/tenants/new')}>
+            <UserPlus className="h-4 w-4" />
+            Add Tenant
+          </Button>
+        </div>
       </div>
 
-      {/* MAIN — energy intelligence + operational attention */}
-      <SplitGrid>
-        {/* Both charts answer one question — where the park's energy goes — so
-            they share a panel instead of floating in two. */}
-        <Panel>
-          <PanelHeader
-            title="Energy Intelligence"
-            subtitle="Park-wide, last 30 days"
-            accent="energy"
-            actions={<Button variant="ghost" size="xs" onClick={() => navigate('/admin/energy')}>Energy<ArrowRight className="h-3.5 w-3.5" /></Button>}
+      {/* --------------------------------------------------------- KPI band */}
+      <Frame className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
+        <KpiPanel
+          label="Active Tenants" value={num(kpis.tenantsActive)} icon={Building2} tone="text-primary"
+          caption={`${kpis.tenantsPending} pending · ${kpis.tenantsSuspended} suspended`}
+          onClick={() => navigate('/admin/tenants')}
+        />
+        <KpiPanel
+          label="Current Load" value={energy(kpis.currentLoadKw, 'kW').value} unit={energy(kpis.currentLoadKw, 'kW').unit}
+          icon={Zap} tone="text-energy" caption={`Peak ${num(kpis.peakDemandKw)} kW`}
+          spark={consumptionSpark} onClick={() => navigate('/admin/energy')}
+        />
+        <KpiPanel
+          label="Visitors Inside" value={num(kpis.visitorsInside)} icon={DoorOpen} tone="text-visitor"
+          caption={`${kpis.visitorsScheduledToday} scheduled today`}
+          onClick={() => navigate('/admin/visitors/inside')}
+        />
+        <KpiPanel
+          label="Open Requests" value={num(kpis.requestsOpen)} icon={Wrench} tone="text-service"
+          caption={`${kpis.requestsCritical} critical · ${kpis.requestsOverdue} overdue`}
+          onClick={() => navigate('/admin/service')}
+        />
+      </Frame>
+
+      {/* ------------------------------------------- supporting totals strip */}
+      <Frame>
+        <FramePanel className="grid grid-cols-2 gap-px overflow-hidden bg-border p-0! lg:grid-cols-4">
+          <MetricCell label="Month Consumption" value={energy(kpis.totalConsumptionKwh).value} unit={energy(kpis.totalConsumptionKwh).unit} caption="All active tenants" />
+          <MetricCell label="Month Charges" value={currency(kpis.totalChargesMonth, { compact: true })} caption="Billing period to date" />
+          <MetricCell
+            label="Overstaying" value={num(kpis.visitorsOverstaying)}
+            badge={kpis.visitorsOverstaying ? { variant: 'destructive-light', text: 'Needs attention' } : { variant: 'success-light', text: 'Clear' }}
+            onClick={() => navigate('/admin/visitors/overstaying')}
           />
-          <PanelSection title="Consumption & Peak Demand">
+          <MetricCell
+            label="Offline Meters" value={num(kpis.offlineMeters)}
+            caption={`of ${num(kpis.metersTotal)} monitored`}
+            badge={kpis.offlineMeters ? { variant: 'destructive-light', text: 'Action needed' } : { variant: 'success-light', text: 'All online' }}
+            onClick={() => navigate('/admin/energy/meters')}
+          />
+        </FramePanel>
+      </Frame>
+
+      {/* -------------------------- energy intelligence + operational attention */}
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:gap-5">
+        <Frame stacked>
+          <FramePanel>
+            <FrameHeader className="flex-row items-start justify-between gap-3">
+              <div className="min-w-0">
+                <FrameTitle>Consumption &amp; Peak Demand</FrameTitle>
+                <FrameDescription>Park-wide, last 30 days</FrameDescription>
+              </div>
+              <Button variant="ghost" size="sm" className="-me-1.5 shrink-0" onClick={() => navigate('/admin/energy')}>
+                Energy <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
+            </FrameHeader>
             <TrendChart
               data={daily}
               series={[{ key: 'kwh', label: 'Consumption (kWh)' }]}
               unit="kWh"
-              height={230}
+              height={224}
               valueFormatter={(v) => `${num(v)} kWh`}
             />
-          </PanelSection>
-          <PanelSection title="Highest Consuming Tenants · This billing period">
+          </FramePanel>
+          <FramePanel>
+            <FrameHeader>
+              <FrameTitle>Highest Consuming Tenants</FrameTitle>
+              <FrameDescription>This billing period</FrameDescription>
+            </FrameHeader>
             <BarSeriesChart
               data={ranking.map((r) => ({ label: r.tenant.code, kwh: r.periodKwh }))}
               series={[{ key: 'kwh', label: 'kWh' }]}
               horizontal
-              height={190}
+              height={186}
               valueFormatter={(v) => `${num(v)} kWh`}
             />
-          </PanelSection>
-        </Panel>
+          </FramePanel>
+        </Frame>
 
-        {/* Operational attention — what needs attention right now.
-            The queue is unbounded, so in the two-column layout the panel is
+        {/* The queue is unbounded, so in the two-column layout the frame is
             taken out of flow: the cell then contributes no intrinsic height,
             the energy column sizes the row, and the list scrolls inside
             whatever height that yields. Left in flow it grew to 1230px and
             stranded ~480px of empty space beside the charts. */}
-        <div className="relative">
-          <Panel className="min-h-0 xl:absolute xl:inset-0">
-            <PanelHeader
-              title="Operational Attention"
-              subtitle={`${attention.length} item${attention.length === 1 ? '' : 's'} need review`}
-              accent={attention.length ? 'warning' : 'success'}
-            />
-            <div className="min-h-0 flex-1 overflow-y-auto p-2">
+        <div className="relative min-h-[420px]">
+          <Frame className="flex min-h-0 flex-col xl:absolute xl:inset-0">
+            <FramePanel className="flex min-h-0 flex-1 flex-col overflow-hidden p-0!">
+              <FrameHeader className="flex-row items-center justify-between gap-3 border-b border-border">
+                <div className="min-w-0">
+                  <FrameTitle>Operational Attention</FrameTitle>
+                  <FrameDescription>Ranked by urgency across every domain</FrameDescription>
+                </div>
+                <Badge variant={attention.length ? 'warning-light' : 'success-light'} size="sm" className="shrink-0 tabular-nums">
+                  {attention.length}
+                </Badge>
+              </FrameHeader>
+
               {attention.length === 0 ? (
-                <div className="flex flex-col items-center gap-2 px-4 py-12 text-center">
-                  <IconBox icon={Bell} tone="success" size="lg" />
-                  <p className="text-[13px] font-medium text-foreground">Nothing needs attention</p>
-                  <p className="text-[12px] text-subtle">All tenants nominal across every domain.</p>
+                <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 py-16 text-center">
+                  <IconTile variant="soft" size="lg" className="text-success"><Bell /></IconTile>
+                  <div>
+                    <p className="text-[13px] font-medium text-foreground">Nothing needs attention</p>
+                    <p className="mt-0.5 text-[12px] text-muted-foreground">All tenants nominal across every domain.</p>
+                  </div>
                 </div>
               ) : (
-                <ul className="flex flex-col gap-0.5">
-                  {attention.map((item) => (
-                    <li key={item.id}>
-                      {/* The row carries no border or fill of its own — twelve
-                          bordered boxes inside a bordered panel was the noisiest
-                          thing on the page. Tone lives in the icon, and the tag
-                          keeps it readable without a second coloured pill. */}
+                <ScrollArea className="min-h-0 flex-1">
+                  <div className="divide-y divide-border">
+                    {attention.map((item) => (
                       <button
+                        key={item.id}
                         onClick={() => navigate(item.href)}
-                        className="flex w-full items-start gap-3 rounded-lg px-2.5 py-2.5 text-left transition-colors duration-150 hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-inset"
+                        className="block w-full text-left transition-colors hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-inset"
                       >
-                        <IconBox icon={item.icon} tone={item.tone} size="sm" />
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-baseline justify-between gap-2">
-                            <p className="truncate text-[13px] font-medium leading-tight text-foreground">{item.title}</p>
-                            <span className="shrink-0 text-[10px] font-semibold uppercase leading-none tracking-[0.09em] text-subtle">{item.tag}</span>
-                          </div>
-                          <p className="mt-1 truncate text-[12px] leading-tight text-muted">{item.detail}</p>
-                          <p className="mt-1 truncate text-[11px] leading-tight text-subtle">{item.tenant} · {ago(item.ts)}</p>
-                        </div>
+                        <Alert variant={ALERT_VARIANT[item.tone]} className="border-0 bg-transparent shadow-none">
+                          <item.icon />
+                          <AlertTitle className="flex items-baseline justify-between gap-2">
+                            <span className="truncate">{item.title}</span>
+                            <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.09em] opacity-70">{item.tag}</span>
+                          </AlertTitle>
+                          <AlertDescription>
+                            <span className="block truncate">{item.detail}</span>
+                            <span className="mt-0.5 block truncate text-muted-foreground">{item.tenant} · {ago(item.ts)}</span>
+                          </AlertDescription>
+                        </Alert>
                       </button>
-                    </li>
-                  ))}
-                </ul>
+                    ))}
+                  </div>
+                </ScrollArea>
               )}
-            </div>
-          </Panel>
+            </FramePanel>
+          </Frame>
         </div>
-      </SplitGrid>
+      </div>
 
-      {/* LOWER — tenant operations */}
-      <ContentGrid cols={3} align="start">
-        <Panel>
-          <PanelHeader title="Recent Activity" subtitle="Across all tenants" />
-          <PanelBody>
-            <Timeline
-              items={activity.map((a) => ({
-                id: a.id,
-                icon: ACTIVITY_ICON[a.kind] ?? Bell,
-                tone: a.domain === 'energy' ? 'energy' : a.domain === 'visitor' ? 'visitor' : a.domain === 'service' ? 'service' : 'primary',
-                title: a.title,
-                detail: a.detail,
-                meta: ago(a.ts),
-              }))}
-            />
-          </PanelBody>
-        </Panel>
+      {/* ------------------------------------------------- tenant operations */}
+      {/* items-start, not stretch: these three panels genuinely vary in length,
+          and stretching the short ones strands the difference as empty space
+          inside the card, which reads as a bug rather than as breathing room. */}
+      <div className="grid items-start gap-4 lg:grid-cols-3 lg:gap-5">
+        <Frame>
+          <FramePanel className="p-0!">
+            <FrameHeader className="border-b border-border">
+              <FrameTitle>Recent Activity</FrameTitle>
+              <FrameDescription>Across all tenants</FrameDescription>
+            </FrameHeader>
+            <ul className="divide-y divide-border">
+              {activity.map((a) => {
+                const Icon = ACTIVITY_ICON[a.kind] ?? Bell;
+                const tone = a.domain === 'energy' ? 'text-energy' : a.domain === 'visitor' ? 'text-visitor' : a.domain === 'service' ? 'text-service' : 'text-primary';
+                return (
+                  <li key={a.id} className="flex items-start gap-3 px-4 py-3">
+                    <IconTile variant="soft" size="sm" className={cn('mt-0.5 shrink-0', tone)}><Icon /></IconTile>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-baseline justify-between gap-2">
+                        <p className="truncate text-[13px] font-medium text-foreground">{a.title}</p>
+                        <span className="shrink-0 text-[11px] text-muted-foreground">{ago(a.ts)}</span>
+                      </div>
+                      {a.detail && <p className="mt-0.5 truncate text-[12px] text-muted-foreground">{a.detail}</p>}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </FramePanel>
+        </Frame>
 
-        <Panel>
-          <PanelHeader
-            title="Upcoming Visitors"
-            subtitle="Next arrivals"
-            accent="visitor"
-            actions={<Button variant="ghost" size="xs" onClick={() => navigate('/admin/visitors/scheduled')}>All</Button>}
-          />
-          <PanelBody className="flex flex-col gap-0.5 p-2">
+        <Frame>
+          <FramePanel className="p-0!">
+            <FrameHeader className="flex-row items-center justify-between gap-3 border-b border-border">
+              <div className="min-w-0">
+                <FrameTitle>Upcoming Visitors</FrameTitle>
+                <FrameDescription>Next arrivals</FrameDescription>
+              </div>
+              <Button variant="ghost" size="sm" className="-me-1.5 shrink-0" onClick={() => navigate('/admin/visitors/scheduled')}>All</Button>
+            </FrameHeader>
             {upcoming.length === 0 ? (
-              <p className="py-6 text-center text-[12px] text-subtle">No upcoming visitors.</p>
+              <p className="px-4 py-10 text-center text-[12px] text-muted-foreground">No upcoming visitors.</p>
             ) : (
-              upcoming.map((v) => (
-                <VisitorRow key={v.id} name={v.fullName} company={v.company} time={fmtTime(v.expectedArrival)} />
-              ))
+              <ul className="divide-y divide-border">
+                {upcoming.map((v) => (
+                  <li key={v.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
+                    <div className="min-w-0">
+                      <p className="truncate text-[13px] font-medium text-foreground">{v.fullName}</p>
+                      {v.company && <p className="truncate text-[11.5px] text-muted-foreground">{v.company}</p>}
+                    </div>
+                    <span className="shrink-0 font-mono text-[11.5px] tabular-nums text-muted-foreground">{fmtTime(v.expectedArrival)}</span>
+                  </li>
+                ))}
+              </ul>
             )}
-          </PanelBody>
-        </Panel>
+          </FramePanel>
+        </Frame>
 
-        <Panel>
-          <PanelHeader
-            title="Recent Onboarding"
-            subtitle="Newest tenants"
-            accent="primary"
-            actions={<Button variant="ghost" size="xs" onClick={() => navigate('/admin/tenants')}>All</Button>}
-          />
-          <PanelBody className="flex flex-col gap-0.5 p-2">
-            {recentTenants.map((r) => (
-              <button
-                key={r.tenant.id}
-                onClick={() => navigate(`/admin/tenants/${r.tenant.id}`)}
-                className="flex items-center gap-3 rounded-lg px-2 py-1.5 text-left transition-colors duration-150 hover:bg-surface-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-inset"
-              >
-                <TenantMark name={r.tenant.name} hue={r.tenant.brandHue} size={32} />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-[13px] font-medium leading-tight text-foreground">{r.tenant.name}</p>
-                  <p className="mt-0.5 truncate text-[11px] leading-tight text-subtle">{r.buildingName} · {ago(r.tenant.createdAt)}</p>
-                </div>
-                <TenantStatusBadge status={r.tenant.status} size="sm" />
-              </button>
-            ))}
-          </PanelBody>
-        </Panel>
-      </ContentGrid>
+        <Frame>
+          <FramePanel className="p-0!">
+            <FrameHeader className="flex-row items-center justify-between gap-3 border-b border-border">
+              <div className="min-w-0">
+                <FrameTitle>Recent Onboarding</FrameTitle>
+                <FrameDescription>Newest tenants</FrameDescription>
+              </div>
+              <Button variant="ghost" size="sm" className="-me-1.5 shrink-0" onClick={() => navigate('/admin/tenants')}>All</Button>
+            </FrameHeader>
+            <ul className="divide-y divide-border">
+              {recentTenants.map((r) => {
+                const meta = TENANT_STATUS[r.tenant.status];
+                return (
+                  <li key={r.tenant.id}>
+                    <button
+                      onClick={() => navigate(`/admin/tenants/${r.tenant.id}`)}
+                      className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-inset"
+                    >
+                      <span
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[11px] font-semibold text-white"
+                        style={{ background: `hsl(${r.tenant.brandHue} 62% 45%)` }}
+                        aria-hidden
+                      >
+                        {r.tenant.name.slice(0, 2).toUpperCase()}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[13px] font-medium text-foreground">{r.tenant.name}</p>
+                        <p className="truncate text-[11.5px] text-muted-foreground">{r.buildingName} · {ago(r.tenant.createdAt)}</p>
+                      </div>
+                      <Badge variant={BADGE_VARIANT[meta.tone] ?? 'secondary'} size="xs" className="shrink-0">{meta.label}</Badge>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </FramePanel>
+        </Frame>
+      </div>
 
-      <p className="pb-2 text-center text-[11px] text-subtle">
+      <p className="pb-1 text-center text-[11.5px] text-muted-foreground">
         Live values update every few seconds · {compact(kpis.metersTotal)} meters monitored across the park
       </p>
-    </Page>
+    </div>
   );
 }
 
-function VisitorRow({ name, company, time }: { name: string; company?: string; time: string }) {
+/* ------------------------------------------------------------ KPI panel */
+
+function KpiPanel({
+  label, value, unit, icon: Icon, tone, caption, spark, onClick,
+}: {
+  label: string; value: string; unit?: string; icon: typeof Zap; tone: string;
+  caption: string; spark?: number[]; onClick: () => void;
+}) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5">
-      <div className="min-w-0">
-        <p className="truncate text-[13px] font-medium leading-tight text-foreground">{name}</p>
-        {company && <p className="mt-0.5 truncate text-[11px] leading-tight text-subtle">{company}</p>}
+    <FramePanel className="overflow-hidden p-0!">
+      <button
+        onClick={onClick}
+        className="flex w-full flex-col gap-3.5 px-4 pb-3 pt-3.5 text-left transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-inset"
+      >
+        <div className="flex items-center justify-between gap-2">
+          <span className="truncate text-[12px] font-medium text-muted-foreground">{label}</span>
+          <IconTile variant="soft" size="sm" className={cn('shrink-0', tone)}><Icon /></IconTile>
+        </div>
+
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-[26px] font-semibold leading-none tracking-[-0.03em] tabular-nums text-foreground">{value}</span>
+          {unit && <span className="text-[12px] font-medium text-muted-foreground">{unit}</span>}
+        </div>
+
+        <div className="flex min-h-[20px] items-end justify-between gap-3">
+          <span className="truncate text-[11.5px] text-muted-foreground">{caption}</span>
+          {spark && spark.length > 1 && (
+            <span className="w-20 shrink-0 opacity-70">
+              <Sparkline data={spark} height={20} color="var(--module-energy)" />
+            </span>
+          )}
+        </div>
+      </button>
+    </FramePanel>
+  );
+}
+
+/* --------------------------------------------------------- metric cell */
+
+function MetricCell({
+  label, value, unit, caption, badge, onClick,
+}: {
+  label: string; value: string; unit?: string; caption?: string;
+  badge?: { variant: 'success-light' | 'destructive-light'; text: string };
+  onClick?: () => void;
+}) {
+  const body = (
+    <>
+      <span className="truncate text-[11.5px] font-medium text-muted-foreground">{label}</span>
+      <div className="flex items-baseline gap-1.5">
+        <span className="text-[17px] font-semibold leading-none tracking-[-0.02em] tabular-nums text-foreground">{value}</span>
+        {unit && <span className="text-[11px] font-medium text-muted-foreground">{unit}</span>}
       </div>
-      <span className="tnum shrink-0 text-[11.5px] font-medium text-muted">{time}</span>
-    </div>
+      <div className="flex min-w-0 items-center gap-2">
+        {badge && <Badge variant={badge.variant} size="xs" className="shrink-0">{badge.text}</Badge>}
+        {caption && <span className="truncate text-[11px] text-muted-foreground">{caption}</span>}
+      </div>
+    </>
+  );
+  const cls = 'flex flex-col gap-2 bg-card px-4 py-3.5 text-left';
+  return onClick ? (
+    <button onClick={onClick} className={cn(cls, 'transition-colors hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-inset')}>
+      {body}
+    </button>
+  ) : (
+    <div className={cls}>{body}</div>
   );
 }
 

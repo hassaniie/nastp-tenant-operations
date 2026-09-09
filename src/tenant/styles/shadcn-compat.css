@@ -54,9 +54,46 @@
    * red `critical`. Aliased rather than renamed so `lib/meta.ts` stays the
    * authority on what a status colour means. */
   --destructive: var(--critical);
-  --destructive-foreground: #ffffff;
+  /* Tint-text, matching the other status foregrounds — NOT the contrast
+   * partner for a solid fill. ReUI's `destructive-light` paints
+   * `text-destructive-foreground` on a 10% red wash, so white here renders an
+   * invisible badge on light paper; the solid fills use `text-white`
+   * directly instead (see install-reui.mjs). */
+  --destructive-foreground: color-mix(in oklch, var(--critical) 88%, white);
 
   --input: var(--border);
+
+  /**
+   * ReUI's extended status tokens.
+   *
+   * A `*-foreground` here is NOT the contrast partner for a solid fill —
+   * ReUI's solid badges hardcode `text-white`. It is the text colour used on
+   * the *tinted* `-light` and `-outline` variants (`bg-success/10
+   * text-success-foreground`). Upstream ships emerald-900 on light and
+   * emerald-600 on dark, i.e. two separate decisions rather than one palette
+   * flipped.
+   *
+   * This follows that intent against the NASTP palette. theme.css already
+   * designs each mode's status hue independently — dark uses #22c55e, light
+   * uses the deeper #15a34a chosen for white paper — so each foreground is
+   * derived from the tone that mode already owns: lifted toward white on the
+   * dark canvas, deepened toward black on light paper. Light is engineered,
+   * not inverted, and both stay correct if the underlying hue is ever retuned.
+   */
+  --success-foreground: color-mix(in oklch, var(--success) 88%, white);
+  --warning-foreground: color-mix(in oklch, var(--warning) 88%, white);
+  --info-foreground: color-mix(in oklch, var(--info) 88%, white);
+
+  /* `focus` is ReUI's fifth semantic accent. NASTP's accent is the indigo
+   * brand, so it maps there rather than introducing a sixth hue. */
+  --focus: var(--primary);
+  --focus-foreground: color-mix(in oklch, var(--primary) 55%, white);
+
+  /* The inverted chip: a light plate on the dark canvas, a near-black plate
+   * on light paper. Both fall out of the palette because theme.css swaps
+   * foreground and background per mode. */
+  --invert: var(--foreground);
+  --invert-foreground: var(--background);
 
   /**
    * Raw token only — deliberately NOT wired into Tailwind's --radius-*
@@ -67,6 +104,20 @@
    * scale is a deliberate design decision for a later phase.
    */
   --radius: 10px;
+}
+
+/**
+ * Light is designed, not derived. On white paper a status hue that reads
+ * well against the dark canvas turns weak the moment it sits on a 10% tint,
+ * so each foreground is deepened instead of lifted. Same tokens, opposite
+ * direction, per ReUI's own light/dark split.
+ */
+[data-theme='light'] {
+  --success-foreground: color-mix(in oklch, var(--success) 72%, black);
+  --warning-foreground: color-mix(in oklch, var(--warning) 66%, black);
+  --info-foreground: color-mix(in oklch, var(--info) 72%, black);
+  --focus-foreground: color-mix(in oklch, var(--primary) 78%, black);
+  --destructive-foreground: color-mix(in oklch, var(--critical) 74%, black);
 }
 
 /**
@@ -93,4 +144,12 @@
   --color-destructive-foreground: var(--destructive-foreground);
 
   --color-input: var(--input);
+
+  --color-success-foreground: var(--success-foreground);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info-foreground: var(--info-foreground);
+  --color-focus: var(--focus);
+  --color-focus-foreground: var(--focus-foreground);
+  --color-invert: var(--invert);
+  --color-invert-foreground: var(--invert-foreground);
 }
