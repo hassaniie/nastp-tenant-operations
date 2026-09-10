@@ -6,7 +6,7 @@ export const Tabs = TabsPrimitive.Root;
 
 export const TabsList = forwardRef<ElementRef<typeof TabsPrimitive.List>, ComponentPropsWithoutRef<typeof TabsPrimitive.List>>(
   ({ className, ...props }, ref) => (
-    <TabsPrimitive.List ref={ref} className={cn('inline-flex items-center gap-1 rounded-xl border border-border bg-surface-inset p-1', className)} {...props} />
+    <TabsPrimitive.List ref={ref} className={cn('inline-flex items-center gap-1 rounded-md border border-border bg-surface-inset p-1', className)} {...props} />
   ),
 );
 TabsList.displayName = 'TabsList';
@@ -16,7 +16,7 @@ export const TabsTrigger = forwardRef<ElementRef<typeof TabsPrimitive.Trigger>, 
     <TabsPrimitive.Trigger
       ref={ref}
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[13px] font-medium text-subtle transition-all outline-none hover:text-foreground',
+        'inline-flex items-center gap-1.5 rounded-md px-3.5 py-1.5 text-[13px] font-medium text-subtle transition-all outline-none hover:text-foreground',
         'data-[state=active]:bg-surface-raised data-[state=active]:text-foreground data-[state=active]:shadow-[var(--shadow-sm)]',
         className,
       )}
@@ -52,7 +52,14 @@ export function TabBar<T extends string>({
         return (
           <button
             key={t.value}
+            type="button"
             role="tab"
+            tabIndex={active ? 0 : -1}
+            onKeyDown={(event) => {
+              const index = tabs.findIndex(tab => tab.value === t.value);
+              const next = event.key === 'ArrowRight' ? (index + 1) % tabs.length : event.key === 'ArrowLeft' ? (index - 1 + tabs.length) % tabs.length : event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : -1;
+              if (next >= 0) { event.preventDefault(); onChange(tabs[next].value); (event.currentTarget.parentElement?.querySelectorAll('button')[next] as HTMLButtonElement)?.focus(); }
+            }}
             aria-selected={active}
             onClick={() => onChange(t.value)}
             className={cn(
@@ -63,9 +70,9 @@ export function TabBar<T extends string>({
             {t.icon}
             {t.label}
             {t.count !== undefined && (
-              <span className={cn('tnum rounded-full px-1.5 text-[11px]', active ? 'bg-primary-muted text-primary' : 'bg-surface-inset text-subtle')}>{t.count}</span>
+              <span className={cn('tnum rounded px-1.5 text-[11px]', active ? 'bg-primary-muted text-primary' : 'bg-surface-inset text-subtle')}>{t.count}</span>
             )}
-            {active && <span className="absolute inset-x-2 -bottom-px h-[2px] rounded-full bg-primary" />}
+            {active && <span className="absolute inset-x-2 -bottom-px h-[2px] rounded bg-primary" />}
           </button>
         );
       })}
@@ -88,14 +95,14 @@ export function Segmented<T extends string>({
   className?: string;
 }) {
   return (
-    <div role="tablist" className={cn('inline-flex items-center gap-0.5 rounded-lg border border-border bg-surface-inset p-0.5', className)}>
+    <div role="group" aria-label="View mode" className={cn('inline-flex items-center gap-0.5 rounded-md border border-border bg-surface-inset p-0.5', className)}>
       {options.map((opt) => {
         const active = opt.value === value;
         return (
           <button
             key={opt.value}
-            role="tab"
-            aria-selected={active}
+            type="button"
+            aria-pressed={active}
             disabled={opt.disabled}
             onClick={() => onChange(opt.value)}
             className={cn(
@@ -136,11 +143,11 @@ export function FilterChips<T extends string>({
             onClick={() => toggle(opt.value)}
             aria-pressed={active}
             className={cn(
-              'inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-[12px] font-medium transition-all',
+              'inline-flex h-8 items-center gap-1.5 rounded border px-3 text-[12px] font-medium transition-all',
               active ? 'border-primary/40 bg-primary-muted text-foreground' : 'border-border bg-surface-inset text-subtle hover:border-border-strong hover:text-muted',
             )}
           >
-            {opt.dot && <span className="h-1.5 w-1.5 rounded-full" style={{ background: opt.dot }} />}
+            {opt.dot && <span className="h-1.5 w-1.5 rounded" style={{ background: opt.dot }} />}
             {opt.label}
             {opt.count !== undefined && <span className="tnum rounded bg-surface px-1 text-[11px] text-subtle">{opt.count}</span>}
           </button>

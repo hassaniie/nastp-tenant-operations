@@ -1,0 +1,20 @@
+.workbench { --wb-gutter: 32px; }
+.wb-nav { display:flex; border:0; border-bottom:1px solid var(--border); border-radius:0; background:var(--background); padding:0 var(--wb-gutter); gap:24px; overflow-x:auto; }
+.wb-nav button { background:transparent!important; box-shadow:none!important; border-radius:0; border-bottom:2px solid transparent; padding:14px 0; white-space:nowrap; }
+.wb-nav button[data-state=active] { border-color:var(--primary); }
+.wb-content { padding:0 var(--wb-gutter) 32px; }
+.wb-example { padding:26px 0; border-bottom:1px solid var(--border); }
+.wb-example-body { display:flex; flex-direction:column; gap:20px; margin-top:20px; min-width:0; }
+.wb-row { display:flex; align-items:center; flex-wrap:wrap; gap:12px; }
+.wb-form-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; margin-bottom:20px; }
+.wb-choice { display:inline-flex; align-items:center; gap:8px; font-size:13px; color:var(--foreground-muted); }
+.wb-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; margin-top:24px; }
+.wb-swatches { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:16px; }
+.wb-swatches > div { min-width:0; }
+.wb-swatches span { display:block; height:64px; border:1px solid var(--border); border-radius:6px; margin-bottom:8px; }
+.wb-swatches code { font-size:11px; overflow-wrap:anywhere; color:var(--foreground-muted); }
+.wb-type h1 { font-size:30px; letter-spacing:-1px; }.wb-type h2 { font-size:16px; margin-block:16px; }.wb-type p { font-size:14px; }.wb-type small { display:block; color:var(--foreground-subtle); margin-top:8px; font-size:12px; }.wb-type strong { display:block; font-size:37px; font-weight:500; margin-top:20px; }.wb-type strong small { display:inline; }
+.wb-space { display:flex; gap:8px; align-items:center; font-size:12px; }.wb-space i { display:block; background:var(--primary); }
+.wb-footer { display:flex; align-items:center; flex-wrap:wrap; gap:10px; padding:20px 32px; border-top:1px solid var(--border); color:var(--foreground-subtle); font-size:12px; }
+@media(max-width:900px) { .wb-form-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }.wb-swatches { grid-template-columns:repeat(4,minmax(0,1fr)); } }
+@media(max-width:600px) { .workbench { --wb-gutter:20px; }.wb-form-grid,.wb-grid { grid-template-columns:minmax(0,1fr); }.wb-swatches { grid-template-columns:repeat(3,minmax(0,1fr)); }.wb-nav { gap:18px; }.wb-nav button { font-size:12px; } }

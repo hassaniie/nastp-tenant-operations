@@ -20,6 +20,7 @@ import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
 import { cn, compact, num } from '../lib/utils';
 import { useSession } from '../store/session';
 import { Button } from './ui/primitives';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from './ui/table';
 
 /* ------------------------------------------------------------- theme bridge */
 
@@ -69,7 +70,7 @@ export function seqColor(theme: VizTheme, t: number) {
 
 /* ------------------------------------------------------------------ shared */
 
-const AXIS_STYLE = { fontSize: 10.5, fontFamily: 'var(--font-sans)' } as const;
+const AXIS_STYLE = { fontSize: 12, fontFamily: 'var(--font-sans)' } as const;
 
 function ChartTooltip({ active, payload, label, formatter, unit }: { active?: boolean; payload?: Array<{ name?: string; value?: number; color?: string; dataKey?: string | number }>; label?: string | number; formatter?: (v: number, key: string) => string; unit?: string }) {
   if (!active || !payload?.length) return null;
@@ -109,26 +110,26 @@ function LegendRow({ series, theme }: { series: SeriesSpec[]; theme: VizTheme })
 function DataTableView({ data, categoryKey, series }: { data: any[]; categoryKey: string; series: SeriesSpec[] }) {
   return (
     <div className="max-h-[260px] overflow-auto rounded-lg border border-border">
-      <table className="w-full text-left text-[12px]">
-        <thead className="sticky top-0 bg-surface-inset">
-          <tr>
-            <th className="px-2.5 py-1.5 font-semibold uppercase tracking-[0.08em] text-subtle">Period</th>
+      <Table className="w-full text-left text-[12px]">
+        <TableHeader className="sticky top-0 bg-surface-inset">
+          <TableRow>
+            <TableHead className="px-2.5 py-1.5 font-semibold uppercase tracking-[0.08em] text-subtle">Period</TableHead>
             {series.map((s) => (
-              <th key={s.key} className="px-2.5 py-1.5 text-right font-semibold uppercase tracking-[0.08em] text-subtle">{s.label}</th>
+              <TableHead key={s.key} className="px-2.5 py-1.5 text-right font-semibold uppercase tracking-[0.08em] text-subtle">{s.label}</TableHead>
             ))}
-          </tr>
-        </thead>
-        <tbody>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {data.map((row, i) => (
-            <tr key={i} className="border-t border-border-subtle">
-              <td className="px-2.5 py-1.5 text-muted">{row[categoryKey]}</td>
+            <TableRow key={i} className="border-t border-border-subtle">
+              <TableCell className="px-2.5 py-1.5 text-muted">{row[categoryKey]}</TableCell>
               {series.map((s) => (
-                <td key={s.key} className="tnum px-2.5 py-1.5 text-right text-foreground">{num(Number(row[s.key] ?? 0))}</td>
+                <TableCell key={s.key} className="tnum px-2.5 py-1.5 text-right text-foreground">{num(Number(row[s.key] ?? 0))}</TableCell>
               ))}
-            </tr>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 }
@@ -138,7 +139,7 @@ export function ChartFrame({ children, data, categoryKey, series, height = 220, 
   const [asTable, setAsTable] = useState(false);
   const canTable = Boolean(data && categoryKey && series);
   return (
-    <div className={cn('flex flex-col gap-2', className)}>
+    <div className={cn('ds-chart-frame flex flex-col gap-2', className)}>
       {(series || toolbar || canTable) && (
         <div className="flex items-start justify-between gap-3">
           {series ? <LegendRow series={series} theme={theme} /> : <span />}
@@ -291,7 +292,7 @@ export function DonutChart({ data, height = 200, centreLabel, centreValue }: { d
   const theme = useVizTheme();
   const total = data.reduce((s, d) => s + d.value, 0);
   return (
-    <div className="flex items-center gap-5">
+    <div className="flex flex-wrap items-center gap-5">
       <div className="relative shrink-0" style={{ width: height, height }}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>

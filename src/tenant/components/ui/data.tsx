@@ -1,189 +1,72 @@
-/**
- * Data surfaces: the table and the states every data view must be able to show
- * — loading, empty, error. These are components rather than copy-pasted markup
- * so a screen physically cannot forget one.
- */
-
-import {
-  AlertTriangle, ChevronDown, ChevronLeft, ChevronRight, ChevronsUpDown, ChevronUp, Inbox, RefreshCw,
-} from 'lucide-react';
+/** Canonical data surface: semantic table + controlled selection + keyboard sorting. */
+import { AlertTriangle, ChevronDown, ChevronLeft, ChevronRight, ChevronsUpDown, ChevronUp, Inbox, RefreshCw, ShieldX } from 'lucide-react';
 import { useMemo, useState, type ReactNode } from 'react';
 import { cn } from '../../lib/utils';
-import { Button, Skeleton } from './primitives';
-
-/* ------------------------------------------------------------------- Table */
+import { Button, Skeleton, Spinner } from './primitives';
+import { Checkbox } from './form';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from './table';
+import { sortRows, pageRows, togglePageSelection } from './table-model';
 
 export interface Column<T> {
-  key: string;
-  header: ReactNode;
-  cell: (row: T, index: number) => ReactNode;
-  sortValue?: (row: T) => string | number;
-  width?: string;
-  align?: 'left' | 'right' | 'center';
-  className?: string;
-  hideBelow?: 'sm' | 'md' | 'lg' | 'xl';
+  key: string; header: ReactNode; cell: (row: T, index: number) => ReactNode;
+  sortValue?: (row: T) => string | number; width?: string; align?: 'left' | 'right' | 'center';
+  className?: string; hideBelow?: 'sm' | 'md' | 'lg' | 'xl';
 }
-
-const HIDE: Record<NonNullable<Column<unknown>['hideBelow']>, string> = {
-  sm: 'hidden sm:table-cell',
-  md: 'hidden md:table-cell',
-  lg: 'hidden lg:table-cell',
-  xl: 'hidden xl:table-cell',
-};
-
-export function DataTable<T>({
-  rows,
-  columns,
-  rowKey,
-  onRowClick,
-  loading,
-  error,
-  onRetry,
-  emptyTitle = 'Nothing to show',
-  emptyDescription,
-  emptyAction,
-  emptyIcon,
-  pageSize = 0,
-  stickyHeader = true,
-  dense,
-  className,
-  selectedKey,
+const HIDE = { sm: 'hidden sm:table-cell', md: 'hidden md:table-cell', lg: 'hidden lg:table-cell', xl: 'hidden xl:table-cell' };
+export function DataTable<T>({ rows, columns, rowKey, onRowClick, loading, error, onRetry, emptyTitle = 'Nothing to show', emptyDescription,
+  emptyAction, emptyIcon, pageSize = 0, stickyHeader = true, dense, className, selectedKey, label = 'Records', rowLabel,
+  selection, onSelectionChange, bulkActions, resetKey,
 }: {
-  rows: T[];
-  columns: Column<T>[];
-  rowKey: (row: T, index: number) => string;
-  onRowClick?: (row: T) => void;
-  loading?: boolean;
-  error?: string;
-  onRetry?: () => void;
-  emptyTitle?: string;
-  emptyDescription?: string;
-  emptyAction?: ReactNode;
-  emptyIcon?: ReactNode;
-  pageSize?: number;
-  stickyHeader?: boolean;
-  dense?: boolean;
-  className?: string;
-  selectedKey?: string;
+  rows: T[]; columns: Column<T>[]; rowKey: (row: T, index: number) => string; onRowClick?: (row: T) => void;
+  loading?: boolean; error?: string; onRetry?: () => void; emptyTitle?: string; emptyDescription?: string; emptyAction?: ReactNode; emptyIcon?: ReactNode;
+  pageSize?: number; stickyHeader?: boolean; dense?: boolean; className?: string; selectedKey?: string; label?: string; rowLabel?: (row: T) => string;
+  selection?: Set<string>; onSelectionChange?: (selection: Set<string>) => void; bulkActions?: ReactNode; resetKey?: string;
 }) {
   const [sort, setSort] = useState<{ key: string; dir: 'asc' | 'desc' } | null>(null);
-  const [page, setPage] = useState(0);
-
-  const sorted = useMemo(() => {
-    if (!sort) return rows;
-    const col = columns.find((c) => c.key === sort.key);
-    if (!col?.sortValue) return rows;
-    const dir = sort.dir === 'asc' ? 1 : -1;
-    return [...rows].sort((a, b) => {
-      const av = col.sortValue!(a);
-      const bv = col.sortValue!(b);
-      if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * dir;
-      return String(av).localeCompare(String(bv)) * dir;
-    });
-  }, [rows, sort, columns]);
-
-  const pageCount = pageSize ? Math.max(1, Math.ceil(sorted.length / pageSize)) : 1;
-  const current = Math.min(page, pageCount - 1);
-  const visible = pageSize ? sorted.slice(current * pageSize, current * pageSize + pageSize) : sorted;
-
+  const [pagination, setPagination] = useState({ page: 0, resetKey });
+  const sorted = useMemo(() => sortRows(rows, columns.find(c => c.key === sort?.key)?.sortValue, sort?.dir), [rows, columns, sort]);
+  const { count: pageCount, current, visible } = pageRows(sorted, pagination.resetKey === resetKey ? pagination.page : 0, pageSize);
+  // Commit the filter reset so returning to an earlier filter never revives its old page.
+  if (pagination.resetKey !== resetKey) setPagination({ page: 0, resetKey });
+  const selectable = Boolean(selection && onSelectionChange);
+  const visibleKeys = visible.map(rowKey);
+  const pageSelected = visibleKeys.filter(key => selection?.has(key)).length;
+  const changeSort = (key: string) => { setSort(previous => ({ key, dir: previous?.key === key && previous.dir === 'asc' ? 'desc' : 'asc' })); setPagination({ page: 0, resetKey }); };
   if (error) return <ErrorState message={error} onRetry={onRetry} />;
-
-  return (
-    <div className={cn('flex min-h-0 flex-col', className)}>
-      <div className="min-h-0 flex-1 overflow-auto">
-        <table className="w-full border-collapse text-left">
-          <thead className={cn(stickyHeader && 'sticky top-0 z-10')}>
-            <tr className="bg-surface-inset">
-              {columns.map((col) => {
-                const sortable = Boolean(col.sortValue);
-                const active = sort?.key === col.key;
-                return (
-                  <th
-                    key={col.key}
-                    style={{ width: col.width }}
-                    className={cn(
-                      'whitespace-nowrap border-b border-border px-3.5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.09em] text-subtle',
-                      col.align === 'right' && 'text-right',
-                      col.align === 'center' && 'text-center',
-                      col.hideBelow && HIDE[col.hideBelow],
-                      sortable && 'cursor-pointer select-none transition-colors hover:text-foreground',
-                    )}
-                    onClick={
-                      sortable
-                        ? () => setSort((prev) => (prev?.key === col.key ? { key: col.key, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { key: col.key, dir: 'asc' }))
-                        : undefined
-                    }
-                  >
-                    <span className={cn('inline-flex items-center gap-1', col.align === 'right' && 'flex-row-reverse')}>
-                      {col.header}
-                      {sortable && (active ? sort!.dir === 'asc' ? <ChevronUp className="h-3 w-3 text-primary" /> : <ChevronDown className="h-3 w-3 text-primary" /> : <ChevronsUpDown className="h-3 w-3 opacity-40" />)}
-                    </span>
-                  </th>
-                );
-              })}
-            </tr>
-          </thead>
-          <tbody>
-            {loading &&
-              Array.from({ length: 8 }).map((_, i) => (
-                <tr key={`sk-${i}`} className="border-b border-border-subtle">
-                  {columns.map((col) => (
-                    <td key={col.key} className={cn('px-3.5', dense ? 'py-2' : 'py-3', col.hideBelow && HIDE[col.hideBelow])}>
-                      <Skeleton className="h-3.5 w-full max-w-[150px]" />
-                    </td>
-                  ))}
-                </tr>
-              ))}
-
-            {!loading &&
-              visible.map((row, i) => {
-                const key = rowKey(row, i);
-                return (
-                  <tr
-                    key={key}
-                    onClick={onRowClick ? () => onRowClick(row) : undefined}
-                    className={cn(
-                      'border-b border-border-subtle transition-colors',
-                      onRowClick && 'cursor-pointer hover:bg-surface-raised',
-                      selectedKey === key && 'bg-primary-muted/40',
-                    )}
-                  >
-                    {columns.map((col) => (
-                      <td
-                        key={col.key}
-                        className={cn(
-                          'px-3.5 align-middle text-[13px] text-muted',
-                          dense ? 'py-2' : 'py-3',
-                          col.align === 'right' && 'text-right',
-                          col.align === 'center' && 'text-center',
-                          col.hideBelow && HIDE[col.hideBelow],
-                          col.className,
-                        )}
-                      >
-                        {col.cell(row, i)}
-                      </td>
-                    ))}
-                  </tr>
-                );
-              })}
-          </tbody>
-        </table>
-
-        {!loading && !visible.length && <EmptyState title={emptyTitle} description={emptyDescription} action={emptyAction} icon={emptyIcon} />}
-      </div>
-
-      {pageSize > 0 && sorted.length > pageSize && <Pagination page={current} pageCount={pageCount} total={sorted.length} pageSize={pageSize} onChange={setPage} />}
-    </div>
-  );
+  return <div className={cn('ds-data-table flex min-h-0 flex-col', className)} aria-busy={loading || undefined}>
+    {selectable && Boolean(selection?.size) && <div className="ds-bulk-actions"><span role="status">{selection!.size} selected</span>{bulkActions}<Button size="xs" variant="ghost" onClick={() => onSelectionChange!(new Set())}>Clear selection</Button></div>}
+    <Table aria-label={label} className="w-full text-left">
+      <TableHeader className={cn(stickyHeader && 'sticky top-0 z-10 bg-surface-inset')}><TableRow>
+        {selectable && <TableHead className="w-10"><Checkbox aria-label="Select current page" disabled={loading || !visible.length} checked={pageSelected === visible.length && visible.length > 0 ? true : pageSelected ? 'indeterminate' : false} onCheckedChange={value => onSelectionChange!(togglePageSelection(selection!, visibleKeys, value === true))} /></TableHead>}
+        {columns.map(col => <TableHead key={col.key} style={{ width: col.width }} aria-sort={sort?.key === col.key ? sort.dir === 'asc' ? 'ascending' : 'descending' : col.sortValue ? 'none' : undefined} className={cn(col.hideBelow && HIDE[col.hideBelow], col.align === 'right' && 'text-right', col.align === 'center' && 'text-center')}>
+          {col.sortValue ? <button type="button" className="inline-flex items-center gap-1 py-1 text-inherit hover:text-foreground" onClick={() => changeSort(col.key)}>{col.header}{sort?.key === col.key ? sort.dir === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} /> : <ChevronsUpDown size={14} />}</button> : col.header}
+        </TableHead>)}
+      </TableRow></TableHeader>
+      <TableBody>{loading ? Array.from({ length: 6 }, (_, index) => <TableRow key={index}>{selectable && <TableCell><Skeleton className="size-4" /></TableCell>}{columns.map(col => <TableCell key={col.key} className={col.hideBelow && HIDE[col.hideBelow]}><Skeleton className="h-4 w-full max-w-40" /></TableCell>)}</TableRow>) : visible.map((row, index) => {
+        const key = rowKey(row, index);
+        return <TableRow key={key} data-state={selection?.has(key) || selectedKey === key ? 'selected' : undefined}
+          tabIndex={onRowClick ? 0 : undefined} aria-label={onRowClick ? `Open ${rowLabel?.(row) ?? key}` : undefined}
+          onKeyDown={onRowClick ? event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); onRowClick(row); } } : undefined}
+          onClick={onRowClick ? event => { if (!(event.target as HTMLElement).closest('button,a,input,[role=checkbox]')) onRowClick(row); } : undefined}
+          className={cn(onRowClick && 'cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring focus-visible:-outline-offset-2')}>
+          {selectable && <TableCell><Checkbox checked={selection!.has(key)} onCheckedChange={checked => onSelectionChange!(togglePageSelection(selection!, [key], checked === true))} aria-label={`Select ${rowLabel?.(row) ?? key}`} /></TableCell>}
+          {columns.map(col => <TableCell key={col.key} className={cn(dense ? 'py-2' : 'py-3.5', col.align === 'right' && 'text-right', col.align === 'center' && 'text-center', col.hideBelow && HIDE[col.hideBelow], col.className)}>{col.cell(row, index)}</TableCell>)}
+        </TableRow>;
+      })}</TableBody>
+    </Table>
+    {!loading && !visible.length && <EmptyState title={emptyTitle} description={emptyDescription} action={emptyAction} icon={emptyIcon} />}
+    {loading && <span role="status" className="sr-only">Loading {label.toLowerCase()}</span>}
+    {pageSize > 0 && <Pagination page={current} pageCount={pageCount} total={sorted.length} pageSize={pageSize} onChange={page => setPagination({ page, resetKey })} />}
+  </div>;
 }
 
 /* -------------------------------------------------------------- Pagination */
 
 export function Pagination({ page, pageCount, total, pageSize, onChange }: { page: number; pageCount: number; total: number; pageSize: number; onChange: (page: number) => void }) {
-  const from = page * pageSize + 1;
+  const from = total ? page * pageSize + 1 : 0;
   const to = Math.min(total, (page + 1) * pageSize);
   return (
-    <div className="flex items-center justify-between border-t border-border px-3.5 py-2.5">
+    <nav aria-label="Pagination" className="flex items-center justify-between border-t border-border px-5 py-3">
       <p className="tnum text-[12px] text-subtle">
         {from}–{to} of {total.toLocaleString()}
       </p>
@@ -198,7 +81,7 @@ export function Pagination({ page, pageCount, total, pageSize, onChange }: { pag
           <ChevronRight className="h-3.5 w-3.5" />
         </Button>
       </div>
-    </div>
+    </nav>
   );
 }
 
@@ -207,7 +90,7 @@ export function Pagination({ page, pageCount, total, pageSize, onChange }: { pag
 export function EmptyState({ title, description, action, icon, className }: { title: ReactNode; description?: ReactNode; action?: ReactNode; icon?: ReactNode; className?: string }) {
   return (
     <div className={cn('flex flex-col items-center justify-center gap-3 px-6 py-16 text-center', className)}>
-      <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-border bg-surface-raised text-subtle">{icon ?? <Inbox className="h-5 w-5" />}</div>
+      <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-border bg-surface-raised text-subtle">{icon ?? <Inbox className="h-5 w-5" />}</div>
       <div>
         <p className="text-[14px] font-medium text-foreground">{title}</p>
         {description && <p className="mx-auto mt-1 max-w-sm text-[13px] leading-relaxed text-subtle">{description}</p>}
@@ -219,8 +102,8 @@ export function EmptyState({ title, description, action, icon, className }: { ti
 
 export function ErrorState({ message, onRetry, className, compact }: { message: string; onRetry?: () => void; className?: string; compact?: boolean }) {
   return (
-    <div className={cn('flex flex-col items-center justify-center gap-3 rounded-2xl border border-critical/25 bg-critical-dim/40 text-center', compact ? 'px-4 py-5' : 'px-6 py-12', className)} role="alert">
-      <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-critical/30 bg-critical-dim text-critical">
+    <div className={cn('flex flex-col items-center justify-center gap-3 rounded-lg border border-critical/25 bg-surface text-center', compact ? 'px-4 py-5' : 'px-6 py-12', className)} role="alert">
+      <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-critical/30 bg-critical-dim text-critical">
         <AlertTriangle className="h-5 w-5" />
       </div>
       <div>
@@ -240,10 +123,7 @@ export function ErrorState({ message, onRetry, className, compact }: { message: 
 export function LoadingState({ label = 'Loading…', className }: { label?: string; className?: string }) {
   return (
     <div className={cn('flex flex-col items-center justify-center gap-3 px-6 py-16', className)}>
-      <div className="relative h-9 w-9">
-        <span className="absolute inset-0 rounded-full border-2 border-border" />
-        <span className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-primary" />
-      </div>
+      <Spinner label={label} className="size-6" />
       <p className="text-[13px] text-subtle">{label}</p>
     </div>
   );
@@ -277,13 +157,17 @@ export function AsyncBoundary({
 
 export function DefList({ items, columns = 2, className }: { items: Array<{ label: ReactNode; value: ReactNode; span?: boolean }>; columns?: 1 | 2 | 3; className?: string }) {
   return (
-    <dl className={cn('grid gap-x-6 gap-y-4', columns === 1 ? 'grid-cols-1' : columns === 2 ? 'grid-cols-2' : 'grid-cols-3', className)}>
+    <dl className={cn('grid gap-x-6 gap-y-4', columns === 1 ? 'grid-cols-1' : columns === 2 ? 'grid-cols-1 min-[360px]:grid-cols-2' : 'grid-cols-1 sm:grid-cols-3', className)}>
       {items.map((item, i) => (
         <div key={i} className={cn('min-w-0', item.span && 'col-span-full')}>
-          <dt className="text-[11px] font-medium uppercase tracking-[0.1em] text-subtle">{item.label}</dt>
+          <dt className="text-xs font-medium text-subtle">{item.label}</dt>
           <dd className="mt-1 text-[13px] text-foreground">{item.value}</dd>
         </div>
       ))}
     </dl>
   );
+}
+
+export function NoPermissionState({ description = 'Your account does not have access to this action.', action }: { description?: string; action?: ReactNode }) {
+  return <EmptyState title="Access restricted" description={description} icon={<ShieldX className="size-5" />} action={action} />;
 }

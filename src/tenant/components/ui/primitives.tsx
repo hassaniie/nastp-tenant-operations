@@ -1,69 +1,9 @@
-import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Loader2, type LucideIcon } from 'lucide-react';
-import { forwardRef, type ButtonHTMLAttributes, type HTMLAttributes, type ReactNode } from 'react';
+import { type HTMLAttributes, type ReactNode } from 'react';
 import { cn } from '../../lib/utils';
 import type { Tone } from '../../lib/meta';
-
-/* ------------------------------------------------------------------ Button */
-
-const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-[10px] font-medium ' +
-    'transition-all duration-150 outline-none disabled:pointer-events-none disabled:opacity-45 ' +
-    'active:scale-[0.985] select-none focus-visible:ring-2 focus-visible:ring-ring/40 ' +
-    // The button owns its icon size and gap. Call sites were passing a mix of
-    // h-3.5 and h-4, so the same variant rendered differently across screens;
-    // sizing here keeps every button consistent by construction.
-    '[&_svg]:shrink-0',
-  {
-    variants: {
-      variant: {
-        primary:
-          'bg-primary text-primary-foreground shadow-[0_1px_0_rgba(255,255,255,0.12)_inset,0_2px_10px_rgba(99,102,241,0.28)] hover:bg-primary-hover',
-        secondary:
-          'bg-surface-raised text-foreground border border-border hover:border-border-strong hover:bg-surface-overlay',
-        ghost: 'text-muted hover:text-foreground hover:bg-surface-raised',
-        outline: 'border border-border-strong text-foreground hover:bg-surface-raised',
-        danger: 'bg-critical text-white shadow-[0_2px_8px_rgba(244,63,94,0.3)] hover:brightness-110',
-        success: 'bg-success text-white font-semibold hover:brightness-110',
-        subtle: 'bg-surface-inset text-muted hover:text-foreground',
-      },
-      size: {
-        xs: 'h-7 gap-1.5 px-2.5 text-[12px] rounded-lg [&_svg]:h-3.5 [&_svg]:w-3.5',
-        sm: 'h-8 gap-1.5 px-3 text-[13px] [&_svg]:h-4 [&_svg]:w-4',
-        md: 'h-9 gap-2 px-4 text-[13px] [&_svg]:h-4 [&_svg]:w-4',
-        lg: 'h-11 gap-2 px-5 text-[14px] [&_svg]:h-[18px] [&_svg]:w-[18px]',
-        icon: 'h-9 w-9 [&_svg]:h-4 [&_svg]:w-4',
-        'icon-sm': 'h-8 w-8 rounded-lg [&_svg]:h-4 [&_svg]:w-4',
-      },
-    },
-    defaultVariants: { variant: 'secondary', size: 'md' },
-  },
-);
-
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
-  asChild?: boolean;
-  loading?: boolean;
-}
-
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild, loading, children, disabled, ...props }, ref) => {
-    const Comp = asChild ? Slot : 'button';
-    return (
-      <Comp ref={ref} className={cn(buttonVariants({ variant, size }), className)} disabled={disabled || loading} {...props}>
-        {loading ? (
-          <>
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            {children}
-          </>
-        ) : (
-          children
-        )}
-      </Comp>
-    );
-  },
-);
-Button.displayName = 'Button';
+export { Button, IconButton, buttonVariants, type ButtonProps } from './button';
 
 /* ---------------------------------------------------------- tone classes */
 
@@ -99,12 +39,18 @@ export const TONE_ICON_BOX: Record<Tone, string> = {
 
 /* -------------------------------------------------------------- StatusBadge */
 
+const STATUS_TEXT: Record<Tone, string> = {
+  neutral: 'text-subtle', primary: 'text-primary', success: 'text-success', warning: 'text-warning',
+  critical: 'text-critical', info: 'text-info', energy: 'text-energy', visitor: 'text-visitor',
+  service: 'text-service', online: 'text-online', offline: 'text-offline',
+};
+
 /** Status + optional dot, always paired with a text label. Never colour-only. */
 export function StatusBadge({
   tone = 'neutral',
   children,
   dot = true,
-  pulse,
+  pulse: _pulse,
   size = 'md',
   className,
 }: {
@@ -118,15 +64,14 @@ export function StatusBadge({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full font-medium whitespace-nowrap',
-        size === 'sm' ? 'px-2 py-0.5 text-[11px]' : 'px-2.5 py-1 text-[12px]',
-        TONE_CHIP[tone],
+        'inline-flex items-center gap-1.5 font-medium whitespace-nowrap ds-status',
+        size === 'sm' ? 'text-[12px]' : 'text-[13px]',
+        STATUS_TEXT[tone],
         className,
       )}
     >
       {dot && (
         <span className="relative flex h-1.5 w-1.5">
-          {pulse && <span className={cn('absolute inline-flex h-full w-full rounded-full opacity-70', TONE_DOT[tone], 'animate-[pulse-ring_2.4s_ease-in-out_infinite]')} />}
           <span className={cn('relative inline-flex h-1.5 w-1.5 rounded-full', TONE_DOT[tone])} />
         </span>
       )}
@@ -195,17 +140,15 @@ export function Skeleton({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-md bg-surface-raised',
-        'after:absolute after:inset-0 after:-translate-x-full after:animate-[sweep_2.6s_linear_infinite]',
-        'after:bg-gradient-to-r after:from-transparent after:via-white/[0.04] after:to-transparent',
+        'animate-pulse rounded-md bg-border',
         className,
       )}
     />
   );
 }
 
-export function Spinner({ className }: { className?: string }) {
-  return <Loader2 className={cn('h-4 w-4 animate-spin text-subtle', className)} />;
+export function Spinner({ className, label = 'Loading' }: { className?: string; label?: string }) {
+  return <span role="status" className="inline-flex"><Loader2 aria-hidden className={cn('h-4 w-4 animate-spin text-subtle', className)} /><span className="sr-only">{label}</span></span>;
 }
 
 /* ---------------------------------------------------------------- Progress */
@@ -228,8 +171,9 @@ export function ProgressBar({
     <div
       className={cn('flex w-full overflow-hidden rounded-full bg-surface-inset', className)}
       style={{ height }}
-      role="meter"
-      aria-valuenow={Math.round(value)}
+      role="progressbar"
+      aria-label="Progress"
+      aria-valuenow={Math.round(Math.max(0, Math.min(100, value)))}
       aria-valuemin={0}
       aria-valuemax={100}
     >
@@ -243,12 +187,12 @@ export function ProgressBar({
 /* ------------------------------------------------------------------ Avatar */
 
 export function Avatar({ name, seed = 1, size = 34, className }: { name: string; seed?: number; size?: number; className?: string }) {
-  const hue = (seed * 47) % 360;
+  void seed; // Compatibility only: identity marks no longer invent decorative colors.
   const letters = name.split(' ').filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase()).join('');
   return (
     <span
-      className={cn('inline-flex shrink-0 items-center justify-center rounded-full font-semibold text-white ring-1 ring-white/10', className)}
-      style={{ width: size, height: size, fontSize: size * 0.38, background: `linear-gradient(140deg, hsl(${hue} 52% 46%), hsl(${(hue + 42) % 360} 55% 30%))` }}
+      className={cn('inline-flex shrink-0 items-center justify-center rounded-full border border-border bg-surface-raised font-medium text-subtle', className)}
+      style={{ width: size, height: size, fontSize: size * 0.34 }}
       aria-hidden
     >
       {letters}
@@ -261,8 +205,8 @@ export function TenantMark({ name, hue, size = 40, className }: { name: string; 
   const letters = name.split(' ').filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase()).join('');
   return (
     <span
-      className={cn('inline-flex shrink-0 items-center justify-center rounded-[12px] font-semibold text-white ring-1 ring-white/10', className)}
-      style={{ width: size, height: size, fontSize: size * 0.36, background: `linear-gradient(140deg, hsl(${hue} 62% 52%), hsl(${(hue + 30) % 360} 58% 34%))` }}
+      className={cn('inline-flex shrink-0 items-center justify-center rounded-md border border-border font-medium', className)}
+      style={{ width: size, height: size, fontSize: size * 0.36, background: `hsl(${hue} 20% 88%)`, color: `hsl(${hue} 25% 25%)` }}
       aria-hidden
     >
       {letters}
@@ -273,7 +217,5 @@ export function TenantMark({ name, hue, size = 40, className }: { name: string; 
 /* -------------------------------------------------------------- Separator */
 
 export function Separator({ orientation = 'horizontal', className }: { orientation?: 'horizontal' | 'vertical'; className?: string }) {
-  return <div role="separator" className={cn('bg-border', orientation === 'horizontal' ? 'h-px w-full' : 'h-full w-px', className)} />;
+  return <div role="separator" aria-orientation={orientation} className={cn('bg-border', orientation === 'horizontal' ? 'h-px w-full' : 'h-full w-px', className)} />;
 }
-
-export { buttonVariants };

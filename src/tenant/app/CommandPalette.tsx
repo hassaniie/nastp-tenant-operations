@@ -13,7 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import { simulation } from '../data/live';
 import { useSession } from '../store/session';
 import { ADMIN_NAV } from './nav';
-import { Dialog, DialogContent } from '../components/ui/overlay';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '../components/ui/overlay';
 import { Kbd, TenantMark } from '../components/ui/primitives';
 import { TenantStatusBadge, ServiceStatusBadge, VisitorStatusBadge } from '../components/status';
 
@@ -44,6 +44,8 @@ export function CommandPalette() {
   return (
     <Dialog open={paletteOpen} onOpenChange={setPaletteOpen}>
       <DialogContent size="lg" className="top-[18%] max-w-2xl translate-y-0 p-0">
+        <DialogTitle className="sr-only">Search NASTP</DialogTitle>
+        <DialogDescription className="sr-only">Find pages, tenants and service requests.</DialogDescription>
         <Command shouldFilter={false} className="cmd-group">
           <div className="flex items-center gap-2.5 border-b border-border px-4">
             <Search className="h-4 w-4 shrink-0 text-subtle" />

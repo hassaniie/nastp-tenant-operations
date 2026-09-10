@@ -28,8 +28,8 @@ export function Toaster() {
         return (
           <div
             key={t.id}
-            className="pointer-events-auto flex items-start gap-3 rounded-[14px] border border-border bg-surface-overlay p-3.5 shadow-[var(--shadow-lg)] animate-[slide-in_0.28s_cubic-bezier(0.22,1,0.36,1)]"
-            role="status"
+            className="pointer-events-auto flex items-start gap-3 rounded-[var(--radius-surface)] border border-border bg-surface-overlay p-3.5 shadow-[var(--shadow-lg)] animate-[slide-in_0.28s_cubic-bezier(0.22,1,0.36,1)]"
+            role={t.variant === 'critical' ? 'alert' : 'status'}
           >
             <Icon className={cn('mt-0.5 h-4.5 w-4.5 shrink-0', TONE[t.variant])} />
             <div className="min-w-0 flex-1">
@@ -41,7 +41,7 @@ export function Toaster() {
                 </Button>
               )}
             </div>
-            <button onClick={() => dismissToast(t.id)} className="rounded-md p-1 text-subtle transition-colors hover:bg-surface-raised hover:text-foreground" aria-label="Dismiss">
+            <button type="button" onClick={() => dismissToast(t.id)} className="rounded-md p-1 text-subtle transition-colors hover:bg-surface-raised hover:text-foreground" aria-label="Dismiss">
               <X className="h-3.5 w-3.5" />
             </button>
           </div>

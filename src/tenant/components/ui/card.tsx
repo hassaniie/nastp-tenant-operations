@@ -2,17 +2,16 @@ import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { cn } from '../../lib/utils';
 
 /**
- * The surface every panel is built from. Softer elevation and a larger radius
- * than the PMS command centre — the calmer, more premium tenant feel.
+ * The surface every panel is built from. Bordered surfaces have no elevation; overlays alone cast shadows.
  */
 export const Card = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement> & { interactive?: boolean; glass?: boolean }>(
   ({ className, interactive, glass, ...props }, ref) => (
     <div
       ref={ref}
       className={cn(
-        'edge-light relative flex flex-col rounded-[16px] border border-border bg-surface shadow-[var(--shadow-sm)]',
+        'relative flex flex-col rounded-[var(--radius-surface)] border border-border bg-surface',
         glass && 'glass',
-        interactive && 'cursor-pointer transition-all duration-200 hover:border-border-strong hover:shadow-[var(--shadow-md)] hover:-translate-y-px',
+        interactive && 'cursor-pointer transition-all duration-200 hover:border-border-strong',
         className,
       )}
       {...props}
@@ -59,24 +58,11 @@ export function CardFooter({ className, ...props }: HTMLAttributes<HTMLDivElemen
 }
 
 /** Page-level section heading, used above grids of cards. */
-export function SectionHeader({
-  title,
-  description,
-  actions,
-  className,
-}: {
-  title: ReactNode;
-  description?: ReactNode;
-  actions?: ReactNode;
-  className?: string;
+export function SectionHeader({ title, description, actions, children, className, compact }: {
+  title: ReactNode; description?: ReactNode; actions?: ReactNode; children?: ReactNode; className?: string; compact?: boolean;
 }) {
-  return (
-    <div className={cn('flex flex-wrap items-end justify-between gap-3', className)}>
-      <div>
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.13em] text-subtle">{title}</h2>
-        {description && <p className="mt-1 text-[13px] text-muted">{description}</p>}
-      </div>
-      {actions && <div className="flex items-center gap-2">{actions}</div>}
-    </div>
-  );
+  return <div className={cn('ds-section-header', compact && 'is-compact', className)}>
+    <div><h2>{title}</h2>{description && <p>{description}</p>}</div>
+    {(actions || children) && <div className="flex items-center gap-2">{actions || children}</div>}
+  </div>;
 }

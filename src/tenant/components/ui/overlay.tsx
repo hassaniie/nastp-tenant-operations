@@ -11,20 +11,40 @@ import * as PopoverPrimitive from '@radix-ui/react-popover';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import * as DropdownPrimitive from '@radix-ui/react-dropdown-menu';
 import { X } from 'lucide-react';
-import { forwardRef, type ComponentPropsWithoutRef, type ElementRef, type ReactNode } from 'react';
+import { forwardRef, useState, useRef, type ComponentPropsWithoutRef, type ElementRef, type ReactNode } from 'react';
 import { cn } from '../../lib/utils';
+import { Button } from './button';
+
+/** Return focus for programmatically opened details as well as Radix triggers. */
+function useOverlayFocus(props: ComponentPropsWithoutRef<typeof DialogPrimitive.Content>) {
+  const origin = useRef<HTMLElement | null>(null);
+  return {
+    onOpenAutoFocus: (event: Event) => {
+      origin.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      props.onOpenAutoFocus?.(event);
+    },
+    onCloseAutoFocus: (event: Event) => {
+      props.onCloseAutoFocus?.(event);
+      if (!event.defaultPrevented && origin.current?.isConnected && origin.current !== document.body) {
+        event.preventDefault(); origin.current.focus();
+      }
+    },
+  };
+}
 
 /* ------------------------------------------------------------------ Dialog */
 
 export const Dialog = DialogPrimitive.Root;
 export const DialogTrigger = DialogPrimitive.Trigger;
 export const DialogClose = DialogPrimitive.Close;
+export const DialogTitle = DialogPrimitive.Title;
+export const DialogDescription = DialogPrimitive.Description;
 
 const Overlay = forwardRef<ElementRef<typeof DialogPrimitive.Overlay>, ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>>(
   ({ className, ...props }, ref) => (
     <DialogPrimitive.Overlay
       ref={ref}
-      className={cn('fixed inset-0 z-[70] bg-black/60 backdrop-blur-[3px] data-[state=open]:animate-[fade-in_0.2s_ease-out]', className)}
+      className={cn('fixed inset-0 z-[70] bg-black/60 data-[state=open]:animate-[fade-in_0.2s_ease-out]', className)}
       {...props}
     />
   ),
@@ -34,24 +54,25 @@ Overlay.displayName = 'DialogOverlay';
 export const DialogContent = forwardRef<
   ElementRef<typeof DialogPrimitive.Content>,
   ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { size?: 'sm' | 'md' | 'lg' | 'xl' }
->(({ className, children, size = 'md', ...props }, ref) => (
+>(({ className, children, size = 'md', ...props }, ref) => { const focus = useOverlayFocus(props); return (
   <DialogPrimitive.Portal>
     <Overlay />
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        'fixed left-1/2 top-1/2 z-[80] flex max-h-[90vh] w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2 flex-col',
-        'overflow-hidden rounded-[18px] border border-border bg-surface-overlay shadow-[var(--shadow-lg)]',
+        'fixed left-1/2 top-1/2 z-[80] flex max-h-[90dvh] w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2 flex-col',
+        'overflow-hidden rounded-[var(--radius-overlay)] border border-border bg-surface-overlay shadow-[var(--shadow-lg)]',
         'data-[state=open]:animate-[fade-up_0.24s_cubic-bezier(0.22,1,0.36,1)]',
         { sm: 'max-w-md', md: 'max-w-xl', lg: 'max-w-3xl', xl: 'max-w-5xl' }[size],
         className,
       )}
       {...props}
+      {...focus}
     >
       {children}
     </DialogPrimitive.Content>
   </DialogPrimitive.Portal>
-));
+); });
 DialogContent.displayName = 'DialogContent';
 
 export function DialogHeader({ title, description, icon }: { title: ReactNode; description?: ReactNode; icon?: ReactNode }) {
@@ -61,7 +82,7 @@ export function DialogHeader({ title, description, icon }: { title: ReactNode; d
         {icon}
         <div>
           <DialogPrimitive.Title className="text-[15px] font-semibold text-foreground">{title}</DialogPrimitive.Title>
-          {description && <DialogPrimitive.Description className="mt-1 text-[13px] leading-relaxed text-muted">{description}</DialogPrimitive.Description>}
+          <DialogPrimitive.Description className={description ? "mt-1 text-[13px] leading-relaxed text-muted" : "sr-only"}>{description ?? "Review and complete this action."}</DialogPrimitive.Description>
         </div>
       </div>
       <DialogPrimitive.Close className="rounded-md p-1.5 text-subtle transition-colors hover:bg-surface-raised hover:text-foreground">
@@ -73,11 +94,11 @@ export function DialogHeader({ title, description, icon }: { title: ReactNode; d
 }
 
 export function DialogBody({ className, children }: { className?: string; children: ReactNode }) {
-  return <div className={cn('flex-1 overflow-y-auto px-5 py-4', className)}>{children}</div>;
+  return <div className={cn('min-h-0 flex-1 overflow-y-auto px-5 py-4', className)}>{children}</div>;
 }
 
 export function DialogFooter({ className, children }: { className?: string; children: ReactNode }) {
-  return <div className={cn('flex items-center justify-end gap-2 border-t border-border bg-surface px-5 py-4', className)}>{children}</div>;
+  return <div className={cn('flex flex-wrap items-center justify-end gap-2 border-t border-border bg-surface px-5 py-4', className)}>{children}</div>;
 }
 
 /* -------------------------------------------------------------- Drawer */
@@ -89,12 +110,12 @@ export const DrawerClose = DialogPrimitive.Close;
 export const DrawerContent = forwardRef<
   ElementRef<typeof DialogPrimitive.Content>,
   ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { side?: 'right' | 'left'; width?: string }
->(({ className, children, side = 'right', width = '520px', ...props }, ref) => (
+>(({ className, children, side = 'right', width = '520px', ...props }, ref) => { const focus = useOverlayFocus(props); return (
   <DialogPrimitive.Portal>
     <Overlay />
     <DialogPrimitive.Content
       ref={ref}
-      style={{ width, maxWidth: '96vw' }}
+      style={{ width, maxWidth: '100vw' }}
       className={cn(
         'fixed inset-y-0 z-[80] flex flex-col border-border bg-surface shadow-[var(--shadow-lg)]',
         side === 'right' ? 'right-0 border-l' : 'left-0 border-r',
@@ -102,22 +123,23 @@ export const DrawerContent = forwardRef<
         className,
       )}
       {...props}
+      {...focus}
     >
       {children}
     </DialogPrimitive.Content>
   </DialogPrimitive.Portal>
-));
+); });
 DrawerContent.displayName = 'DrawerContent';
 
 export function DrawerHeader({ title, subtitle, badge, actions }: { title: ReactNode; subtitle?: ReactNode; badge?: ReactNode; actions?: ReactNode }) {
   return (
     <div className="flex items-start justify-between gap-3 border-b border-border px-5 py-4">
       <div className="min-w-0">
-        <div className="flex items-center gap-2">
-          <DialogPrimitive.Title className="truncate text-[16px] font-semibold tracking-[-0.01em] text-foreground">{title}</DialogPrimitive.Title>
+        <div className="flex flex-col items-start gap-3">
+          <DialogPrimitive.Title className=" text-[16px] font-semibold tracking-[-0.01em] text-foreground">{title}</DialogPrimitive.Title>
           {badge}
         </div>
-        {subtitle && <DialogPrimitive.Description className="mt-1 truncate text-[13px] text-subtle">{subtitle}</DialogPrimitive.Description>}
+        <DialogPrimitive.Description className={subtitle ? "mt-1 text-[13px] text-subtle" : "sr-only"}>{subtitle ?? "Details and available actions."}</DialogPrimitive.Description>
       </div>
       <div className="flex shrink-0 items-center gap-1.5">
         {actions}
@@ -135,7 +157,7 @@ export function DrawerBody({ className, children }: { className?: string; childr
 }
 
 export function DrawerFooter({ className, children }: { className?: string; children: ReactNode }) {
-  return <div className={cn('flex items-center justify-end gap-2 border-t border-border bg-surface px-5 py-4', className)}>{children}</div>;
+  return <div className={cn('flex flex-wrap items-center justify-end gap-2 border-t border-border bg-surface px-5 py-4', className)}>{children}</div>;
 }
 
 /* ----------------------------------------------------------------- Tooltip */
@@ -177,7 +199,7 @@ export const PopoverContent = forwardRef<ElementRef<typeof PopoverPrimitive.Cont
         align={align}
         sideOffset={sideOffset}
         className={cn(
-          'z-[85] w-72 rounded-[14px] border border-border bg-surface-overlay p-1.5 shadow-[var(--shadow-lg)]',
+          'z-[85] w-72 max-w-[calc(100vw-2rem)] rounded-[var(--radius-overlay)] border border-border bg-surface-overlay p-1.5 shadow-[var(--shadow-lg)]',
           'data-[state=open]:animate-[fade-up_0.18s_cubic-bezier(0.22,1,0.36,1)]',
           className,
         )}
@@ -201,7 +223,7 @@ export const MenuContent = forwardRef<ElementRef<typeof DropdownPrimitive.Conten
         align={align}
         sideOffset={sideOffset}
         className={cn(
-          'z-[85] min-w-[210px] overflow-hidden rounded-[12px] border border-border bg-surface-overlay p-1 shadow-[var(--shadow-lg)]',
+          'z-[85] min-w-[210px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-[var(--radius-surface)] border border-border bg-surface-overlay p-1 shadow-[var(--shadow-lg)]',
           'data-[state=open]:animate-[fade-up_0.16s_cubic-bezier(0.22,1,0.36,1)]',
           className,
         )}
@@ -234,3 +256,24 @@ export function MenuLabel({ children }: { children: ReactNode }) {
 }
 
 export const MenuSeparator = () => <DropdownPrimitive.Separator className="my-1 h-px bg-border" />;
+
+/** Explicit, async confirmation. Never dismisses on a failed mutation. */
+export function ConfirmDialog({ open, onOpenChange, title, description, confirmLabel = 'Confirm', cancelLabel = 'Cancel', destructive, onConfirm }: {
+  open: boolean; onOpenChange: (open: boolean) => void; title: string; description: ReactNode;
+  confirmLabel?: string; cancelLabel?: string; destructive?: boolean; onConfirm: () => void | Promise<void>;
+}) {
+  const [busy, setBusy] = useState(false); const [error, setError] = useState<string>();
+  const cancel = useRef<HTMLButtonElement>(null);
+  const changeOpen = (value: boolean) => { if (busy) return; setError(undefined); onOpenChange(value); };
+  const confirm = async () => {
+    setBusy(true); setError(undefined);
+    try { await onConfirm(); onOpenChange(false); }
+    catch (cause) { setError(cause instanceof Error ? cause.message : 'Could not complete this action. Please try again.'); }
+    finally { setBusy(false); }
+  };
+  return <Dialog open={open} onOpenChange={changeOpen}><DialogContent size="sm" onOpenAutoFocus={event => { event.preventDefault(); cancel.current?.focus(); }} onEscapeKeyDown={event => { if (busy) event.preventDefault(); }}>
+    <DialogHeader title={title} description={description} />
+    {error && <DialogBody><p role="alert" className="text-sm text-critical">{error}</p></DialogBody>}
+    <DialogFooter><Button ref={cancel} disabled={busy} variant="ghost" onClick={() => changeOpen(false)}>{cancelLabel}</Button><Button variant={destructive ? 'danger' : 'primary'} loading={busy} onClick={confirm}>{confirmLabel}</Button></DialogFooter>
+  </DialogContent></Dialog>;
+}

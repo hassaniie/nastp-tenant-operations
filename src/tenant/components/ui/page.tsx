@@ -17,9 +17,9 @@ import { cn } from '../../lib/utils';
  */
 
 /** Standard page: centred, gutter, and a consistent section rhythm. */
-export function Page({ children, className }: { children: ReactNode; className?: string }) {
+export function Page({ children, className, workspace }: { children: ReactNode; className?: string; workspace?: boolean }) {
   return (
-    <div className={cn('mx-auto flex w-full max-w-[1600px] flex-col gap-5 p-4 lg:p-6', className)}>
+    <div className={cn(workspace ? 'ds-workspace' : 'mx-auto flex w-full max-w-[1600px] flex-col gap-5 p-4 lg:p-6', className)}>
       {children}
     </div>
   );
@@ -120,4 +120,16 @@ export function SplitGrid({
     aside: { lg: 'lg:grid-cols-[320px_minmax(0,1fr)]', xl: 'xl:grid-cols-[320px_minmax(0,1fr)]' },
   };
   return <div className={cn('grid gap-4', cols[ratio][at], className)}>{children}</div>;
+}
+
+/** List pages share a visible filter region and a single reset action. */
+export function ListToolbar({ children, actions, summary, onReset }: { children: ReactNode; actions?: ReactNode; summary?: ReactNode; onReset?: () => void }) {
+  return <div className="ds-list-toolbar"><div className="ds-list-filters" role="search" aria-label="Filter records">{children}</div><div className="ds-list-summary"><span role="status">{summary}</span><div className="flex items-center gap-3">{onReset && <button type="button" className="text-xs text-primary hover:underline" onClick={onReset}>Reset filters</button>}{actions}</div></div></div>;
+}
+/** Consistent detail sections and forms use actual children/actions, never invented workflow state. */
+export function DetailSection({ title, children, actions }: { title: string; children: ReactNode; actions?: ReactNode }) {
+  return <section className="ds-detail-section"><div className="flex items-center justify-between gap-3"><h3>{title}</h3>{actions}</div><div>{children}</div></section>;
+}
+export function FormActions({ children, message }: { children: ReactNode; message?: ReactNode }) {
+  return <div className="ds-form-actions">{message && <span role="status" className="mr-auto text-xs text-subtle">{message}</span>}{children}</div>;
 }

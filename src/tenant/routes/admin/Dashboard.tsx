@@ -21,7 +21,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Button } from "../../components/ui/ops-button";
+import { Button } from "../../components/ui/button";
 import {
   Table,
   TableBody,
@@ -29,7 +29,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../../components/ui/ops-table";
+} from "../../components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { useLive } from "../../data/live";
 import {
@@ -39,27 +39,10 @@ import {
 } from "../../data/selectors";
 import { ago, compact, currency, energy, fmtTime, num } from "../../lib/utils";
 import { ACTIVITY_ICON } from "../../lib/activityMeta";
-import { CATEGORY_ICON } from "../../components/status";
+import { CATEGORY_ICON, PriorityBadge, MeterStatusBadge, VisitorStatusBadge, AlertSeverityBadge, TenantStatusBadge } from "../../components/status";
+import { PageHeader, StatCard } from "../../components/common";
+import { SectionHeader } from "../../components/ui/card";
 
-function SectionTitle({
-  title,
-  detail,
-  children,
-}: {
-  title: string;
-  detail?: string;
-  children?: ReactNode;
-}) {
-  return (
-    <div className="ops-section-title">
-      <div>
-        <h2>{title}</h2>
-        {detail && <p>{detail}</p>}
-      </div>
-      {children}
-    </div>
-  );
-}
 function TextLink({ to, children }: { to: string; children: ReactNode }) {
   return (
     <Link className="ops-text-link" to={to}>
@@ -123,88 +106,14 @@ export default function AdminDashboard() {
         <Link to="/admin/visitors">Visitors</Link>
         <Link to="/admin/service">Service center</Link>
       </nav>
-      <div className="ops-page-heading">
-        <div>
-          <div className="ops-eyebrow">
-            Park intelligence{" "}
-            <span className="ops-live">
-              <i />
-              Live
-            </span>
-          </div>
-          <h1>
-            Operations overview<span>.</span>
-          </h1>
-          <p>Your park at a glance. Every tenant, every operation.</p>
-        </div>
-        <div className="ops-heading-actions">
-          <span className="ops-date">
-            <CalendarDays size={15} />
-            {today}
-          </span>
-          <Button onClick={() => navigate("/admin/tenants/new")}>
-            <Plus />
-            Add tenant
-          </Button>
-        </div>
-      </div>
-      <div className="ops-metrics">
-        <Link to="/admin/tenants" className="ops-metric">
-          <span>
-            Active tenants
-            <ArrowUpRight />
-          </span>
-          <strong>
-            {num(kpis.tenantsActive)}
-            <small>/ {num(kpis.tenantsTotal)}</small>
-          </strong>
-          <p>
-            {kpis.tenantsPending} pending<span>·</span>
-            {kpis.tenantsSuspended} suspended
-          </p>
-        </Link>
-        <Link to="/admin/energy" className="ops-metric">
-          <span>
-            Current load
-            <ArrowUpRight />
-          </span>
-          <strong>
-            {energy(kpis.currentLoadKw, "kW").value}
-            <small>kW</small>
-          </strong>
-          <p>
-            <span className="ops-live-dot" />
-            Live demand<span>·</span>Meter peak {num(kpis.peakDemandKw)} kW
-          </p>
-        </Link>
-        <Link to="/admin/visitors/inside" className="ops-metric">
-          <span>
-            Visitors inside
-            <ArrowUpRight />
-          </span>
-          <strong>
-            {num(kpis.visitorsInside)}
-            <small>people</small>
-          </strong>
-          <p>{kpis.visitorsScheduledToday} scheduled today</p>
-        </Link>
-        <Link to="/admin/service" className="ops-metric">
-          <span>
-            Open requests
-            <ArrowUpRight />
-          </span>
-          <strong>
-            {num(kpis.requestsOpen)}
-            <small>requests</small>
-          </strong>
-          <p>
-            <span className={kpis.requestsCritical ? "ops-danger" : ""}>
-              {kpis.requestsCritical} critical
-            </span>
-            <span>·</span>
-            {kpis.requestsOverdue} overdue
-          </p>
-        </Link>
+      <PageHeader className="ops-page-heading" title={<>Operations overview<span>.</span></>} description="Your park at a glance. Every tenant, every operation."
+        eyebrow={<>Park intelligence <span className="ops-live"><i />Live</span></>}
+        actions={<div className="ops-heading-actions"><span className="ops-date"><CalendarDays size={15} />{today}</span><Button variant="primary" onClick={() => navigate('/admin/tenants/new')}><Plus />Add tenant</Button></div>} />
+      <div className="ds-metrics">
+        <StatCard variant="inline" to="/admin/tenants" label="Active tenants" value={num(kpis.tenantsActive)} unit={`/ ${num(kpis.tenantsTotal)}`} caption={<>{kpis.tenantsPending} pending<span>·</span>{kpis.tenantsSuspended} suspended</>} />
+        <StatCard variant="inline" to="/admin/energy" label="Current load" value={energy(kpis.currentLoadKw, 'kW').value} unit="kW" caption={<><span className="ops-live-dot" />Live demand<span>·</span>Meter peak {num(kpis.peakDemandKw)} kW</>} />
+        <StatCard variant="inline" to="/admin/visitors/inside" label="Visitors inside" value={num(kpis.visitorsInside)} unit="people" caption={`${kpis.visitorsScheduledToday} scheduled today`} />
+        <StatCard variant="inline" to="/admin/service" label="Open requests" value={num(kpis.requestsOpen)} unit="requests" caption={<><span className={kpis.requestsCritical ? 'ops-danger' : ''}>{kpis.requestsCritical} critical</span><span>·</span>{kpis.requestsOverdue} overdue</>} />
       </div>
       <div className="ops-energy-grid">
         <section className="ops-energy-main" aria-labelledby="energy-title">
@@ -353,9 +262,9 @@ export default function AdminDashboard() {
           </div>
         </section>
         <section className="ops-ranking">
-          <SectionTitle
+          <SectionHeader compact className="ops-section-title"
             title="Highest consuming tenants"
-            detail="This billing period"
+            description="This billing period"
           />
           <div className="ops-ranking-label">
             <span>Tenant</span>
@@ -411,12 +320,12 @@ export default function AdminDashboard() {
       </div>
       <div className="ops-triage-grid">
         <section className="ops-attention">
-          <SectionTitle
+          <SectionHeader compact className="ops-section-title"
             title="Operational attention"
-            detail="Prioritized exceptions across the park"
+            description="Prioritized exceptions across the park"
           >
             <span className="ops-count">{attention.length} to review</span>
-          </SectionTitle>
+          </SectionHeader>
           <div className="ops-queue-toolbar">
             <Tabs
               value={queueFilter}
@@ -492,12 +401,7 @@ export default function AdminDashboard() {
                       </Link>
                     </TableCell>
                     <TableCell>
-                      <span
-                        className={`ops-status ${item.rank === 0 ? "is-critical" : "is-warning"}`}
-                      >
-                        <i />
-                        {item.tag}
-                      </span>
+                      {item.id.startsWith('req-') ? <PriorityBadge priority="critical" size="sm" /> : item.id.startsWith('mtr-') ? <MeterStatusBadge status="offline" size="sm" /> : item.id.startsWith('vis-') ? <VisitorStatusBadge status="overstaying" size="sm" /> : <AlertSeverityBadge severity={item.tag === 'Critical' ? 'critical' : 'warning'} size="sm" />}
                     </TableCell>
                     <TableCell className="ops-nowrap">{ago(item.ts)}</TableCell>
                     <TableCell>
@@ -537,12 +441,12 @@ export default function AdminDashboard() {
           </div>
         </section>
         <section className="ops-arrivals">
-          <SectionTitle
+          <SectionHeader compact className="ops-section-title"
             title="Upcoming visitors"
-            detail="Next scheduled arrivals"
+            description="Next scheduled arrivals"
           >
             <TextLink to="/admin/visitors/scheduled">All</TextLink>
-          </SectionTitle>
+          </SectionHeader>
           <Link to="/admin/visitors/overstaying" className="ops-overstay">
             <AlarmClock size={16} />
             <span>
@@ -586,12 +490,12 @@ export default function AdminDashboard() {
       </div>
       <div className="ops-bottom-grid">
         <section className="ops-onboarding">
-          <SectionTitle
+          <SectionHeader compact className="ops-section-title"
             title="Recent onboarding"
-            detail="Newest organizations in your park"
+            description="Newest organizations in your park"
           >
             <TextLink to="/admin/tenants">All tenants</TextLink>
-          </SectionTitle>
+          </SectionHeader>
           <Table aria-label="Recent onboarding">
             <TableHeader>
               <TableRow>
@@ -617,12 +521,7 @@ export default function AdminDashboard() {
                   </TableCell>
                   <TableCell>{r.buildingName}</TableCell>
                   <TableCell>
-                    <span
-                      className={`ops-status ${r.tenant.status === "active" ? "is-success" : r.tenant.status === "suspended" ? "is-critical" : ""}`}
-                    >
-                      <i />
-                      {r.tenant.status.replace(/_/g, " ")}
-                    </span>
+                    <TenantStatusBadge status={r.tenant.status} size="sm" />
                   </TableCell>
                   <TableCell className="ops-nowrap">
                     {ago(r.tenant.createdAt)}
@@ -633,9 +532,9 @@ export default function AdminDashboard() {
           </Table>
         </section>
         <section className="ops-activity">
-          <SectionTitle
+          <SectionHeader compact className="ops-section-title"
             title="Recent activity"
-            detail="Live updates across all tenants"
+            description="Live updates across all tenants"
           />
           <ol>
             {activity.map((a) => {

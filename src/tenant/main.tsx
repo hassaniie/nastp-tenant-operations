@@ -16,6 +16,7 @@ import { PortalVisitorList } from './routes/portal/visitors/List';
 import { PortalServiceList } from './routes/portal/service/List';
 import { NotificationsPage } from './routes/NotificationsPage';
 import './styles/theme.css';
+import './styles/components.css';
 
 /**
  * NASTP Tenant Operations — a peer module to Nexus PMS in the same suite.
@@ -64,6 +65,8 @@ const AdminUsers = lazy(() => import('./routes/admin/Users'));
 const AdminSecurity = lazy(() => import('./routes/admin/Security'));
 const Organization = lazy(() => import('./routes/portal/Organization'));
 const TechJobs = lazy(() => import('./routes/tech/Jobs'));
+// Vite eliminates the import and route from production builds. AdminLayout still authenticates development access.
+const DesignWorkbench = import.meta.env.DEV ? lazy(() => import('./dev/DesignWorkbench')) : null;
 const NotFound = lazy(() => import('./routes/NotFound'));
 
 const L = ({ children }: { children: ReactNode }) => <Suspense fallback={<LoadingState label="Loading…" />}>{children}</Suspense>;
@@ -117,6 +120,7 @@ createRoot(document.getElementById('root')!).render(
           {/* -------------------------------------------------- Admin */}
           <Route element={<AdminLayout />}>
             <Route path="/admin" element={<L><AdminDashboard /></L>} />
+            {DesignWorkbench && <Route path="/admin/design-system" element={<L><DesignWorkbench /></L>} />}
 
             <Route path="/admin/tenants" element={<L><Tenants /></L>} />
             <Route path="/admin/tenants/new" element={<L><TenantOnboarding /></L>} />

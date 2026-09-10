@@ -41,6 +41,7 @@ export function AnimatedNumber({ value, digits = 0, className, duration = 520 }:
   const from = useRef(value);
   const raf = useRef<number>();
   useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setDisplay(value); from.current = value; return; }
     const start = performance.now();
     const origin = from.current;
     const delta = value - origin;
@@ -98,29 +99,37 @@ export interface StatCardProps {
   loading?: boolean;
   tooltip?: ReactNode;
   className?: string;
+  variant?: 'surface' | 'inline';
+  to?: string;
 }
 
 /** The workhorse KPI tile: one figure, one label, only as much supporting
  *  detail as fits without competing with the number. */
 export const StatCard = memo(function StatCard({
-  label, value, unit, icon: Icon, tone = 'neutral', delta, deltaSuffix, invertDelta, caption, spark, sparkColor, onClick, loading, tooltip, className,
+  label, value, unit, icon: Icon, tone = 'neutral', delta, deltaSuffix, invertDelta, caption, spark, sparkColor, onClick, loading, tooltip, className, variant = 'surface', to,
 }: StatCardProps) {
   const hasSpark = Boolean(spark && spark.length > 1);
+  if (variant === 'inline') {
+    const content = <><span className="ds-metric-label">{label}{(to || onClick) && <ArrowUpRight aria-hidden size={14} />}</span>
+      {loading ? <Skeleton className="my-4 h-9 w-24" /> : <strong className="ds-metric-value">{value}{unit && <small>{unit}</small>}</strong>}
+      {caption && <div className="ds-metric-caption">{caption}</div>}</>;
+    return to ? <Link className={cn('ds-metric', className)} to={to}>{content}</Link> : onClick ? <button type="button" className={cn('ds-metric text-left', className)} onClick={onClick}>{content}</button> : <div className={cn('ds-metric', className)}>{content}</div>;
+  }
   const body = (
     <div
       className={cn(
-        'edge-light group relative flex min-h-[104px] flex-col gap-2 overflow-hidden rounded-[15px] border border-border bg-surface p-3.5 pb-6 transition-all duration-200',
+        'group relative flex min-h-[104px] flex-col gap-2 overflow-hidden rounded-[var(--radius-surface)] border border-border bg-surface p-3.5 pb-6 transition-all duration-200',
         // Every tile reserves the same bottom band, whether or not it carries a
         // sparkline. Reserving it only on spark tiles made one KPI row render at
         // three different heights; drawing the spark over the caption instead cost
         // legibility. A uniform reservation buys both.
-        onClick && 'cursor-pointer hover:border-border-strong hover:bg-surface-raised hover:-translate-y-px hover:shadow-[var(--shadow-md)]',
+        onClick && 'cursor-pointer hover:border-border-strong hover:bg-surface-raised',
         className,
       )}
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
-      onKeyDown={onClick ? (e) => (e.key === 'Enter' || e.key === ' ') && onClick() : undefined}
+      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } } : undefined}
     >
       <div className="flex items-start justify-between gap-2">
         <p className="text-[11px] font-medium uppercase leading-tight tracking-[0.09em] text-subtle">{label}</p>
@@ -244,7 +253,7 @@ export function RatingStars({ value, onChange, size = 16, className }: { value: 
   const [hover, setHover] = useState(0);
   const interactive = Boolean(onChange);
   return (
-    <div className={cn('inline-flex items-center gap-0.5', className)} role={interactive ? 'radiogroup' : undefined}>
+    <div className={cn('inline-flex items-center gap-0.5', className)} role={interactive ? 'group' : undefined} aria-label="Service rating">
       {[1, 2, 3, 4, 5].map((n) => {
         const filled = (hover || value) >= n;
         return (
@@ -256,7 +265,7 @@ export function RatingStars({ value, onChange, size = 16, className }: { value: 
             onMouseLeave={interactive ? () => setHover(0) : undefined}
             onClick={interactive ? () => onChange?.(n) : undefined}
             className={cn(interactive && 'cursor-pointer transition-transform hover:scale-110', !interactive && 'cursor-default')}
-            aria-label={`${n} star${n > 1 ? 's' : ''}`}
+            aria-pressed={interactive ? value === n : undefined} aria-label={`${n} star${n > 1 ? 's' : ''}`}
           >
             <Star className={cn(filled ? 'fill-warning text-warning' : 'text-border-strong')} style={{ width: size, height: size }} />
           </button>
@@ -268,19 +277,11 @@ export function RatingStars({ value, onChange, size = 16, className }: { value: 
 
 /* ---------------------------------------------------------------- PageHeader */
 
-export function PageHeader({ title, description, actions, breadcrumb, className }: { title: ReactNode; description?: ReactNode; actions?: ReactNode; breadcrumb?: ReactNode; className?: string }) {
-  return (
-    <div className={cn('flex flex-col gap-3', className)}>
-      {breadcrumb}
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h1 className="text-[20px] font-semibold tracking-[-0.02em] text-foreground">{title}</h1>
-          {description && <p className="mt-1 text-[13px] text-muted">{description}</p>}
-        </div>
-        {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
-      </div>
-    </div>
-  );
+export function PageHeader({ title, description, actions, breadcrumb, className, eyebrow }: { title: ReactNode; description?: ReactNode; actions?: ReactNode; breadcrumb?: ReactNode; className?: string; eyebrow?: ReactNode }) {
+  return <div className={cn('ds-page-header', className)}>
+    <div className="min-w-0">{breadcrumb}{eyebrow && <div className="ds-eyebrow">{eyebrow}</div>}<h1>{title}</h1>{description && <p>{description}</p>}</div>
+    {actions && <div className="ds-page-actions">{actions}</div>}
+  </div>;
 }
 
 /* --------------------------------------------------------------- Breadcrumb */
