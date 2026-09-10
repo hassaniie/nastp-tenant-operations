@@ -17,6 +17,7 @@ The shared Admin Visitor list chooses Data Workspace for history and Operational
 ## Canonical layout primitives
 
 - `Page workspace archetype="…"` removes the legacy centred card-page gutters and records the page’s structural role.
+- `Page` and `PageFull` own the gutter on contained screens. Their direct `PageHeader` uses that same content edge, preventing a second inset from shifting titles away from tabs, toolbars, and primary content.
 - `PageHeader` owns a 32px desktop / 20px mobile gutter and the title/action hierarchy.
 - `MetricBand` renders `StatCard variant="inline"` as cells on common grid lines. It supports two through six columns and collapses to two columns on mobile.
 - `WorkspaceSection` gives analytical and detail content a shared heading, inset, and bottom divider. `inset={false}` lets a table meet the workspace edge while retaining an integrated section heading.
@@ -27,6 +28,6 @@ The shared Admin Visitor list chooses Data Workspace for history and Operational
 
 ## Spatial rules
 
-Primary page regions have no outer radius or shadow. Borders connect adjacent metric, chart, toolbar, table, and list regions. Radius remains on controls, overlays, and small contained widgets where the boundary carries meaning. Top-level sections use 28–32px desktop insets and 20–22px mobile insets. Analytical splits collapse below 1024px. Tables hide declared secondary columns while preserving the full record in a drawer/detail view, and the document must never gain horizontal overflow.
+Primary page regions have no outer radius or shadow. Borders connect adjacent metric, chart, toolbar, table, and list regions. Radius remains on controls, overlays, and small contained widgets where the boundary carries meaning. Workspace pages give the header and sections their own 28–32px desktop / 20–22px mobile insets. Contained pages provide one 24px desktop / 16px mobile outer gutter shared by the header and content. Analytical splits collapse below 1024px. Tables hide declared secondary columns while preserving the full record in a drawer/detail view, and the document must never gain horizontal overflow.
 
 Routes keep their existing data selectors, permissions, URL destinations, dialogs, drawers, mutations, validation, and status metadata. Layout migration changes composition and interaction hierarchy only.

@@ -21,7 +21,7 @@ export type PageArchetype = 'analytics' | 'data' | 'operational' | 'setup' | 'de
 
 export function Page({ children, className, workspace, archetype }: { children: ReactNode; className?: string; workspace?: boolean; archetype?: PageArchetype }) {
   return (
-    <div data-page-archetype={archetype} className={cn(workspace ? 'ds-workspace' : 'mx-auto flex w-full max-w-[1600px] flex-col gap-5 p-4 lg:p-6', className)}>
+    <div data-page-archetype={archetype} className={cn(workspace ? 'ds-workspace' : 'ds-contained-page mx-auto flex w-full max-w-[1600px] flex-col gap-5 p-4 lg:p-6', className)}>
       {children}
     </div>
   );
@@ -30,7 +30,7 @@ export function Page({ children, className, workspace, archetype }: { children: 
 /** Full-height page for screens that own their own scrolling (board, wall). */
 export function PageFull({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className={cn('flex h-full min-h-0 w-full flex-col gap-4 p-4 lg:p-6', className)}>
+    <div className={cn('ds-contained-page flex h-full min-h-0 w-full flex-col gap-4 p-4 lg:p-6', className)}>
       {children}
     </div>
   );
