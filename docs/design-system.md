@@ -1,83 +1,109 @@
 # NASTP product design system
 
-The approved Admin Dashboard is the visual source of truth. The checkpoint tag `approved-admin-dashboard-a5b8427` preserves that implementation. This system consolidates it; it does not introduce a new template or dependencies.
+The approved Admin Overview is the visual source of truth. The annotated tag `approved-ui-2026-09-10` preserves the zero-intentional-change baseline at `d1eb4af`. This architecture consolidates that UI; it does not introduce another visual language or dependency.
 
-Page composition is defined in `docs/page-layout-system.md`. It extends these foundations with reusable Analytics, Data, Operational, Setup, and Detail workspace archetypes.
+## Architecture and ownership
 
-## Structure and ownership
+The dependency direction is tokens → primitives → product patterns → layouts → screens.
 
-- `src/tenant/styles/theme.css`: semantic light/dark tokens, Tailwind bridge, focus and reduced-motion defaults. Approved `ops-*` names are compatibility aliases, not another palette.
-- `src/tenant/styles/components.css`: shared headers, metric strips, table/filter workspaces, detail sections and form actions.
-- `src/tenant/styles/admin-workspace.css`: approved shell and Dashboard composition.
-- `src/tenant/components/ui/`: canonical controls, surfaces and data patterns. `common.tsx`, `charts.tsx`, `status.tsx` remain the shared product compositions.
-- `src/tenant/lib/meta.ts`: existing status meanings, labels and tones. Do not independently map lifecycle statuses in routes.
-- `src/tenant/dev/DesignWorkbench.tsx`: real components with local deterministic fixtures, dynamically imported only in development, inside the existing Admin permission boundary.
+| Layer | Source | Ownership |
+| --- | --- | --- |
+| Tokens | `src/tenant/styles/theme.css` | The only light/dark color source plus shared typography, spacing, geometry, motion, elevation and z-index values. |
+| Shared styling | `src/tenant/styles/components.css` | Canonical component and layout recipes. `admin-workspace.css` retains the approved shell and Overview composition. |
+| Primitives | `src/tenant/components/ui/` | Reusable controls, overlays, feedback primitives, surfaces and table families. A primitive does not know a NASTP lifecycle. |
+| Product patterns | `src/tenant/components/patterns/` | NASTP metrics, headers, statuses, timelines, steps, feedback compositions and charts. |
+| Layout | `src/tenant/components/layout/` | Page, metric band, workspace section/split, toolbar, detail and action structures. |
+| Business meaning | `src/tenant/lib/meta.ts` | Lifecycle labels and semantic tones. Routes do not redefine status colors or labels. |
+| Screens | `src/tenant/routes/` | Compose canonical pieces while retaining data, permissions, navigation and mutations. |
 
-## Foundations
+Grouped `common.tsx`, `status.tsx`, `charts.tsx`, `ui/form.tsx`, `ui/overlay.tsx`, `ui/primitives.tsx`, `ui/data.tsx` and `ui/page.tsx` were removed after consumers migrated. There are no permanent compatibility barrels. Add new work to the owning family file.
 
-| Role | Convention |
-| --- | --- |
-| Canvas and surfaces | `canvas`/`surface` are the integrated workspace; `background`/`surface-inset` separate navigation and table headers; `surface-raised` is hover/selected context; `surface-overlay` is a dialog or menu. |
-| Borders/elevation | `border` separates sections, `border-subtle` for secondary divisions, `border-strong` for stronger control boundaries. Avoid repeated floating cards. Reserve medium/large shadows for overlays. |
-| Text | Foreground for values/headings, muted for body metadata, subtle for supporting labels; disabled only for unavailable controls. Body 14px, captions 12px, section 14–16px, page title 30px (25px mobile). Tabular numerals for operational values. |
-| Spacing | 4, 8, 12, 16, 20, 24, 32, 40px. Workspace gutter 32px desktop, 20px mobile. Standard control gap 8px; filter gap 12px. |
-| Dimensions | Controls 32/36/44px; dense extra-small actions 27px. Radii: control 6px, surface 8px, overlay 10px. Use large controls for primary touch-heavy forms. |
-| Brand | Sage primary: dark #a3c9b3, light #376b53. Main action may use the approved neutral foreground/surface contrast. No decorative color tiles or gradients. |
-| Status | Semantic success/warning/critical/info tokens have theme-specific foregrounds and subdued backgrounds. Every status includes a text label; never encode meaning only in color. Energy/visitor/service colors retain domain meaning. |
-| States | Hover uses raised surface or variant hover token; active uses inset/active token; selected uses primary-muted and explicit pressed/selected ARIA; invalid uses critical border plus associated text; loading disables repeat action and announces busy; disabled dims and blocks activation. |
-| Focus/icons | Visible 2px focus outline with offset. Icons normally 16px in controls, 14px for compact context. Icon-only actions require a label and usually a tooltip. Icons supplement text. |
-| Motion | Short 150–180ms feedback; existing overlay entrances remain brief. Reduced-motion disables animation/transition and numeric tweening. No pulsing status decoration. |
-| Responsive density | Standard Tailwind boundaries 640/768/1024/1280px; approved shell collapses on smaller viewports. Metric strips become two columns below 768px. Filters wrap; search occupies the full mobile row. Lower-priority columns hide by declared breakpoint, with all information available in details. Tables own overflow; the page must not scroll sideways. |
-| Charts | Theme-derived six-series muted categorical palette; sage first. Label units and period. Recharts tooltip, legend for multiple series, and exact-value table toggle in ChartFrame. Keep semantic warning/reference lines distinct from series colors. |
+## Token hierarchy
 
-## Canonical components and contracts
+- Semantic surfaces: `canvas`, `background`, `surface`, `surface-raised`, `surface-overlay`, `surface-inset`.
+- Text and lines: `foreground`, `muted`, `subtle`, `disabled`, `border`, `border-subtle`, `border-strong`.
+- Interaction: `primary`, `primary-hover`, `primary-active`, `primary-muted`.
+- Operational meaning: `success`, `warning`, `critical`, `info`, `online`, `offline`, plus `energy`, `visitors` and `service`. Each has theme-specific values behind the same name.
+- Visualization: `viz-1` through `viz-6` are categorical series; `seq-1` through `seq-7` are sequential intensity. They remain independent of status colors.
+- Primitive scales: 4/8/12/16/20/24/32/40 spacing; caption/body/section/page-title typography; control/surface/overlay radii; xs/sm/md/lg control and icon sizes.
+- Layout and density: topbar/sidebar dimensions, mobile/tablet/desktop gutters, section gap, compact/default table rows and list rows.
+- Motion and layering: fast/standard/slow durations, standard/decelerate easing, reduced-motion override, shadow levels and named sticky/dropdown/popover/overlay/modal/toast z-index tiers.
 
-| Source | Public contract / intended use |
-| --- | --- |
-| `ui/button.tsx` | Button with primary, secondary (default), outline, ghost, subtle, danger, success; xs/sm/md/lg/icon/icon-sm sizes; loading, disabled, asChild. IconButton requires label. Native type defaults to button; forms explicitly use submit. `primitives.tsx` re-exports for existing imports. Old ops-button removed. |
-| `ui/form.tsx` | Input/Textarea forward native props/ref. Field owns label, required indicator, hint/error associations; controls consume its context. SearchInput has labelled clearable search. SimpleSelect/Radix Select, Checkbox (including indeterminate), Switch, and native RadioGroup preserve keyboard semantics. |
-| `ui/primitives.tsx` | Badge for short metadata; StatusBadge for text-led semantic state; neutral Avatar; domain TenantMark; Skeleton, labelled Spinner, clamped ProgressBar, Separator. Existing APIs retained. |
-| `ui/overlay.tsx` | Radix Dialog/Drawer with title/description/body/footer, Tooltip, Popover and Menu. ConfirmDialog accepts async onConfirm; pending blocks dismissal; rejection stays open with an alert; cancel receives initial focus. Programmatic overlays restore their opening control's focus. |
-| `ui/tabs.tsx` | Radix Tabs for actual panels; keyboard TabBar for existing callers; Segmented is an aria-pressed choice group, with actual disabled options. |
-| `ui/table.tsx`, `ui/data.tsx` | One shadcn Table, composed by DataTable. Columns define cell/sortValue/hideBelow. rowKey required; rowLabel names keyboard-openable rows. resetKey resets paging after filter changes. Controlled selection/onSelectionChange plus optional bulkActions; page selection preserves other pages. loading/error/onRetry/emptyAction are explicit states. Pagination clamps after data shrinks. Old ops-table removed. |
-| `common.tsx`, `ui/card.tsx`, `ui/page.tsx` | PageHeader, SectionHeader, StatCard inline/surface, MetricValue, Page workspace, ListToolbar, DetailSection, FormActions, DefList. Inline metrics consume the same typography as Dashboard. |
-| `charts.tsx`, `status.tsx`, `ui/toast.tsx` | ChartFrame and existing charts, exact-value tables use canonical Table; domain badges use existing maps; toast store/API retained with success/error announcements. EmptyState, ErrorState, NoPermissionState expose actual actions only. |
+Components consume semantic variables. Raw color values belong only in `theme.css`. A repeated number becomes a token only when it represents an actual system rule.
 
-Use existing compatibility exports when maintaining older screens. New screens import canonical files. Do not add alternative Button/Table families or route-local status colors. Stable business selectors and mutations stay in existing data/hooks.
+## Canonical primitives
 
-## Interaction conventions
+- `button.tsx`: Button variants `primary`, `secondary`/default, `outline`, `ghost`, `subtle`, `danger`, `success`; deliberate sizes; disabled/loading/asChild. IconButton requires an accessible label.
+- `input.tsx`, `textarea.tsx`, `select.tsx`, `checkbox.tsx`, `switch.tsx`, `radio-group.tsx`, `field.tsx`: associated labels, hints/errors, invalid and disabled semantics, native or Radix keyboard behavior.
+- `badge.tsx`, `avatar.tsx`, `separator.tsx`, `skeleton.tsx`, `spinner.tsx`, `progress.tsx`, `kbd.tsx`, `icon-box.tsx`: small presentation and feedback families with restrained APIs.
+- `dialog.tsx`, `drawer.tsx`, `popover.tsx`, `dropdown-menu.tsx`, `tooltip.tsx`: Radix focus trapping, Escape handling and focus restoration using NASTP geometry and surfaces.
+- `tabs.tsx` and `segmented-control.tsx`: panel navigation and pressed-choice controls remain separate semantics.
+- `table.tsx`, `data-table.tsx`, `pagination.tsx`: one table family. DataTable owns sorting, paging, selection, bulk actions and explicit loading/error/empty states.
+- `card.tsx` and `toast.tsx`: contained secondary surfaces and announced transient feedback. Primary workspaces do not default to cards.
 
-- Use pages for navigable workspaces, drawers for contextual details, dialogs for focused edits/decisions, popovers for short pickers. Preserve URL-backed detail selection and list context.
-- Page actions belong top-right; main form action is last/right in the footer, cancel immediately before it. One clear primary intent per action area.
-- Associate labels, hints and validation errors with controls. Retain entered values on failure. Explain required reasons beside the input; disable only when prerequisites are clear. Async errors stay visible and offer retry.
-- Confirm destructive actions with explicit object/action language. Cancel gets initial focus. Keep the overlay open while pending and on failure; prevent duplicate submission.
-- Unsent request comments are scoped by identity, experience and request, retained in session storage. Closing a dirty drawer asks to keep editing or discard; posting clears the draft. Browser unload warns. Hash-route navigation retains the draft rather than globally blocking navigation. Temporary assignment/category edits retain established cancel behavior.
-- Sort from header buttons, announce aria-sort, reset the page after sorting/filter changes, retain sorting during live refresh. Selection is controlled; bulk actions must correspond to real authorized operations. The production Requests page adds no speculative bulk mutation.
-- Rows open with Enter/Space, without hijacking embedded controls. Radix provides focus trapping, Escape and keyboard picker behavior; focus returns to connected opening controls. If a filtered row disappears after a transition it cannot receive focus; navigate from the remaining workspace controls.
-- Empty states explain the absence and give a real next step. Loading preserves context; errors expose retry without clearing user inputs. No-permission states describe the actual access boundary, never offer fake escalation.
-- Wrap long operational titles and keep the full value in the detail workspace. Do not truncate the only available copy of important data.
+Keep component APIs finite. A one-screen color or geometry adjustment belongs in its composition, not a new global variant.
 
-## Representative workflow
+## Product patterns
 
-Admin Service Requests now consumes the shared workspace, metrics, labelled filters, canonical table/statuses and contextual drawer. Search also matches tenant names; all existing lifecycle statuses are available; critical/overdue metrics apply real filters. Existing routes, permissions, simulation data, live subscriptions, attachments, comments, assignment, category routing and transitions remain.
+`patterns/` owns MetricValue/Delta, StatCard, StatusBadge and all domain badge renderers, PageHeader, SectionHeader, Breadcrumb, Timeline, Stepper, navigation tabs, filter chips, confirmation, Empty/Error/NoPermission states, definition/key-value lists and theme-aware charts. These patterns consume primitives and tokens while expressing NASTP product language.
 
-Admin resolution now uses the existing note-required resolution dialog, matching the Technician convention. No status meanings were changed. Shared drawer/control improvements also reach their existing Tenant/Technician consumers; those screens were not recomposed.
+Status labels, tones and icons come from `lib/meta.ts`. Status is never communicated by color alone. Charts use the visualization palette and always expose units, periods, legends where needed and exact values through ChartFrame.
 
-## Local workbench
+## Page archetypes
+
+The detailed composition contract is in `docs/page-layout-system.md`.
+
+- Analytics: MetricBand plus integrated full-width or split WorkspaceSections.
+- Data Workspace: PageHeader, ListToolbar, DataTable and integrated pagination on one data surface.
+- Operational Workspace: optional status strip, integrated filters and flat separated triage rows.
+- Setup Workspace: progress, structured content/context columns and predictable WorkspaceActions.
+- Detail Workspace: entity header, status/metadata, tabs or structured DetailSections and contextual actions.
+
+Page, WorkspaceSection, WorkspaceSplit, MetricBand, ListToolbar, DetailSection, FormActions and WorkspaceActions own shared spatial decisions. Primary sections use aligned edges and dividers; radius is reserved for controls, overlays and purposeful secondary panels.
+
+## State and accessibility conventions
+
+- Hover, active, selected, disabled, loading, invalid, readonly, empty, error and success states use shared tokens and visible text where meaning matters.
+- Use visible `focus-visible` treatment. Icon-only actions require an accessible label. Controls preserve keyboard operation and correct `aria-invalid`, `aria-selected`, `aria-pressed`, `aria-sort`, `role=status` or `role=alert` semantics.
+- Field owns label, description and error associations. Async submission disables repeat action, retains entered values and exposes failure near the action.
+- Dialogs trap focus and restore it to their opener. Destructive confirmation names the object/action, gives Cancel initial focus, and remains open while pending or failed.
+- Tables own horizontal overflow; lower-priority columns may hide only when complete information remains available in details. Rows open with Enter/Space without intercepting embedded controls.
+- Empty states explain the absence and offer a real permitted next action. Loading retains context; retry does not discard inputs.
+- Reduced-motion removes animation and numeric tweening while retaining state visibility.
+
+Use pages for navigable workspaces, drawers for contextual detail, dialogs for focused decisions/edits and popovers for short pickers. Primary page actions sit at the header edge; save is last/right in form actions.
+
+## Imports and compatibility
+
+Import directly from the owner:
+
+```tsx
+import { Button } from '@/tenant/components/ui/button'
+import { Input } from '@/tenant/components/ui/input'
+import { StatusBadge } from '@/tenant/components/patterns/status-badge'
+import { WorkspaceSection } from '@/tenant/components/layout/workspace-section'
+```
+
+Compatibility re-exports may be introduced briefly during a staged migration, must be documented, and must be removed when the final consumer moves. Circular imports and giant unrelated barrels are prohibited. There are currently no retained compatibility exports or deprecated duplicate component families.
+
+## Development workbench
 
 ```sh
 npm ci
 npm run dev -- --host 0.0.0.0 --port 5188
 ```
 
-Open `http://localhost:5188/#/admin/design-system`. If signed out, use the existing Admin demo account picker (`a.raza@nastp.pk`, password `nastp2026`), sign in, then open the URL. Foundations, Components, Patterns and NASTP domain tabs use real components. Header theme control switches light/dark. Fixtures stay in local workbench state. No production route or fixture chunk is emitted.
+Sign in with the existing Admin demo account and open `http://localhost:5188/#/admin/design-system`. Foundations, Components, Patterns and Layout render the actual production components with deterministic local fixtures. The route and fixtures are excluded from production builds.
 
-## Migration order after approval
+## Rules for future implementation
 
-1. Remaining Service Center Board/Performance and Technician request lists (reuse validated detail workflow).
-2. Admin tenant directory/details and onboarding forms.
-3. Visitor lists, approvals and visit details.
-4. Energy meters/analytics and alert workspaces.
-5. Tenant workspace pages, then settings, authentication and recovery forms.
-
-Preserve each screen's selectors and permission guards; replace only presentation and inconsistent interaction patterns. Validate one workflow at a time.
+1. Check for an existing canonical component before creating anything.
+2. Never create route-local colors for shared statuses.
+3. Never introduce a second Button, Table or Input family.
+4. Reuse layout archetypes before inventing page spacing.
+5. Prefer semantic tokens over hard-coded visual values.
+6. Keep product patterns separate from primitives.
+7. Preserve light/dark parity.
+8. Add genuinely reusable new components to the workbench.
+9. Do not change business-state semantics in UI code.
+10. Do not introduce a new design language without explicit approval.

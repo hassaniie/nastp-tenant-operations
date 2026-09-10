@@ -11,7 +11,7 @@ Approved zero-change baseline: annotated tag `approved-ui-2026-09-10` → d1eb4a
 - [x] Primitive component-family file normalization
 - [x] Product patterns and layout organization
 - [x] Consumer import migration and compatibility cleanup
-- [ ] Workbench/documentation update
+- [x] Workbench/documentation update
 - [ ] Visual regression and final verification
 
 ### Inventory decisions
@@ -37,7 +37,9 @@ Pattern/layout phase complete: metrics, stat cards, status families, charts, tim
 
 Consumer migration complete: all application and workbench imports now point to the canonical family or composition owner. The obsolete grouped files and unused compatibility exports were removed after repository-wide reference checks. Three remaining raw data tables were migrated to the canonical Table family without changing their local geometry. Raw buttons that remain are composition-specific rows, tabs, navigation, file controls, or icon affordances whose styling is intentionally owned by their pattern.
 
-Next: reorganize the lightweight workbench around Foundations, Components, Patterns, and Layout, then consolidate the design-system documentation.
+Workbench/documentation complete: the lightweight development route now presents Foundations, Components, Patterns, and all five Layout archetypes using production exports. `design-system.md` documents the final ownership, token hierarchy, APIs, states, accessibility, imports, compatibility policy, and future implementation rules.
+
+Next: run final automated checks and representative light/dark browser regression captures, then record the evidence and commit the verification phase.
 
 - [x] Checkpoint and focused inventory
 - [x] Shared semantic foundations and conventions

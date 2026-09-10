@@ -67,7 +67,7 @@ One scale, encoded in the layout primitives rather than repeated per screen:
 | `p-4` / `lg:p-6` | 16 / 24px | the page gutter |
 
 `Page`, `StatGrid`, `ContentGrid` and `SplitGrid` in
-[`components/ui/page.tsx`](../../src/tenant/components/ui/page.tsx) apply these,
+[`components/layout/`](../src/tenant/components/layout/) apply these,
 so no screen defines its own page padding, section rhythm or grid ratio.
 `SplitGrid` in particular replaces what had become eleven one-off
 "primary + aside" ratios with three named intents (`balanced`, `wide`,
@@ -98,17 +98,19 @@ command centre — information-rich but calm.
 
 ## Component library (§43)
 
-- **Primitives** (`components/ui/`) — Button, Badge, StatusBadge, IconBox, Kbd,
-  Skeleton, ProgressBar, Avatar/TenantMark, Separator; Card family; Input /
-  Textarea / Search / Select / Switch / Checkbox / Field / SettingRow; Tabs /
-  TabBar / Segmented / FilterChips; Dialog / Drawer / Tooltip / Popover / Menu;
-  DataTable + EmptyState / ErrorState / LoadingState / AsyncBoundary / DefList;
-  Toaster; Page / StatGrid / Toolbar.
-- **Common** (`components/common.tsx`) — StatCard, MetricValue, Delta,
-  AnimatedNumber, Timeline, Stepper, RatingStars, PageHeader, Breadcrumb,
-  KeyValue.
-- **Charts** (`components/charts.tsx`) — TrendChart, MultiLineChart,
-  BarSeriesChart, DonutChart, Sparkline, all theme-aware with a table fallback.
+- **Primitives** (`components/ui/`) — one predictable file per control, overlay,
+  feedback or table family. These components own behavior and NASTP styling but
+  do not know product lifecycle meaning.
+- **Patterns** (`components/patterns/`) — metrics, headers, lifecycle badges,
+  timeline, stepper, feedback compositions and theme-aware charts with exact
+  value tables.
+- **Layouts** (`components/layout/`) — Page, grids, metric bands, workspace
+  sections/splits, toolbars, detail sections and form/workspace actions.
+
+The current ownership, APIs and compatibility policy are documented in
+[`design-system.md`](design-system.md). The former grouped `common.tsx`,
+`status.tsx`, `charts.tsx`, `ui/form.tsx`, `ui/overlay.tsx`,
+`ui/primitives.tsx`, `ui/data.tsx` and `ui/page.tsx` files have been removed.
 
 ## Charts
 
