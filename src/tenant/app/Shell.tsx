@@ -83,8 +83,8 @@ function Brand({ collapsed }: { collapsed: boolean }) {
 
 function Rail({ groups, badges, activeId, collapsed, onToggle, onNavigate, mobile }: { groups: NavGroup[]; badges: Badges; activeId?: string; collapsed: boolean; onToggle: () => void; onNavigate?: () => void; mobile?: boolean }) {
   return (
-    <nav className={cn('flex h-full flex-col border-r border-border bg-background transition-[width] duration-200 ease-out', collapsed ? 'w-[68px]' : 'w-[244px]')} aria-label="Primary">
-      <div className="flex h-[58px] shrink-0 items-center justify-between border-b border-border">
+    <nav className={cn('flex h-full flex-col border-r border-border bg-background transition-[width] duration-200 ease-out', collapsed ? 'w-[var(--sidebar-width-collapsed)]' : 'w-[var(--sidebar-width)]')} aria-label="Primary">
+      <div className="flex h-[var(--topbar-height)] shrink-0 items-center justify-between border-b border-border">
         <Brand collapsed={collapsed} />
         {!mobile && !collapsed && (
           <button onClick={onToggle} className="mr-2 rounded-md p-1.5 text-subtle transition-colors hover:bg-surface-raised hover:text-foreground" aria-label="Collapse navigation">
@@ -154,7 +154,7 @@ function TopBar({ onOpenMobileNav }: { onOpenMobileNav: () => void }) {
   const title = match ? (match.nested && match.group.label ? match.group.label : match.leaf.label) : undefined;
 
   return (
-    <header className="ops-topbar flex h-[58px] shrink-0 items-center gap-3 border-b border-border bg-background px-3 lg:px-5">
+    <header className="ops-topbar flex h-[var(--topbar-height)] shrink-0 items-center gap-3 border-b border-border bg-background px-3 lg:px-5">
       <button onClick={onOpenMobileNav} className="rounded-md p-1.5 text-muted transition-colors hover:bg-surface-raised hover:text-foreground lg:hidden" aria-label="Open navigation">
         <Menu className="h-5 w-5" />
       </button>

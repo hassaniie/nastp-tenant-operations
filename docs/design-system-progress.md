@@ -2,6 +2,37 @@
 
 Branch: main-codex-redesign. Approved checkpoint: annotated tag `approved-admin-dashboard-a5b8427` → a5b8427. Working tree was clean at start; main remains at 1055724.
 
+## Architecture normalization pass — 10 September 2026
+
+Approved zero-change baseline: annotated tag `approved-ui-2026-09-10` → d1eb4af. The branch and tag are pushed; `main` remains at 1055724.
+
+- [x] Focused shared-component inventory (no route-by-route redesign audit)
+- [x] Token architecture and shared geometry normalization
+- [ ] Primitive component-family file normalization
+- [ ] Product patterns and layout organization
+- [ ] Consumer import migration and compatibility cleanup
+- [ ] Workbench/documentation update
+- [ ] Visual regression and final verification
+
+### Inventory decisions
+
+| Existing source | Normalization decision |
+| --- | --- |
+| `styles/theme.css` | Remains the single light/dark token source. Separate semantic colors, visualization colors, primitive scales, geometry, motion, elevation, and z-index without changing values. |
+| `ui/form.tsx` | Split into Input, Textarea, Select, Checkbox, Switch, Radio Group, and Field families. Keep a temporary re-export barrel. |
+| `ui/overlay.tsx` | Split into Dialog, Drawer, Tooltip, Popover, and Dropdown Menu families. Share focus-return behavior internally; keep a temporary re-export barrel. |
+| `ui/primitives.tsx` | Split Badge, Avatar, Separator, Skeleton, Spinner, Progress, Kbd, IconBox, and semantic tone recipes. Move product StatusBadge to patterns. Keep temporary re-exports. |
+| `ui/data.tsx` | Keep DataTable as the single data-table composition; move Pagination and feedback/product states to dedicated files. Keep temporary re-exports. |
+| `common.tsx` | Split product compositions into dedicated `patterns/` files; retain a compatibility barrel until consumers migrate. |
+| `status.tsx` + `lib/meta.ts` | Move badge renderers to `patterns/status-badge.tsx`; keep lifecycle labels/tones in `lib/meta.ts` as the business-state source of truth. |
+| `charts.tsx` | Move the existing chart family intact to `patterns/charts.tsx`; preserve a compatibility export and the independent viz palette. |
+| `ui/page.tsx` | Split structural components into `layout/`; retain a compatibility barrel during migration. |
+| Workbench | Continue using real production exports; reorganize sections as Foundations, Components, Patterns, and Layout. |
+
+Token phase complete: semantic color values are unchanged; repeated typography, control, shell, gutter, density, icon, motion, elevation, and z-index decisions now have named tokens in `theme.css`. Shared page layouts and the shell consume the geometry tokens. Typecheck and production build pass.
+
+Next: split the grouped primitive families into predictable files while retaining build-safe compatibility exports.
+
 - [x] Checkpoint and focused inventory
 - [x] Shared semantic foundations and conventions
 - [x] Consolidated production primitives and states

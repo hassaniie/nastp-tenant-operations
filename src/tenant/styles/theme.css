@@ -175,15 +175,85 @@
   --shadow-glow: none;
 }
 
-/* Shared scale and compatibility aliases; no per-screen palette. */
+/*
+ * Primitive scales and product geometry.
+ *
+ * These values describe repeated decisions in the approved interface. Color
+ * values stay in the light/dark semantic blocks above; components consume the
+ * stable role names regardless of theme.
+ */
 :root {
-  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
-  --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px;
-  --text-caption: 12px; --text-body: 14px; --text-section: 16px; --text-title: 30px;
-  --radius-control: 6px; --radius-surface: 8px; --radius-overlay: 10px;
-  --control-sm: 32px; --control-md: 36px; --control-lg: 44px;
-  --motion-fast: 150ms; --motion-enter: 180ms;
+  --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  --text-caption: 12px;
+  --text-label: 13px;
+  --text-body: 14px;
+  --text-section: 16px;
+  --text-page-title: 30px;
+  --text-page-title-mobile: 25px;
+  --line-caption: 1.45;
+  --line-body: 1.5;
+  --line-heading: 1.3;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-page-title: 550;
+  --weight-semibold: 600;
+  --tracking-heading: -0.02em;
+  --tracking-page-title: -1.1px;
+  --tracking-label: 0.08em;
+
+  --radius-control: 6px;
+  --radius-surface: 8px;
+  --radius-overlay: 10px;
+  --radius-round: 999px;
+
+  --control-height-xs: 28px;
+  --control-height-sm: 32px;
+  --control-height-md: 36px;
+  --control-height-lg: 44px;
+  --icon-xs: 12px;
+  --icon-sm: 14px;
+  --icon-md: 16px;
+  --icon-lg: 20px;
+
+  --topbar-height: 58px;
+  --sidebar-width: 244px;
+  --sidebar-width-collapsed: 68px;
+  --page-gutter-mobile: 16px;
+  --page-gutter-desktop: 24px;
+  --workspace-gutter-mobile: 20px;
+  --workspace-gutter-desktop: 32px;
+  --section-gap: 20px;
+  --table-row-compact: 36px;
+  --table-row-default: 48px;
+  --list-row-default: 52px;
+
+  --motion-fast: 150ms;
+  --motion-enter: 180ms;
+  --motion-standard: 200ms;
+  --motion-emphasis: 300ms;
+  --ease-standard: ease-out;
+  --ease-enter: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --z-sticky: 10;
+  --z-overlay: 70;
+  --z-modal: 80;
+  --z-popover: 85;
+  --z-tooltip: 90;
+  --z-toast: 100;
 }
+
+/* Compatibility aliases for the approved Dashboard CSS. */
 :root, [data-theme] {
   --ops-paper: var(--surface); --ops-rail: var(--background); --ops-ink: var(--foreground);
   --ops-muted: var(--foreground-subtle); --ops-line: var(--border); --ops-hover: var(--surface-raised);
@@ -247,12 +317,12 @@
   --color-viz-5: var(--viz-5);
   --color-viz-6: var(--viz-6);
 
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-sans: var(--font-family-sans);
+  --font-mono: var(--font-family-mono);
 
   /* Components use the same compact radius scale. */
-  --radius-card: 8px;
-  --radius-panel: 10px;
+  --radius-card: var(--radius-surface);
+  --radius-panel: var(--radius-overlay);
 
   --shadow-elevated: var(--shadow-md);
   --shadow-floating: var(--shadow-lg);
