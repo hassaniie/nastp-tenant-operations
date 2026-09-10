@@ -1,0 +1,7 @@
+import { Check } from 'lucide-react';
+import { Fragment } from 'react';
+import { cn } from '../../lib/utils';
+
+export function Stepper({ steps, current, onStep, className }: { steps: Array<{ label: string; done?: boolean }>; current: number; onStep?: (index: number) => void; className?: string }) {
+  return <ol className={cn('flex items-center gap-1', className)}>{steps.map((step, index) => { const active = index === current; const done = step.done ?? index < current; const reachable = Boolean(onStep) && (done || index <= current); return <Fragment key={step.label}><li className="flex items-center gap-2"><button type="button" disabled={!reachable} onClick={reachable ? () => onStep?.(index) : undefined} className={cn('flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-[12px] font-semibold transition-colors', active ? 'border-primary bg-primary text-primary-foreground' : done ? 'border-success/40 bg-success-dim text-success' : 'border-border bg-surface-inset text-subtle', reachable && !active && 'hover:border-border-strong')}>{done ? <Check className="h-3.5 w-3.5" /> : index + 1}</button><span className={cn('hidden text-[12px] font-medium lg:inline', active ? 'text-foreground' : done ? 'text-muted' : 'text-subtle')}>{step.label}</span></li>{index < steps.length - 1 && <span className={cn('h-px w-4 flex-1 lg:w-8', done ? 'bg-success/40' : 'bg-border')} aria-hidden />}</Fragment>; })}</ol>;
+}

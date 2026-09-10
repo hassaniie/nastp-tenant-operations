@@ -9,7 +9,7 @@ Approved zero-change baseline: annotated tag `approved-ui-2026-09-10` → d1eb4a
 - [x] Focused shared-component inventory (no route-by-route redesign audit)
 - [x] Token architecture and shared geometry normalization
 - [x] Primitive component-family file normalization
-- [ ] Product patterns and layout organization
+- [x] Product patterns and layout organization
 - [ ] Consumer import migration and compatibility cleanup
 - [ ] Workbench/documentation update
 - [ ] Visual regression and final verification
@@ -33,7 +33,9 @@ Token phase complete: semantic color values are unchanged; repeated typography, 
 
 Primitive phase complete: form controls, overlays, feedback primitives, badges, identity, progress, and data-table support now live in predictable component-family files. `form.tsx`, `overlay.tsx`, `primitives.tsx`, and `data.tsx` are temporary compatibility barrels. Existing public behavior and classes were retained. Typecheck, focused tests, and production build pass.
 
-Next: split product compositions and page layout primitives, then redirect the compatibility barrels to those canonical owners.
+Pattern/layout phase complete: metrics, stat cards, status families, charts, timelines, stepper, page/section headers, navigation tabs, feedback, confirmation, and definition lists now live in `components/patterns/`. Page, grid, toolbar, metric-band, section, split, detail, and action structures now live in `components/layout/`. Existing grouped files redirect to these owners. Typecheck, focused tests, and production build pass.
+
+Next: migrate application and workbench imports to canonical files, then remove compatibility barrels that no longer have consumers.
 
 - [x] Checkpoint and focused inventory
 - [x] Shared semantic foundations and conventions

@@ -57,12 +57,5 @@ export function CardFooter({ className, ...props }: HTMLAttributes<HTMLDivElemen
   return <div className={cn('flex items-center justify-between gap-3 border-t border-border-subtle px-4 py-3', className)} {...props} />;
 }
 
-/** Page-level section heading, used above grids of cards. */
-export function SectionHeader({ title, description, actions, children, className, compact }: {
-  title: ReactNode; description?: ReactNode; actions?: ReactNode; children?: ReactNode; className?: string; compact?: boolean;
-}) {
-  return <div className={cn('ds-section-header', compact && 'is-compact', className)}>
-    <div><h2>{title}</h2>{description && <p>{description}</p>}</div>
-    {(actions || children) && <div className="flex items-center gap-2">{actions || children}</div>}
-  </div>;
-}
+/** @deprecated Import SectionHeader from `components/patterns/section-header`. */
+export { SectionHeader } from '../patterns/section-header';
