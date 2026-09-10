@@ -2,6 +2,8 @@
 
 The approved Admin Dashboard is the visual source of truth. The checkpoint tag `approved-admin-dashboard-a5b8427` preserves that implementation. This system consolidates it; it does not introduce a new template or dependencies.
 
+Page composition is defined in `docs/page-layout-system.md`. It extends these foundations with reusable Analytics, Data, Operational, Setup, and Detail workspace archetypes.
+
 ## Structure and ownership
 
 - `src/tenant/styles/theme.css`: semantic light/dark tokens, Tailwind bridge, focus and reduced-motion defaults. Approved `ops-*` names are compatibility aliases, not another palette.

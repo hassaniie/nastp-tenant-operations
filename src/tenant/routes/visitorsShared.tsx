@@ -30,7 +30,7 @@ export function visitorColumns(opts: { showTenant?: (v: Visitor) => string } = {
   return cols;
 }
 
-export function VisitorTable({ visitors, loading, onOpen, selectedKey, showTenant, pageSize = 12, emptyTitle = 'No visitors', emptyDescription }: {
+export function VisitorTable({ visitors, loading, onOpen, selectedKey, showTenant, pageSize = 12, emptyTitle = 'No visitors', emptyDescription, resetKey }: {
   visitors: Visitor[];
   loading?: boolean;
   onOpen: (v: Visitor) => void;
@@ -39,12 +39,15 @@ export function VisitorTable({ visitors, loading, onOpen, selectedKey, showTenan
   pageSize?: number;
   emptyTitle?: string;
   emptyDescription?: string;
+  resetKey?: string;
 }) {
   return (
     <DataTable
       rows={visitors}
       columns={visitorColumns({ showTenant })}
       rowKey={(v) => v.id}
+      rowLabel={(v) => `${v.reference}: ${v.fullName}`}
+      label="Visitors"
       onRowClick={onOpen}
       selectedKey={selectedKey}
       loading={loading}
@@ -52,6 +55,7 @@ export function VisitorTable({ visitors, loading, onOpen, selectedKey, showTenan
       emptyDescription={emptyDescription}
       emptyIcon={<DoorOpen className="h-5 w-5" />}
       pageSize={pageSize}
+      resetKey={resetKey}
     />
   );
 }

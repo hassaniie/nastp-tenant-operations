@@ -5,10 +5,9 @@
 
 import { Bell, Check, CheckCheck } from 'lucide-react';
 import { useState } from 'react';
-import { Page, StatGrid } from '../../../components/ui/page';
-import { Card, CardBody, CardHeader } from '../../../components/ui/card';
+import { MetricBand, Page } from '../../../components/ui/page';
 import { PageHeader, StatCard } from '../../../components/common';
-import { Button, IconBox } from '../../../components/ui/primitives';
+import { Button } from '../../../components/ui/primitives';
 import { Segmented } from '../../../components/ui/tabs';
 import { EmptyState } from '../../../components/ui/data';
 import { AlertSeverityBadge } from '../../../components/status';
@@ -27,43 +26,33 @@ export default function EnergyAlerts() {
   const warning = alerts.filter((a) => a.status === 'active' && a.severity === 'warning').length;
 
   return (
-    <Page>
-      <PageHeader title="Energy Alerts" description="Threshold, demand, offline and unusual-consumption alerts across tenants." />
-
-      <StatGrid cols={3}>
-        <StatCard label="Active" value={num(active)} icon={Bell} tone={active ? 'warning' : 'success'} />
-        <StatCard label="Critical" value={num(critical)} icon={Bell} tone={critical ? 'critical' : 'success'} />
-        <StatCard label="Warning" value={num(warning)} icon={Bell} tone={warning ? 'warning' : 'success'} />
-      </StatGrid>
-
-      <Card>
-        <CardHeader
-          title="Alerts"
-          subtitle={`${shown.length} shown`}
-          icon={<IconBox icon={Bell} tone="warning" size="sm" />}
-          actions={<Segmented value={filter} onChange={setFilter} options={[{ value: 'active', label: 'Active' }, { value: 'acknowledged', label: 'Acknowledged' }, { value: 'all', label: 'All' }]} size="sm" />}
-        />
-        <CardBody className="flex flex-col gap-2">
+    <Page workspace archetype="operational">
+      <PageHeader eyebrow="Energy operations · Live exceptions" title="Energy alerts" description="Threshold, demand, offline and unusual-consumption alerts across tenants." />
+      <MetricBand columns={3}>
+        <StatCard variant="inline" label="Active" value={num(active)} caption={active ? 'Awaiting action' : 'No active alerts'} />
+        <StatCard variant="inline" label="Critical" value={num(critical)} caption={critical ? 'Immediate response' : 'No critical alerts'} />
+        <StatCard variant="inline" label="Warning" value={num(warning)} caption={warning ? 'Monitor and triage' : 'No warnings'} />
+      </MetricBand>
+      <div className="ds-operational-toolbar"><div><h2 className="text-sm font-semibold text-foreground">Alert queue</h2><p className="mt-1 text-xs text-subtle">{shown.length} shown</p></div><Segmented value={filter} onChange={setFilter} options={[{ value: 'active', label: 'Active' }, { value: 'acknowledged', label: 'Acknowledged' }, { value: 'all', label: 'All' }]} size="sm" /></div>
+      <div className="ds-flat-list">
           {shown.length === 0 ? (
             <EmptyState title="No alerts here" description={filter === 'active' ? 'Every tenant is within thresholds.' : 'Nothing to show for this filter.'} icon={<Bell className="h-5 w-5" />} />
           ) : (
             shown.map((a) => <AlertRow key={a.id} alert={a} tenantName={a.tenantName} />)
           )}
-        </CardBody>
-      </Card>
+      </div>
     </Page>
   );
 }
 
 function AlertRow({ alert: a, tenantName }: { alert: EnergyAlert; tenantName: string }) {
   return (
-    <div className="flex items-start gap-3 rounded-xl border border-border-subtle bg-surface-inset/40 p-3.5">
-      <IconBox icon={Bell} tone={a.severity === 'critical' ? 'critical' : a.severity === 'warning' ? 'warning' : 'energy'} size="sm" />
+    <article className="ds-operational-row">
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <p className="text-[13px] font-medium text-foreground">{a.title}</p>
           <AlertSeverityBadge severity={a.severity} size="sm" />
-          <span className="rounded bg-surface px-1.5 py-0.5 text-[11px] text-subtle">{ALERT_KIND_LABEL[a.kind]}</span>
+          <span className="text-[11px] text-subtle">{ALERT_KIND_LABEL[a.kind]}</span>
         </div>
         <p className="mt-0.5 text-[12px] text-muted">{a.description}</p>
         <p className="mt-1 text-[11px] text-subtle">{tenantName} · {a.source}{a.value !== undefined ? ` · value ${num(a.value)} vs threshold ${num(a.threshold ?? 0)}` : ''} · {ago(a.ts)}</p>
@@ -76,6 +65,6 @@ function AlertRow({ alert: a, tenantName }: { alert: EnergyAlert; tenantName: st
           <Button variant="secondary" size="xs" onClick={() => simulation.resolveAlert(a.id)}><CheckCheck className="h-3.5 w-3.5" />Resolve</Button>
         )}
       </div>
-    </div>
+    </article>
   );
 }

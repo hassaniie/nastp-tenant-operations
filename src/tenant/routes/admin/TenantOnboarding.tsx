@@ -13,10 +13,10 @@ import {
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Page, SplitGrid } from '../../components/ui/page';
-import { Card, CardBody, CardHeader } from '../../components/ui/card';
+import { Page, WorkspaceActions } from '../../components/ui/page';
+import { CardBody, CardHeader } from '../../components/ui/card';
 import { Breadcrumb, PageHeader, Stepper } from '../../components/common';
-import { Button, IconBox, ProgressBar, Separator, StatusBadge, TenantMark } from '../../components/ui/primitives';
+import { Button, ProgressBar, Separator, StatusBadge, TenantMark } from '../../components/ui/primitives';
 import { Field, Input, SimpleSelect, Switch } from '../../components/ui/form';
 import { adminApi } from '../../data/api';
 import { simulation } from '../../data/live';
@@ -94,18 +94,14 @@ export default function TenantOnboarding() {
   };
 
   return (
-    <Page>
-      <Breadcrumb items={[{ label: 'Tenants', to: '/admin/tenants' }, { label: 'Onboarding' }]} />
-      <PageHeader title="Onboard a Tenant" description="Configure a new organization step by step. Progress is validated and can be saved as a draft at any point." />
-
-      <div className="rounded-2xl border border-border bg-surface p-4">
+    <Page workspace archetype="setup">
+      <PageHeader eyebrow="Tenant administration · Guided setup" breadcrumb={<Breadcrumb items={[{ label: 'Tenants', to: '/admin/tenants' }, { label: 'Onboarding' }]} />} title="Onboard a tenant" description="Configure a new organization step by step. Progress is validated and can be saved as a draft at any point." />
+      <div className="ds-setup-progress">
         <Stepper steps={STEPS.map((label, i) => ({ label, done: i < step && validity[i] }))} current={step} onStep={setStep} />
       </div>
-
-      <SplitGrid at="lg">
-        {/* Step body */}
-        <div className="flex flex-col gap-4">
-          <Card>
+      <div className="ds-setup-grid">
+        <div className="ds-setup-main">
+          <section className="ds-setup-stage">
             {step === 0 && <StepOrganization draft={draft} set={set} />}
             {step === 1 && <StepLocation draft={draft} set={set} buildings={buildings.data ?? []} floors={floors.data ?? []} />}
             {step === 2 && <StepEnergy draft={draft} set={set} />}
@@ -113,24 +109,21 @@ export default function TenantOnboarding() {
             {step === 4 && <StepAlerts draft={draft} set={set} />}
             {step === 5 && <StepPortal draft={draft} set={set} />}
             {step === 6 && <StepReview draft={draft} validity={validity} totalArea={totalArea} />}
-          </Card>
-
-          <div className="flex items-center justify-between">
+          </section>
+          <WorkspaceActions message={`Step ${step + 1} of ${STEPS.length} · ${completeness}% complete`}>
             <Button variant="ghost" size="md" disabled={step === 0} onClick={() => setStep((s) => Math.max(0, s - 1))}><ArrowLeft className="h-4 w-4" />Previous</Button>
-            <div className="flex items-center gap-2">
-              <Button variant="secondary" size="md" onClick={() => commit(false)}><Save className="h-4 w-4" />Save draft</Button>
-              {step < STEPS.length - 1 ? (
-                <Button variant="primary" size="md" disabled={!stepValid} onClick={() => setStep((s) => Math.min(STEPS.length - 1, s + 1))}>Next<ArrowRight className="h-4 w-4" /></Button>
-              ) : (
-                <Button variant="success" size="md" disabled={completeness < 100} onClick={() => commit(true)}><Check className="h-4 w-4" />Activate Tenant</Button>
-              )}
-            </div>
-          </div>
+            <Button variant="secondary" size="md" onClick={() => commit(false)}><Save className="h-4 w-4" />Save draft</Button>
+            {step < STEPS.length - 1 ? (
+              <Button variant="primary" size="md" disabled={!stepValid} onClick={() => setStep((s) => Math.min(STEPS.length - 1, s + 1))}>Next<ArrowRight className="h-4 w-4" /></Button>
+            ) : (
+              <Button variant="success" size="md" disabled={completeness < 100} onClick={() => commit(true)}><Check className="h-4 w-4" />Activate Tenant</Button>
+            )}
+          </WorkspaceActions>
         </div>
-
-        {/* Live preview */}
-        <PreviewPanel draft={draft} totalArea={totalArea} baseKw={baseKw} completeness={completeness} tariffName={currentTariff?.name} />
-      </SplitGrid>
+        <aside className="ds-setup-aside">
+          <PreviewPanel draft={draft} totalArea={totalArea} baseKw={baseKw} completeness={completeness} tariffName={currentTariff?.name} />
+        </aside>
+      </div>
     </Page>
   );
 }
@@ -138,7 +131,8 @@ export default function TenantOnboarding() {
 /* --------------------------------------------------------------- steps */
 
 function StepHead({ icon, title, subtitle }: { icon: typeof Zap; title: string; subtitle: string }) {
-  return <CardHeader title={title} subtitle={subtitle} icon={<IconBox icon={icon} tone="primary" size="sm" />} />;
+  const Icon = icon;
+  return <CardHeader title={title} subtitle={subtitle} icon={<Icon className="h-4 w-4 text-primary" />} />;
 }
 
 function StepOrganization({ draft, set }: { draft: Draft; set: (p: Partial<Draft>) => void }) {
@@ -214,7 +208,7 @@ function StepEnergy({ draft, set }: { draft: Draft; set: (p: Partial<Draft>) => 
           return (
             <div key={o.key} className="flex items-end gap-3 rounded-xl border border-border-subtle bg-surface p-3">
               <div className="flex items-center gap-2.5">
-                <IconBox icon={Gauge} tone="energy" size="sm" />
+                <Gauge className="h-4 w-4 shrink-0 text-energy" />
                 <div>
                   <p className="text-[13px] font-medium text-foreground">{o.label}</p>
                   <p className="tnum text-[11px] text-subtle">Serial {serial}</p>
@@ -357,8 +351,8 @@ function ReviewBlock({ title, items }: { title: string; items: Array<[string, st
 
 function PreviewPanel({ draft, totalArea, baseKw, completeness, tariffName }: { draft: Draft; totalArea: number; baseKw: number; completeness: number; tariffName?: string }) {
   return (
-    <div className="lg:sticky lg:top-4 lg:self-start">
-      <Card>
+    <div className="lg:sticky lg:top-4">
+      <section>
         <CardHeader title="Live Preview" subtitle="Updates as you configure" />
         <CardBody className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
@@ -386,7 +380,7 @@ function PreviewPanel({ draft, totalArea, baseKw, completeness, tariffName }: { 
             <Row label="Portal user" value={draft.portalName || '—'} />
           </dl>
         </CardBody>
-      </Card>
+      </section>
     </div>
   );
 }

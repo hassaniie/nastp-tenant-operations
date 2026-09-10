@@ -7,10 +7,9 @@
 import { AlarmClock, CalendarClock, DoorOpen, History as HistoryIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Page, Toolbar } from '../../../components/ui/page';
-import { Card } from '../../../components/ui/card';
+import { ListToolbar, Page } from '../../../components/ui/page';
 import { PageHeader } from '../../../components/common';
-import { SearchInput, SimpleSelect } from '../../../components/ui/form';
+import { Field, SearchInput, SimpleSelect } from '../../../components/ui/form';
 import { VisitorTable, VisitorDrawer } from '../../visitorsShared';
 import { useLive } from '../../../data/live';
 import type { Visitor, VisitorStatus } from '../../../data/types';
@@ -18,10 +17,10 @@ import type { Visitor, VisitorStatus } from '../../../data/types';
 export type VisitorListKind = 'scheduled' | 'inside' | 'overstaying' | 'history';
 
 const META: Record<VisitorListKind, { title: string; description: string; icon: typeof DoorOpen; match: (s: VisitorStatus) => boolean }> = {
-  scheduled: { title: 'Scheduled Visitors', description: 'Everyone expected across the park.', icon: CalendarClock, match: (s) => s === 'scheduled' },
-  inside: { title: 'Visitors In Building', description: 'Who is inside right now, by tenant.', icon: DoorOpen, match: (s) => s === 'in_building' || s === 'overstaying' },
-  overstaying: { title: 'Overstaying Visitors', description: 'Visitors past their expected departure time.', icon: AlarmClock, match: (s) => s === 'overstaying' },
-  history: { title: 'Visitor History', description: 'Completed, cancelled and no-show visits.', icon: HistoryIcon, match: (s) => s === 'checked_out' || s === 'cancelled' || s === 'no_show' },
+  scheduled: { title: 'Scheduled visitors', description: 'Everyone expected across the park.', icon: CalendarClock, match: (s) => s === 'scheduled' },
+  inside: { title: 'Visitors in building', description: 'Who is inside right now, by tenant.', icon: DoorOpen, match: (s) => s === 'in_building' || s === 'overstaying' },
+  overstaying: { title: 'Overstaying visitors', description: 'Visitors past their expected departure time.', icon: AlarmClock, match: (s) => s === 'overstaying' },
+  history: { title: 'Visitor history', description: 'Completed, cancelled and no-show visits.', icon: HistoryIcon, match: (s) => s === 'checked_out' || s === 'cancelled' || s === 'no_show' },
 };
 
 export function AdminVisitorList({ kind }: { kind: VisitorListKind }) {
@@ -47,15 +46,12 @@ export function AdminVisitorList({ kind }: { kind: VisitorListKind }) {
   });
 
   return (
-    <Page>
-      <PageHeader title={meta.title} description={meta.description} />
-      <Card>
-        <div className="border-b border-border-subtle p-4">
-          <Toolbar>
-            <SearchInput value={search} onChange={setSearch} placeholder="Search visitors…" className="w-full sm:w-[280px]" />
-            <SimpleSelect value={tenantFilter} onChange={setTenantFilter} options={[{ value: 'all', label: 'All tenants' }, ...data.tenants.map((t) => ({ value: t.id, label: t.name }))]} className="w-[200px]" />
-          </Toolbar>
-        </div>
+    <Page workspace archetype={kind === 'history' ? 'data' : 'operational'} className="ds-data-workspace">
+      <PageHeader eyebrow={`Visitor operations · ${kind === 'history' ? 'Records' : 'Live workflow'}`} title={meta.title} description={meta.description} />
+      <ListToolbar summary={`${filtered.length} matching visitors`} onReset={search || tenantFilter !== 'all' ? () => { setSearch(''); setTenantFilter('all'); } : undefined}>
+        <Field label="Search"><SearchInput value={search} onChange={setSearch} placeholder="Name, company or reference…" label="Search visitors" /></Field>
+        <Field label="Tenant" className="sm:max-w-[280px]"><SimpleSelect value={tenantFilter} onChange={setTenantFilter} options={[{ value: 'all', label: 'All tenants' }, ...data.tenants.map((t) => ({ value: t.id, label: t.name }))]} /></Field>
+      </ListToolbar>
         <VisitorTable
           visitors={filtered}
           onOpen={(v: Visitor) => setParams({ open: v.id })}
@@ -63,8 +59,8 @@ export function AdminVisitorList({ kind }: { kind: VisitorListKind }) {
           showTenant={(v) => data.nameFor(v.tenantId)}
           emptyTitle={`No ${kind === 'inside' ? 'visitors inside' : kind + ' visitors'}`}
           emptyDescription={kind === 'overstaying' ? 'Everyone is within their expected time.' : undefined}
+          resetKey={`${search}|${tenantFilter}`}
         />
-      </Card>
       <VisitorDrawer visitor={open} open={Boolean(open)} onOpenChange={(o) => !o && setParams({})} mode="admin" tenantName={open ? data.nameFor(open.tenantId) : undefined} />
     </Page>
   );

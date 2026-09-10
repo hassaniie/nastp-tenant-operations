@@ -3,12 +3,9 @@
  * ranking, a multi-tenant trend comparison, and a sortable table.
  */
 
-import { BarChart3, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Page } from '../../../components/ui/page';
-import { Card, CardBody, CardHeader } from '../../../components/ui/card';
+import { Page, WorkspaceSection, WorkspaceSplit } from '../../../components/ui/page';
 import { PageHeader } from '../../../components/common';
-import { IconBox } from '../../../components/ui/primitives';
 import { BarSeriesChart, MultiLineChart } from '../../../components/charts';
 import { DataTable, type Column } from '../../../components/ui/data';
 import { AlertLevelBadge } from '../../../components/status';
@@ -41,28 +38,19 @@ export default function TenantConsumption() {
   ];
 
   return (
-    <Page>
-      <PageHeader title="Tenant Consumption" description="Compare energy consumption across every active tenant." />
-
-      <div className="grid gap-5 xl:grid-cols-[1fr_1.4fr]">
-        <Card>
-          <CardHeader title="Ranking" subtitle="By period consumption" icon={<IconBox icon={BarChart3} tone="primary" size="sm" />} />
-          <CardBody>
+    <Page workspace archetype="analytics" className="ds-data-workspace">
+      <PageHeader eyebrow="Energy intelligence · Tenant comparison" title="Tenant consumption" description="Compare energy consumption across every active tenant." />
+      <WorkspaceSplit ratio="balanced">
+        <WorkspaceSection title="Consumption ranking" description="By billing-period consumption">
             <BarSeriesChart data={ranking.slice(0, 10).map((r) => ({ label: r.summary.tenant.code, kwh: r.summary.periodKwh }))} series={[{ key: 'kwh', label: 'kWh' }]} horizontal height={300} valueFormatter={(v) => `${num(v)} kWh`} />
-          </CardBody>
-        </Card>
-        <Card>
-          <CardHeader title="Trend Comparison" subtitle="Top 5 tenants, last 30 days" icon={<IconBox icon={Zap} tone="energy" size="sm" />} />
-          <CardBody>
+        </WorkspaceSection>
+        <WorkspaceSection title="Trend comparison" description="Top 5 tenants · Last 30 days">
             <MultiLineChart data={comparison} series={topCodes.map((c) => ({ key: c, label: c }))} height={300} unit="kWh" valueFormatter={(v) => `${num(v)} kWh`} />
-          </CardBody>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader title="All Tenants" subtitle={`${ranking.length} active`} icon={<IconBox icon={BarChart3} tone="primary" size="sm" />} />
-        <DataTable rows={ranking} columns={columns} rowKey={(r) => r.summary.tenant.id} onRowClick={(r) => navigate(`/admin/tenants/${r.summary.tenant.id}`)} pageSize={12} />
-      </Card>
+        </WorkspaceSection>
+      </WorkspaceSplit>
+      <WorkspaceSection title="All tenants" description={`${ranking.length} active`} inset={false} className="border-b-0">
+        <DataTable rows={ranking} columns={columns} rowKey={(r) => r.summary.tenant.id} rowLabel={(r) => r.summary.tenant.name} label="Tenant energy consumption" onRowClick={(r) => navigate(`/admin/tenants/${r.summary.tenant.id}`)} pageSize={12} />
+      </WorkspaceSection>
     </Page>
   );
 }

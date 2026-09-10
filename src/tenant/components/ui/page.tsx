@@ -17,9 +17,11 @@ import { cn } from '../../lib/utils';
  */
 
 /** Standard page: centred, gutter, and a consistent section rhythm. */
-export function Page({ children, className, workspace }: { children: ReactNode; className?: string; workspace?: boolean }) {
+export type PageArchetype = 'analytics' | 'data' | 'operational' | 'setup' | 'detail';
+
+export function Page({ children, className, workspace, archetype }: { children: ReactNode; className?: string; workspace?: boolean; archetype?: PageArchetype }) {
   return (
-    <div className={cn(workspace ? 'ds-workspace' : 'mx-auto flex w-full max-w-[1600px] flex-col gap-5 p-4 lg:p-6', className)}>
+    <div data-page-archetype={archetype} className={cn(workspace ? 'ds-workspace' : 'mx-auto flex w-full max-w-[1600px] flex-col gap-5 p-4 lg:p-6', className)}>
       {children}
     </div>
   );
@@ -125,6 +127,34 @@ export function SplitGrid({
 /** List pages share a visible filter region and a single reset action. */
 export function ListToolbar({ children, actions, summary, onReset }: { children: ReactNode; actions?: ReactNode; summary?: ReactNode; onReset?: () => void }) {
   return <div className="ds-list-toolbar"><div className="ds-list-filters" role="search" aria-label="Filter records">{children}</div><div className="ds-list-summary"><span role="status">{summary}</span><div className="flex items-center gap-3">{onReset && <button type="button" className="text-xs text-primary hover:underline" onClick={onReset}>Reset filters</button>}{actions}</div></div></div>;
+}
+
+/** Integrated page metric cells. Metrics align to the workspace grid rather
+ * than becoming independent floating cards. */
+export function MetricBand({ children, columns = 4, className }: { children: ReactNode; columns?: 2 | 3 | 4 | 5 | 6; className?: string }) {
+  return <section className={cn('ds-metrics', `is-${columns}`, className)} aria-label="Summary metrics">{children}</section>;
+}
+
+/** A primary page region with shared dividers and no automatic card chrome. */
+export function WorkspaceSection({ children, title, description, actions, className, inset = true }: {
+  children: ReactNode; title?: ReactNode; description?: ReactNode; actions?: ReactNode; className?: string; inset?: boolean;
+}) {
+  return <section className={cn('ds-workspace-section', inset && 'is-inset', className)}>
+    {(title || description || actions) && <header className="ds-workspace-section-header"><div>{title && <h2>{title}</h2>}{description && <p>{description}</p>}</div>{actions}</header>}
+    <div className="ds-workspace-section-body">{children}</div>
+  </section>;
+}
+
+/** Adjacent analytical/detail regions share a central rule and collapse in a
+ * consistent order. */
+export function WorkspaceSplit({ children, ratio = 'balanced', className }: { children: ReactNode; ratio?: 'balanced' | 'wide' | 'equal'; className?: string }) {
+  return <div className={cn('ds-workspace-split', `is-${ratio}`, className)}>{children}</div>;
+}
+
+/** Stable setup footer: progress context stays above it and actions remain
+ * predictable on long form steps. */
+export function WorkspaceActions({ children, message, className }: { children: ReactNode; message?: ReactNode; className?: string }) {
+  return <div className={cn('ds-workspace-actions', className)}>{message && <span className="mr-auto text-xs text-subtle">{message}</span>}{children}</div>;
 }
 /** Consistent detail sections and forms use actual children/actions, never invented workflow state. */
 export function DetailSection({ title, children, actions }: { title: string; children: ReactNode; actions?: ReactNode }) {
