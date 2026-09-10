@@ -1,32 +1,55 @@
-# Design system verification — 10 September 2026
+# Design system normalization verification — 11 September 2026
+
+## Baseline and scope
+
+The approved baseline is annotated tag `approved-ui-2026-09-10` at `d1eb4af`. This pass reorganized tokens, primitives, product patterns, layouts and imports. It did not change application data, permissions, routes, mutations, lifecycle meaning or the approved visual direction.
+
+No visual difference was intentionally introduced. Named token aliases retain the approved values. The three remaining raw data tables now use the canonical Table family while retaining their route-owned classes and geometry.
 
 ## Automated checks
 
 - `npm run typecheck`: passed.
-- `npm run build`: passed (Vite production build, no chunk-size warnings).
-- `npm test`: four focused tests pass: numeric/text sorting, immutable live input, obsolete/empty page clamping, selection across pages.
-- `npm run check:production`: passed; emitted JavaScript contains no workbench module, route or deterministic fixtures.
+- `npm run build`: passed; Vite transformed 2,617 modules with no chunk-size warning.
+- `npm test`: 4/4 focused DataTable tests passed.
+- `npm run check:production`: passed; the workbench route, module and fixtures are absent from emitted JavaScript.
 - `git diff --check`: passed.
+- Obsolete grouped-import scan: passed.
+- Raw hex scan outside `styles/theme.css`: passed.
+- Canonical-family declaration scan found one Button, Input, Textarea, Select, Checkbox, Switch, StatusBadge and DataTable owner.
+- `package.json` and `package-lock.json` are unchanged from the approved checkpoint; no dependency was added.
 
-## Browser verification
+## Browser and accessibility checks
 
-Used the existing local application and its simulated operational data; no new production mock service was introduced.
+- Admin Overview, Energy Overview, Charges & Billing, Energy Alerts and Tenant Onboarding loaded in light and dark themes using the existing simulated operational data.
+- Every reviewed desktop page reported zero document and main horizontal overflow.
+- The workbench renders Foundations, Components, Patterns and Layout. The Layout tab contains Analytics, Data, Operational, Setup and Detail examples built from production components.
+- DataTable request sorting sets `aria-sort="ascending"`.
+- Dialog opens with its accessible title and returns focus to its “Open dialog” trigger after Cancel.
+- Theme switching persists across route navigation.
+- The responsive route markup and breakpoint rules are unchanged from the immediately preceding page-layout verification. Existing 390×1050 captures under `artifacts/page-layout-system/` remain the mobile baseline for Energy Overview, Billing, Alerts, Visitor History, Tenant Consumption and Onboarding; the normalization introduced no route layout class change.
 
-- Workbench: invalid form submission associates both errors with inputs; successful valid submission; disabled/loading controls; dialog accessible title/description, cancel focus and return to opener; async confirmation failure remains open with actionable error; chart exact-value table; table sorting ARIA state, page selection, paging, keyboard detail opening, loading, empty search and retry.
-- Service Requests: live records and counts, all existing status choices, search/filter/reset, keyboard row opening and focus return, responsive table. SR-5149 was acknowledged, assigned to Uzma Haider, started, commented on and resolved through the existing simulation mutations. Timeline retained each transition and resolution note. Empty resolution is disabled; valid note submits. Dirty comment close offers Keep editing / Discard; Keep editing retained text and posting succeeded. Reassignment without a reason is disabled and becomes available with a reason; category dialog explains rerouting/unassignment and rejects unchanged submission.
-- Themes and responsive: reviewed desktop 1440×1000 and mobile 390×1050. No document/main horizontal overflow. Mobile request titles wrap and secondary columns remain available in details. Five-metric strip uses a full-width final summary on mobile.
-- Dashboard: visually reviewed consolidated header/metrics, original analytics/ranking, attention, onboarding and live activity. Approved composition retained. Browser diagnostics showed no warnings/errors in the development review.
-- Production: direct workbench URL renders “This page does not exist.” Existing Admin login remains available. A previously open preview tab initially referenced removed build chunks; loading fresh build assets resolved it (normal stale preview cache, not an application regression).
+## Visual regression evidence
 
-## Captures
+Approved before captures:
 
-All evidence is under `artifacts/design-system/`, separate from the approved baseline in `artifacts/redesign/`:
+- `artifacts/page-layout-system/overview-dark.png`
+- `artifacts/page-layout-system/energy-overview-dark.png` and `energy-overview-light.png`
+- `artifacts/page-layout-system/billing-dark.png` and `billing-light.png`
+- `artifacts/page-layout-system/alerts-dark.png` and `alerts-light.png`
+- `artifacts/page-layout-system/onboarding-dark.png` and `onboarding-light.png`
+- the matching `*-mobile-light.png` captures in that directory
 
-- `workbench-dark.png`, `workbench-light.png`, `workbench-mobile-light.png`
-- `requests-dark.png`, `requests-light.png`, `requests-mobile-light.png`
-- `request-detail-light.png`
-- `dashboard-regression-dark.png`
+After captures in `artifacts/design-system-normalization/`:
 
-## Limits and retained behavior
+- `overview-dark-after.jpg`, `overview-light-after.jpg`
+- `analytics-dark-after.jpg`, `analytics-light-after.jpg`
+- `data-dark-after.jpg`, `data-light-after.jpg`
+- `operational-dark-after.jpg`, `operational-light-after.jpg`
+- `setup-dark-after.jpg`, `setup-light-after.jpg`
+- `workbench-dark-after.jpg`, `workbench-light-after.jpg`, `workbench-layout-dark-after.jpg`
 
-This is the existing simulated-data product; no real backend integration was validated. Its clock/seed can produce future relative “Updated” timestamps, which predates this presentation work. The complete unchanged route suite was not rerun. Shared controls affect their existing consumers, but remaining screens have not been migrated. Unsent request drafts survive hash navigation; only drawer dismissal and browser unload prompt, as documented in the interaction conventions. No unresolved blocker was found in the reviewed slice.
+Side-by-side review found equivalent page edges, typography, control geometry, surfaces, divider rhythm, charts and table density. Live counts and demand values differ because the existing simulation updates over time.
+
+## Remaining limits
+
+The application uses its existing simulated data, so backend integration was not exercised. The complete unchanged business workflow suite was not rerun; verification focused on component architecture, imports, visual regression, themes, focus, sorting, production exclusion and overflow. No blocker or known normalization defect remains.

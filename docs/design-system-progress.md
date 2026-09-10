@@ -12,7 +12,7 @@ Approved zero-change baseline: annotated tag `approved-ui-2026-09-10` → d1eb4a
 - [x] Product patterns and layout organization
 - [x] Consumer import migration and compatibility cleanup
 - [x] Workbench/documentation update
-- [ ] Visual regression and final verification
+- [x] Visual regression and final verification
 
 ### Inventory decisions
 
@@ -39,7 +39,7 @@ Consumer migration complete: all application and workbench imports now point to 
 
 Workbench/documentation complete: the lightweight development route now presents Foundations, Components, Patterns, and all five Layout archetypes using production exports. `design-system.md` documents the final ownership, token hierarchy, APIs, states, accessibility, imports, compatibility policy, and future implementation rules.
 
-Next: run final automated checks and representative light/dark browser regression captures, then record the evidence and commit the verification phase.
+Final verification complete: typecheck, production build, focused tests, production-boundary check, import/color/duplicate scans, light/dark browser review, focus restoration, sorting semantics and overflow checks pass. Representative before/after evidence is recorded in `design-system-verification.md`.
 
 - [x] Checkpoint and focused inventory
 - [x] Shared semantic foundations and conventions
