@@ -9,14 +9,17 @@ import {
   Camera, Check, CheckCheck, CheckCircle2, MessageSquarePlus, Paperclip, PencilLine, RotateCcw, Send, ThumbsUp, UserCog,
 } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
-import { Button, IconBox, Avatar, StatusBadge } from '../components/ui/primitives';
+import { Button, Avatar, StatusBadge } from '../components/ui/primitives';
 import {
-  Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTrigger,
+  ConfirmDialog, Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTrigger,
   Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader,
   Popover, PopoverContent, PopoverTrigger,
 } from '../components/ui/overlay';
 import { DefList } from '../components/ui/data';
-import { SimpleSelect, Textarea } from '../components/ui/form';
+import { Field, SimpleSelect, Textarea } from '../components/ui/form';
+import { Segmented } from '../components/ui/tabs';
+import { useDraft } from '../hooks/useDraft';
+import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
 import { Timeline, RatingStars, type TimelineItem } from '../components/common';
 import { PriorityBadge, ServiceStatusBadge, CATEGORY_ICON } from '../components/status';
 import { SERVICE_STATUS } from '../lib/meta';
@@ -61,10 +64,17 @@ const TECH_NEXT: Partial<Record<ServiceStatus, Array<{ to: ServiceStatus; label:
 };
 const TECH_RESOLVABLE: ReadonlySet<ServiceStatus> = new Set(['in_progress', 'waiting_tenant', 'reopened']);
 
-export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenantName }: { request: ServiceRequest | null; open: boolean; onOpenChange: (o: boolean) => void; mode: 'admin' | 'tenant' | 'tech'; tenantName?: string }) {
+interface ServiceRequestDrawerProps { request: ServiceRequest | null; open: boolean; onOpenChange: (open: boolean) => void; mode: 'admin' | 'tenant' | 'tech'; tenantName?: string }
+export function ServiceRequestDrawer(props: ServiceRequestDrawerProps) {
+  return props.request ? <RequestDetail key={`${props.mode}:${props.request.id}`} {...props} /> : null;
+}
+function RequestDetail({ request, open, onOpenChange, mode, tenantName }: ServiceRequestDrawerProps) {
   const { toast } = useSession();
   const { subject } = useAuth();
-  const [comment, setComment] = useState('');
+  const [comment, setComment, clearComment] = useDraft(`service-comment-${mode}-${subject?.name}-${request?.id}`, '');
+  const [discard, setDiscard] = useState(false);
+  useUnsavedChanges(Boolean(comment.trim()));
+  const requestDismiss = (next: boolean) => { if (!next && comment.trim()) { setDiscard(true); return; } onOpenChange(next); };
   const [visibleToTenant, setVisibleToTenant] = useState(true);
   const [rating, setRating] = useState(0);
   // The assignee is a reference now, so it's resolved from the roster rather
@@ -108,6 +118,7 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
       internal: staff ? !visibleToTenant : false,
     });
     setComment('');
+    clearComment();
   };
 
   const addPhoto = (file: File) => {
@@ -143,16 +154,17 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
   };
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent width="560px">
+    <>
+    <Drawer open={open} onOpenChange={requestDismiss}>
+      <DrawerContent width="600px" className="ds-service-detail">
         <DrawerHeader
           title={r.title}
           subtitle={`${r.reference}${tenantName ? ' · ' + tenantName : ''}`}
           badge={<div className="flex items-center gap-1.5"><PriorityBadge priority={r.priority} size="sm" /><ServiceStatusBadge status={r.status} size="sm" /></div>}
         />
         <DrawerBody className="flex flex-col gap-5">
-          <div className="flex items-start gap-3 rounded-xl border border-border-subtle bg-surface-inset/50 p-3">
-            <IconBox icon={Icon} tone="service" size="md" />
+          <div className="ds-detail-summary flex items-start gap-3">
+            <Icon className="mt-1 size-4 shrink-0 text-subtle" />
             <p className="text-[13px] leading-relaxed text-muted">{r.description}</p>
           </div>
 
@@ -178,9 +190,9 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
           ]} />
 
           {mode === 'admin' && !department?.triageOnly && (
-            <div className="flex items-center justify-between gap-3 rounded-xl border border-border-subtle bg-surface-inset/50 p-3">
+            <div className="ds-detail-row flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle">Assignment</p>
+                <p className="text-xs font-medium text-subtle">Assignment</p>
                 <p className="mt-1 truncate text-[13px] font-medium text-foreground">{assignee ? assignee.name : 'Unassigned'}</p>
                 <p className="text-[11px] text-subtle">
                   {department?.name ?? 'Unrouted'}{assignee ? ` · ${assignee.availability.replace(/_/g, ' ')}` : ''}
@@ -199,9 +211,9 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
           )}
 
           {mode === 'admin' && RECATEGORISABLE_STATUSES.has(r.status) && (
-            <div className="flex items-center justify-between gap-3 rounded-xl border border-border-subtle bg-surface-inset/50 p-3">
+            <div className="ds-detail-row flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle">Category</p>
+                <p className="text-xs font-medium text-subtle">Category</p>
                 <p className="mt-1 text-[13px] font-medium text-foreground">{catLabel(r.category)}</p>
                 <p className="text-[11px] text-subtle">Routed to {department?.name ?? 'Unrouted'}</p>
               </div>
@@ -216,7 +228,7 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
           {(r.attachments.length > 0 || staff) && (
             <div>
               <div className="mb-2 flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle">Attachments</p>
+                <p className="text-xs font-medium text-subtle">Attachments</p>
                 {staff && (
                   <label className="flex cursor-pointer items-center gap-1 text-[11px] font-medium text-primary underline underline-offset-2">
                     <Camera className="h-3.5 w-3.5" />
@@ -245,19 +257,19 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
           )}
 
           <div>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle">Timeline</p>
+            <p className="mb-2 text-xs font-medium text-subtle">Timeline</p>
             <Timeline items={timeline} />
           </div>
 
           <div>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle">Comments</p>
+            <p className="mb-2 text-xs font-medium text-subtle">Comments</p>
             <div className="flex flex-col gap-3">
               {visibleComments.length === 0 && <p className="text-[12px] text-subtle">No comments yet.</p>}
               {visibleComments.map((c) => (
                 <div key={c.id} className="flex gap-2.5">
                   <Avatar name={c.author} seed={c.author.length} size={28} />
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className="text-[12px] font-medium text-foreground">{c.author}</span>
                       <span className="rounded bg-surface-inset px-1.5 py-0.5 text-[11px] text-subtle">
                         {c.authorRole === 'admin' ? 'NASTP' : c.authorRole === 'tech' ? 'Technician' : c.authorRole === 'tenant' ? 'Tenant' : 'System'}
@@ -271,39 +283,17 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
               ))}
             </div>
             <div className="mt-3 flex flex-col gap-2">
-              {staff && (
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => setVisibleToTenant(true)}
-                    className={cn(
-                      'rounded-full border px-1 py-1 transition-all',
-                      visibleToTenant ? 'border-success/40 bg-success-dim' : 'border-border bg-surface-inset opacity-60 hover:opacity-100',
-                    )}
-                  >
-                    <StatusBadge tone="success" size="sm" dot>Visible to tenant</StatusBadge>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setVisibleToTenant(false)}
-                    className={cn(
-                      'rounded-full border px-1 py-1 transition-all',
-                      !visibleToTenant ? 'border-warning/40 bg-warning-dim' : 'border-border bg-surface-inset opacity-60 hover:opacity-100',
-                    )}
-                  >
-                    <StatusBadge tone="warning" size="sm" dot>Internal note</StatusBadge>
-                  </button>
-                </div>
-              )}
+              {staff && <Segmented value={visibleToTenant ? 'tenant' : 'internal'} onChange={value => setVisibleToTenant(value === 'tenant')} options={[{ value: 'tenant', label: 'Visible to tenant' }, { value: 'internal', label: 'Internal note' }]} />}
               <div className="flex items-end gap-2">
                 <Textarea
+                  aria-label={staff && !visibleToTenant ? 'Internal note' : 'Comment visible to tenant'}
                   rows={2}
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   placeholder={staff && !visibleToTenant ? 'Internal note — not shown to the tenant…' : 'Add a comment…'}
                   className="flex-1"
                 />
-                <Button variant="secondary" size="sm" disabled={!comment.trim()} onClick={postComment}><Send className="h-3.5 w-3.5" /></Button>
+                <Button variant="secondary" size="sm" aria-label="Post comment" disabled={!comment.trim()} onClick={postComment}><Send className="h-3.5 w-3.5" /></Button>
               </div>
             </div>
           </div>
@@ -326,7 +316,7 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
         <DrawerFooter>
           {mode === 'admin' && (ADMIN_NEXT[r.status]?.length ? (
             ADMIN_NEXT[r.status]!.map((t) => (
-              <Button key={t.to} variant={t.to === 'resolved' ? 'success' : 'secondary'} size="sm" onClick={() => transition(t.to, t.label)}>{t.label}</Button>
+              t.to === 'resolved' ? <ResolveDialog key={t.to} onResolve={resolve} trigger={<Button variant="success" size="sm">Resolve</Button>} /> : <Button key={t.to} variant="secondary" size="sm" onClick={() => transition(t.to, t.label)}>{t.label}</Button>
             ))
           ) : (
             <span className="text-[12px] text-subtle">
@@ -371,6 +361,8 @@ export function ServiceRequestDrawer({ request, open, onOpenChange, mode, tenant
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
+    <ConfirmDialog open={discard} onOpenChange={setDiscard} title="Discard your unsent comment?" description="Your comment has not been posted. Keep editing to finish it, or discard it and close the request." confirmLabel="Discard comment" cancelLabel="Keep editing" destructive onConfirm={() => { setComment(''); clearComment(); onOpenChange(false); }} />
+    </>
   );
 }
 
@@ -414,13 +406,14 @@ function TechnicianPicker({
       onOpenChange={(o) => { setOpen(o); if (o) { setPicked(currentId); setReason(''); } }}
     >
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-      <PopoverContent align="end" className="w-[300px] p-0">
+      <PopoverContent aria-label="Assign technician" align="end" className="w-[300px] p-0">
         <div className="max-h-[240px] overflow-y-auto p-1.5">
           {techs.length === 0 && <p className="p-3 text-[12px] text-subtle">No active technicians in this department.</p>}
           {techs.map((t) => (
             <button
               key={t.id}
               type="button"
+              aria-pressed={picked === t.id}
               onClick={() => setPicked(t.id)}
               className={cn(
                 'flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-surface-raised',
@@ -440,7 +433,7 @@ function TechnicianPicker({
         </div>
         {requireReason && (
           <div className="border-t border-border-subtle p-2.5">
-            <Textarea rows={2} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason for reassignment…" />
+            <Field label="Reason for reassignment" required hint="A reason is required when changing the assignee."><Textarea rows={2} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Explain the change…" /></Field>
           </div>
         )}
         <div className="flex justify-end gap-2 border-t border-border-subtle p-2.5">
@@ -481,14 +474,14 @@ function CategoryOverrideDialog({ current, onSubmit, trigger }: { current: Servi
           description="Re-routes to whichever department owns the new category, and unassigns the current technician."
         />
         <DialogBody className="flex flex-col gap-4">
-          <SimpleSelect value={category} onChange={setCategory} options={CATEGORY_OPTIONS} />
+          <Field label="Category" required><SimpleSelect value={category} onChange={setCategory} options={CATEGORY_OPTIONS} className="w-full" /></Field>
           {rerouting && (
             <p className="text-[12px] text-muted">
               Will route to <span className="font-medium text-foreground">{target.name}</span>
               {target.triageOnly ? ' — triage only, so it will need re-categorising again before anyone can be assigned' : ''}.
             </p>
           )}
-          <Textarea rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Why is this being re-categorised?" />
+          <Field label="Reason for category change" required hint="Changing the category clears the current assignment."><Textarea rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Why is this being re-categorised?" /></Field>
         </DialogBody>
         <DialogFooter>
           <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
@@ -522,7 +515,7 @@ function ResolveDialog({ onResolve, trigger }: { onResolve: (note: string) => vo
           description="Describe what was done — this is what the tenant will see."
         />
         <DialogBody>
-          <Textarea rows={4} value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. Replaced the faulty ballast and tested the fixture." autoFocus />
+          <Field label="Resolution note" required hint="Describe the completed work. This note is visible to the tenant."><Textarea rows={4} value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. Replaced the faulty ballast and tested the fixture." autoFocus /></Field>
         </DialogBody>
         <DialogFooter>
           <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>

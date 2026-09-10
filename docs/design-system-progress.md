@@ -7,8 +7,8 @@ Branch: main-codex-redesign. Approved checkpoint: annotated tag `approved-admin-
 - [x] Consolidated production primitives and states
 - [x] Reusable patterns and protected development workbench
 - [x] Service Requests proof workflow
-- [ ] Focused tests, keyboard/theme/responsive review, screenshots
-- [ ] Final commits and push
+- [x] Focused tests, keyboard/theme/responsive review, screenshots
+- [x] Final commits and push
 
 ## Inventory decisions (read once, use this handoff)
 
@@ -30,3 +30,7 @@ Branch: main-codex-redesign. Approved checkpoint: annotated tag `approved-admin-
 ## Scope boundary
 
 Shared tokens and canonical components necessarily update their existing consumers. This task does not recompose the other Admin, Tenant, Technician, or auth screens. Their layout migrations remain separate work after approval. No new dependencies or mock production services are planned.
+
+## Resume handoff
+
+Foundation: 39005c9. Canonical components/workbench: 77acfb9. Implementation and focused verification complete; see design-system.md for contracts and design-system-verification.md for evidence. The workflow commit completes this slice; branch and checkpoint tag are pushed. Do not restart inventory or expand migration scope.

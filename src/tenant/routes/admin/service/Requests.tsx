@@ -4,13 +4,12 @@
  * operational metrics, and the request detail drawer.
  */
 
-import { Wrench } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Page, StatGrid, Toolbar } from '../../../components/ui/page';
-import { Card } from '../../../components/ui/card';
+import { Link, useSearchParams } from 'react-router-dom';
+import { Page, ListToolbar } from '../../../components/ui/page';
 import { PageHeader, StatCard } from '../../../components/common';
-import { SearchInput, SimpleSelect } from '../../../components/ui/form';
+import { Field, SearchInput, SimpleSelect } from '../../../components/ui/form';
 import { DataTable, type Column } from '../../../components/ui/data';
 import { PriorityBadge, ServiceStatusBadge, CATEGORY_ICON } from '../../../components/status';
 import { ServiceRequestDrawer } from '../../serviceShared';
@@ -18,14 +17,13 @@ import { SERVICE_CATEGORY_LABEL, departmentById } from '../../../data/catalog';
 import { useLive } from '../../../data/live';
 import { NOW } from '../../../data/world';
 import { ago, duration, num } from '../../../lib/utils';
+import { SERVICE_STATUS } from '../../../lib/meta';
+import { Button } from '../../../components/ui/button';
 import type { ServicePriority, ServiceRequest, ServiceStatus } from '../../../data/types';
 
 const STATUS_OPTS: Array<{ value: ServiceStatus | 'open' | 'all'; label: string }> = [
   { value: 'open', label: 'Open' }, { value: 'all', label: 'All statuses' },
-  { value: 'submitted', label: 'Submitted' }, { value: 'acknowledged', label: 'Acknowledged' },
-  { value: 'assigned', label: 'Assigned' }, { value: 'in_progress', label: 'In Progress' },
-  { value: 'waiting_tenant', label: 'Waiting for Tenant' }, { value: 'resolved', label: 'Resolved' },
-  { value: 'closed', label: 'Closed' },
+  ...Object.entries(SERVICE_STATUS).map(([value, meta]) => ({ value: value as ServiceStatus, label: meta.label })),
 ];
 
 const PRIORITY_OPTS = [{ value: 'all', label: 'All priorities' }, { value: 'critical', label: 'Critical' }, { value: 'high', label: 'High' }, { value: 'medium', label: 'Medium' }, { value: 'low', label: 'Low' }];
@@ -38,6 +36,7 @@ export default function Requests() {
   const [priority, setPriority] = useState('all');
   const [category, setCategory] = useState('all');
   const [tenantFilter, setTenantFilter] = useState('all');
+  const [overdueOnly, setOverdueOnly] = useState(false);
 
   const data = useLive((w) => ({
     tenants: w.tenants.filter((t) => t.status === 'active' || t.status === 'suspended'),
@@ -58,9 +57,10 @@ export default function Requests() {
     else if (status !== 'all' && r.status !== status) return false;
     if (priority !== 'all' && r.priority !== priority) return false;
     if (category !== 'all' && r.category !== category) return false;
+    if (overdueOnly && !(r.dueAt && r.dueAt < NOW && isOpen(r.status))) return false;
     if (tenantFilter !== 'all' && r.tenantId !== tenantFilter) return false;
     const t = search.trim().toLowerCase();
-    if (t && !(r.title.toLowerCase().includes(t) || r.reference.toLowerCase().includes(t))) return false;
+    if (t && !(r.title.toLowerCase().includes(t) || r.reference.toLowerCase().includes(t) || r.tenantName.toLowerCase().includes(t))) return false;
     return true;
   });
 
@@ -70,16 +70,16 @@ export default function Requests() {
 
   const columns: Column<(typeof data.requests)[number]>[] = [
     { key: 'ref', header: 'Ref', cell: (r) => <span className="tnum text-subtle">{r.reference}</span>, sortValue: (r) => r.reference, hideBelow: 'md' },
-    { key: 'title', header: 'Request', cell: (r) => { const Icon = CATEGORY_ICON[r.category]; return <div className="flex items-center gap-2.5"><Icon className="h-4 w-4 shrink-0 text-service" /><div className="min-w-0"><p className="truncate font-medium text-foreground">{r.title}</p><p className="truncate text-[11px] text-subtle">{r.tenantName}</p></div></div>; }, sortValue: (r) => r.title },
+    { key: 'title', header: 'Request', cell: (r) => { const Icon = CATEGORY_ICON[r.category]; return <div className="flex items-center gap-2.5"><Icon className="h-4 w-4 shrink-0 text-subtle" /><div className="min-w-0"><p className="font-medium text-foreground ds-request-title">{r.title}</p><p className="text-xs text-subtle">{r.tenantName}</p></div></div>; }, sortValue: (r) => r.title },
     { key: 'priority', header: 'Priority', cell: (r) => <PriorityBadge priority={r.priority} size="sm" />, sortValue: (r) => ({ critical: 0, high: 1, medium: 2, low: 3 } as Record<ServicePriority, number>)[r.priority], hideBelow: 'sm' },
-    { key: 'status', header: 'Status', cell: (r) => <ServiceStatusBadge status={r.status} size="sm" /> },
+    { key: 'status', header: 'Status', cell: (r) => <ServiceStatusBadge status={r.status} size="sm" />, sortValue: (r) => SERVICE_STATUS[r.status].label },
     {
       key: 'assignee',
       header: 'Assigned to',
       cell: (r) => r.technicianName ? (
         <div className="min-w-0">
           <p className="truncate text-foreground">{r.technicianName}</p>
-          <p className="truncate text-[11px] text-subtle">{r.departmentName}</p>
+          <p className="text-xs text-subtle">{r.departmentName}</p>
         </div>
       ) : r.status === 'acknowledged' ? (
         <span className="inline-flex items-center gap-1.5 text-[12px] text-warning">
@@ -95,32 +95,33 @@ export default function Requests() {
     { key: 'updated', header: 'Updated', cell: (r) => <span className="tnum text-subtle">{ago(r.updatedAt)}</span>, sortValue: (r) => r.updatedAt, hideBelow: 'xl' },
   ];
 
+  const resetFilters = () => { setSearch(''); setStatus('open'); setPriority('all'); setCategory('all'); setTenantFilter('all'); setOverdueOnly(false); };
+  const hasFilters = Boolean(search || status !== 'open' || priority !== 'all' || category !== 'all' || tenantFilter !== 'all' || overdueOnly);
+  const openRequest = (id: string) => setParams(previous => { const next = new URLSearchParams(previous); next.set('open', id); return next; });
+  const closeRequest = () => setParams(previous => { const next = new URLSearchParams(previous); next.delete('open'); return next; });
   return (
-    <Page>
-      <PageHeader title="Service Requests" description="Manage and resolve tenant service requests across the park." />
-
-      <StatGrid cols={5}>
-        <StatCard label="Open" value={num(openReqs.length)} icon={Wrench} tone="service" />
-        <StatCard label="Critical" value={num(openReqs.filter((r) => r.priority === 'critical').length)} icon={Wrench} tone={openReqs.some((r) => r.priority === 'critical') ? 'critical' : 'success'} />
-        <StatCard label="Overdue" value={num(openReqs.filter((r) => r.dueAt && r.dueAt < NOW).length)} icon={Wrench} tone={openReqs.some((r) => r.dueAt && r.dueAt < NOW) ? 'warning' : 'success'} />
-        <StatCard label="Avg Resolution" value={avgResolution ? duration(avgResolution) : '—'} icon={Wrench} tone="neutral" />
-        <StatCard label="Resolved Today" value={num(data.requests.filter((r) => r.resolvedAt && r.resolvedAt >= NOW - 86_400_000).length)} icon={Wrench} tone="success" />
-      </StatGrid>
-
-      <Card>
-        <div className="border-b border-border-subtle p-4">
-          <Toolbar>
-            <SearchInput value={search} onChange={setSearch} placeholder="Search requests…" className="w-full sm:w-[240px]" />
-            <SimpleSelect value={status} onChange={setStatus} options={STATUS_OPTS} className="w-[170px]" />
-            <SimpleSelect value={priority} onChange={setPriority} options={PRIORITY_OPTS} className="w-[150px]" />
-            <SimpleSelect value={category} onChange={setCategory} options={CATEGORY_OPTS} className="w-[160px]" />
-            <SimpleSelect value={tenantFilter} onChange={setTenantFilter} options={[{ value: 'all', label: 'All tenants' }, ...data.tenants.map((t) => ({ value: t.id, label: t.name }))]} className="w-[170px]" />
-          </Toolbar>
-        </div>
-        <DataTable rows={filtered} columns={columns} rowKey={(r) => r.id} onRowClick={(r) => setParams({ open: r.id })} selectedKey={openId ?? undefined} emptyTitle="No requests match" pageSize={14} />
-      </Card>
-
-      <ServiceRequestDrawer request={open as ServiceRequest | null} open={Boolean(open)} onOpenChange={(o) => !o && setParams({})} mode="admin" tenantName={open ? (open as { tenantName?: string }).tenantName : undefined} />
+    <Page workspace className="ds-service-workspace">
+      <nav className="ds-nav-tabs" aria-label="Service center"><Link to="/admin/service" aria-current="page">Requests</Link><Link to="/admin/service/board">Board</Link><Link to="/admin/service/performance">Performance</Link></nav>
+      <PageHeader eyebrow="Service center · Park operations" title="Service requests" description="Prioritize issues, coordinate your teams, and keep every tenant moving."
+        actions={<Button asChild><Link to="/admin/service/board">Open board<ArrowUpRight /></Link></Button>} />
+      <div className="ds-metrics is-five">
+        <StatCard variant="inline" label="Open requests" value={num(openReqs.length)} caption="Across all tenants" onClick={() => { resetFilters(); }} />
+        <StatCard variant="inline" label="Critical" value={num(openReqs.filter((r) => r.priority === 'critical').length)} caption="Needs immediate attention" onClick={() => { resetFilters(); setPriority('critical'); }} />
+        <StatCard variant="inline" label="Overdue" value={num(openReqs.filter((r) => r.dueAt && r.dueAt < NOW).length)} caption="Past response target" onClick={() => { resetFilters(); setOverdueOnly(true); }} />
+        <StatCard variant="inline" label="Avg. resolution" value={avgResolution ? duration(avgResolution) : '—'} caption="Across resolved requests" className="ds-duration-metric" />
+        <StatCard variant="inline" label="Resolved today" value={num(data.requests.filter((r) => r.resolvedAt && r.resolvedAt >= NOW - 86_400_000).length)} caption="Within the last 24 hours" />
+      </div>
+      <ListToolbar summary={`${filtered.length} matching requests${overdueOnly ? ' · Overdue only' : ''}`} onReset={hasFilters ? resetFilters : undefined}>
+        <Field label="Search"><SearchInput value={search} onChange={setSearch} placeholder="Request, reference or tenant…" label="Search requests" /></Field>
+        <Field label="Status"><SimpleSelect value={status} onChange={setStatus} options={STATUS_OPTS} className="w-full" /></Field>
+        <Field label="Priority"><SimpleSelect value={priority} onChange={setPriority} options={PRIORITY_OPTS} className="w-full" /></Field>
+        <Field label="Category"><SimpleSelect value={category} onChange={setCategory} options={CATEGORY_OPTS} className="w-full" /></Field>
+        <Field label="Tenant"><SimpleSelect value={tenantFilter} onChange={setTenantFilter} options={[{ value: 'all', label: 'All tenants' }, ...data.tenants.map((t) => ({ value: t.id, label: t.name }))]} className="w-full" /></Field>
+      </ListToolbar>
+      <DataTable rows={filtered} columns={columns} rowKey={(r) => r.id} rowLabel={(r) => `${r.reference}: ${r.title}`} label="Service requests"
+        onRowClick={(r) => openRequest(r.id)} selectedKey={openId ?? undefined} resetKey={[search,status,priority,category,tenantFilter,overdueOnly].join('|')}
+        emptyTitle="No requests match these filters" emptyDescription="Try a broader search or reset the filters to see open requests." emptyAction={<Button onClick={resetFilters}>Reset filters</Button>} pageSize={14} />
+      <ServiceRequestDrawer request={open as ServiceRequest | null} open={Boolean(open)} onOpenChange={(o) => !o && closeRequest()} mode="admin" tenantName={open?.tenantName} />
     </Page>
   );
 }
