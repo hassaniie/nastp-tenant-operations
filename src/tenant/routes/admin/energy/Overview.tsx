@@ -1,11 +1,15 @@
 /** Admin energy analytics workspace. Existing live selectors and destinations are preserved. */
 import { ArrowUpRight, Gauge } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { MetricBand, Page, WorkspaceSection, WorkspaceSplit } from '../../../components/ui/page';
-import { PageHeader, StatCard } from '../../../components/common';
-import { Button } from '../../../components/ui/primitives';
-import { MeterStatusBadge } from '../../../components/status';
-import { TrendChart, BarSeriesChart, DonutChart } from '../../../components/charts';
+import { MetricBand } from '../../../components/layout/metric-band';
+import { Page } from '../../../components/layout/page';
+import { WorkspaceSection } from '../../../components/layout/workspace-section';
+import { WorkspaceSplit } from '../../../components/layout/workspace-split';
+import { PageHeader } from '../../../components/patterns/page-header';
+import { StatCard } from '../../../components/patterns/stat-card';
+import { Button } from '../../../components/ui/button';
+import { MeterStatusBadge } from '../../../components/patterns/status-badge';
+import { TrendChart, BarSeriesChart, DonutChart } from '../../../components/patterns/charts';
 import { useLive } from '../../../data/live';
 import { computeAdminKpis, aggregateReadings, tenantSummary } from '../../../data/selectors';
 import { currency, energy, num } from '../../../lib/utils';

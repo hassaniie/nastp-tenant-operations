@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { ago } from '../lib/utils';
 import { simulation, useLive } from '../data/live';
 import type { AppNotification } from '../data/types';
-import { Button, IconBox } from '../components/ui/primitives';
-import { Popover, PopoverContent, PopoverTrigger, Tooltip } from '../components/ui/overlay';
-import { EmptyState } from '../components/ui/data';
-import { MODULE_ICON, MODULE_TONE } from '../components/status';
+import { Button } from '../components/ui/button';
+import { IconBox } from '../components/ui/icon-box';
+import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
+import { Tooltip } from '../components/ui/tooltip';
+import { EmptyState } from '../components/patterns/feedback-state';
+import { MODULE_ICON, MODULE_TONE } from '../components/patterns/status-badge';
 import { cn } from '../lib/utils';
 
 export function NotificationBell({ tenantId }: { tenantId?: string }) {

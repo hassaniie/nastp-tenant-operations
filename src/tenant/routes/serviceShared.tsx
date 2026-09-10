@@ -9,19 +9,23 @@ import {
   Camera, Check, CheckCheck, CheckCircle2, MessageSquarePlus, Paperclip, PencilLine, RotateCcw, Send, ThumbsUp, UserCog,
 } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
-import { Button, Avatar, StatusBadge } from '../components/ui/primitives';
-import {
-  ConfirmDialog, Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTrigger,
-  Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader,
-  Popover, PopoverContent, PopoverTrigger,
-} from '../components/ui/overlay';
-import { DefList } from '../components/ui/data';
-import { Field, SimpleSelect, Textarea } from '../components/ui/form';
-import { Segmented } from '../components/ui/tabs';
+import { Button } from '../components/ui/button';
+import { Avatar } from '../components/ui/avatar';
+import { StatusBadge } from '../components/patterns/status-badge';
+import { ConfirmDialog } from '../components/patterns/confirm-dialog';
+import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '../components/ui/dialog';
+import { Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader } from '../components/ui/drawer';
+import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
+import { DefList } from '../components/patterns/definition-list';
+import { Field } from '../components/ui/field';
+import { SimpleSelect } from '../components/ui/select';
+import { Textarea } from '../components/ui/textarea';
+import { Segmented } from '../components/ui/segmented-control';
 import { useDraft } from '../hooks/useDraft';
 import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
-import { Timeline, RatingStars, type TimelineItem } from '../components/common';
-import { PriorityBadge, ServiceStatusBadge, CATEGORY_ICON } from '../components/status';
+import { Timeline, type TimelineItem } from '../components/patterns/timeline';
+import { RatingStars } from '../components/patterns/rating-stars';
+import { PriorityBadge, ServiceStatusBadge, CATEGORY_ICON } from '../components/patterns/status-badge';
 import { SERVICE_STATUS } from '../lib/meta';
 import {
   SERVICE_CATEGORY_LABEL, departmentById, departmentForCategory, technicianOpenLoad,

@@ -8,8 +8,9 @@
 
 import { Outlet } from 'react-router-dom';
 import { Moon, Sun, Wrench } from 'lucide-react';
-import { Button, IconBox } from '../components/ui/primitives';
-import { Tooltip, TooltipProvider } from '../components/ui/overlay';
+import { Button } from '../components/ui/button';
+import { IconBox } from '../components/ui/icon-box';
+import { Tooltip, TooltipProvider } from '../components/ui/tooltip';
 import { Toaster } from '../components/ui/toast';
 import { useSession } from '../store/session';
 import { UserMenu } from './UserMenu';

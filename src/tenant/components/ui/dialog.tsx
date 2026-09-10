@@ -21,13 +21,13 @@ export function useOverlayFocus(props: ComponentPropsWithoutRef<typeof DialogPri
 }
 
 export const DialogOverlay = forwardRef<ElementRef<typeof DialogPrimitive.Overlay>, ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>>(
-  ({ className, ...props }, ref) => <DialogPrimitive.Overlay ref={ref} className={cn('fixed inset-0 z-[70] bg-black/60 data-[state=open]:animate-[fade-in_0.2s_ease-out]', className)} {...props} />,
+  ({ className, ...props }, ref) => <DialogPrimitive.Overlay ref={ref} className={cn('fixed inset-0 z-[var(--z-overlay)] bg-[var(--overlay-scrim)] data-[state=open]:animate-[fade-in_0.2s_ease-out]', className)} {...props} />,
 );
 DialogOverlay.displayName = 'DialogOverlay';
 
 export const DialogContent = forwardRef<ElementRef<typeof DialogPrimitive.Content>, ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { size?: 'sm' | 'md' | 'lg' | 'xl' }>(
   ({ className, children, size = 'md', ...props }, ref) => { const focus = useOverlayFocus(props); return <DialogPrimitive.Portal><DialogOverlay /><DialogPrimitive.Content ref={ref} className={cn(
-    'fixed left-1/2 top-1/2 z-[80] flex max-h-[90dvh] w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden',
+    'fixed left-1/2 top-1/2 z-[var(--z-modal)] flex max-h-[90dvh] w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden',
     'rounded-[var(--radius-overlay)] border border-border bg-surface-overlay shadow-[var(--shadow-lg)] data-[state=open]:animate-[fade-up_0.24s_cubic-bezier(0.22,1,0.36,1)]',
     { sm: 'max-w-md', md: 'max-w-xl', lg: 'max-w-3xl', xl: 'max-w-5xl' }[size], className,
   )} {...props} {...focus}>{children}</DialogPrimitive.Content></DialogPrimitive.Portal>; },

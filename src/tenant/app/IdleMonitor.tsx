@@ -15,8 +15,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Clock } from 'lucide-react';
-import { Button, IconBox } from '../components/ui/primitives';
-import { Dialog, DialogContent, DialogHeader, DialogBody, DialogFooter } from '../components/ui/overlay';
+import { Button } from '../components/ui/button';
+import { IconBox } from '../components/ui/icon-box';
+import { Dialog, DialogContent, DialogHeader, DialogBody, DialogFooter } from '../components/ui/dialog';
 import { useAuth } from '../store/auth';
 import { doorFor } from '../data/auth';
 

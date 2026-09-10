@@ -7,10 +7,14 @@
 import { Info, Pause, Play, Plus, Repeat, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Card, CardBody, CardHeader } from '../../../components/ui/card';
-import { EmptyState } from '../../../components/ui/data';
-import { Button, IconBox, StatusBadge } from '../../../components/ui/primitives';
-import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader } from '../../../components/ui/overlay';
-import { Field, Input, SimpleSelect } from '../../../components/ui/form';
+import { EmptyState } from '../../../components/patterns/feedback-state';
+import { Button } from '../../../components/ui/button';
+import { IconBox } from '../../../components/ui/icon-box';
+import { StatusBadge } from '../../../components/patterns/status-badge';
+import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader } from '../../../components/ui/dialog';
+import { Field } from '../../../components/ui/field';
+import { Input } from '../../../components/ui/input';
+import { SimpleSelect } from '../../../components/ui/select';
 import { useSession } from '../../../store/session';
 import { simulation, useLive } from '../../../data/live';
 import { fmtDateFull } from '../../../lib/utils';

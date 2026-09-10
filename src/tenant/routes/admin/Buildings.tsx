@@ -4,10 +4,14 @@
  */
 
 import { Building2, Gauge, Layers } from 'lucide-react';
-import { Page, StatGrid, ContentGrid } from '../../components/ui/page';
+import { Page } from '../../components/layout/page';
+import { StatGrid, ContentGrid } from '../../components/layout/content-grid';
 import { Card, CardBody, CardHeader } from '../../components/ui/card';
-import { PageHeader, StatCard } from '../../components/common';
-import { IconBox, ProgressBar, StatusBadge } from '../../components/ui/primitives';
+import { PageHeader } from '../../components/patterns/page-header';
+import { StatCard } from '../../components/patterns/stat-card';
+import { IconBox } from '../../components/ui/icon-box';
+import { ProgressBar } from '../../components/ui/progress';
+import { StatusBadge } from '../../components/patterns/status-badge';
 import { useLive } from '../../data/live';
 import { area, num } from '../../lib/utils';
 

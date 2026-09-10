@@ -13,9 +13,10 @@ import { useNavigate } from 'react-router-dom';
 import { simulation } from '../data/live';
 import { useSession } from '../store/session';
 import { ADMIN_NAV } from './nav';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '../components/ui/overlay';
-import { Kbd, TenantMark } from '../components/ui/primitives';
-import { TenantStatusBadge, ServiceStatusBadge, VisitorStatusBadge } from '../components/status';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '../components/ui/dialog';
+import { Kbd } from '../components/ui/kbd';
+import { TenantMark } from '../components/ui/avatar';
+import { TenantStatusBadge, ServiceStatusBadge, VisitorStatusBadge } from '../components/patterns/status-badge';
 
 export function CommandPalette() {
   const { paletteOpen, setPaletteOpen, experience, enterPortal } = useSession();

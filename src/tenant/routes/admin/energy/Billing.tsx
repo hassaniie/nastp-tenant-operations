@@ -5,11 +5,16 @@
  */
 
 import { useState } from 'react';
-import { ListToolbar, MetricBand, Page } from '../../../components/ui/page';
-import { PageHeader, StatCard } from '../../../components/common';
-import { Field, SearchInput, SimpleSelect } from '../../../components/ui/form';
-import { DataTable, type Column } from '../../../components/ui/data';
-import { PaymentBadge } from '../../../components/status';
+import { ListToolbar } from '../../../components/layout/list-toolbar';
+import { MetricBand } from '../../../components/layout/metric-band';
+import { Page } from '../../../components/layout/page';
+import { PageHeader } from '../../../components/patterns/page-header';
+import { StatCard } from '../../../components/patterns/stat-card';
+import { Field } from '../../../components/ui/field';
+import { SearchInput } from '../../../components/ui/input';
+import { SimpleSelect } from '../../../components/ui/select';
+import { DataTable, type Column } from '../../../components/ui/data-table';
+import { PaymentBadge } from '../../../components/patterns/status-badge';
 import { InvoiceDialog } from '../../energyShared';
 import { useLive } from '../../../data/live';
 import { currency, fmtDateFull, num } from '../../../lib/utils';

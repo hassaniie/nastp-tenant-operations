@@ -11,12 +11,16 @@ import { useMemo, useState } from 'react';
 import {
   AlertTriangle, KeyRound, LogIn, LogOut, ShieldAlert, ShieldCheck, UserCog, type LucideIcon,
 } from 'lucide-react';
-import { Page, StatGrid } from '../../components/ui/page';
+import { Page } from '../../components/layout/page';
+import { StatGrid } from '../../components/layout/content-grid';
 import { Card, CardBody, CardHeader } from '../../components/ui/card';
-import { PageHeader, StatCard } from '../../components/common';
-import { IconBox, StatusBadge } from '../../components/ui/primitives';
-import { DataTable, EmptyState, type Column } from '../../components/ui/data';
-import { SimpleSelect } from '../../components/ui/form';
+import { PageHeader } from '../../components/patterns/page-header';
+import { StatCard } from '../../components/patterns/stat-card';
+import { IconBox } from '../../components/ui/icon-box';
+import { StatusBadge } from '../../components/patterns/status-badge';
+import { DataTable, type Column } from '../../components/ui/data-table';
+import { EmptyState } from '../../components/patterns/feedback-state';
+import { SimpleSelect } from '../../components/ui/select';
 import { authEvents } from '../../data/auth';
 import { fmtDateTime, num } from '../../lib/utils';
 import type { AuthEvent, AuthEventKind } from '../../data/types';

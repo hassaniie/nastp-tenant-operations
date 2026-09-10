@@ -4,9 +4,9 @@
  */
 
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Page } from '../../../components/ui/page';
-import { PageHeader } from '../../../components/common';
-import { TabBar } from '../../../components/ui/tabs';
+import { Page } from '../../../components/layout/page';
+import { PageHeader } from '../../../components/patterns/page-header';
+import { TabBar } from '../../../components/patterns/navigation-tabs';
 import { PORTAL_ENERGY_TABS, matchTab } from '../../../app/nav';
 
 export default function EnergyLayout() {

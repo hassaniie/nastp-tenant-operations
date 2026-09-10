@@ -6,8 +6,8 @@
 import { Wrench } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { Card } from '../../../components/ui/card';
-import { DataTable, type Column } from '../../../components/ui/data';
-import { PriorityBadge, ServiceStatusBadge, CATEGORY_ICON } from '../../../components/status';
+import { DataTable, type Column } from '../../../components/ui/data-table';
+import { PriorityBadge, ServiceStatusBadge, CATEGORY_ICON } from '../../../components/patterns/status-badge';
 import { ServiceRequestDrawer } from '../../serviceShared';
 import { useSession } from '../../../store/session';
 import { useLive } from '../../../data/live';

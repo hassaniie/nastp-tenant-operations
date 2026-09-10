@@ -1,9 +1,9 @@
 import { FilePlus2 } from 'lucide-react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Page } from '../../../components/ui/page';
-import { PageHeader } from '../../../components/common';
-import { Button } from '../../../components/ui/primitives';
-import { TabBar } from '../../../components/ui/tabs';
+import { Page } from '../../../components/layout/page';
+import { PageHeader } from '../../../components/patterns/page-header';
+import { Button } from '../../../components/ui/button';
+import { TabBar } from '../../../components/patterns/navigation-tabs';
 import { PORTAL_SERVICE_TABS, matchTab } from '../../../app/nav';
 
 export default function ServiceLayout() {

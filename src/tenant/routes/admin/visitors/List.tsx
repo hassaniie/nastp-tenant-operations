@@ -7,9 +7,12 @@
 import { AlarmClock, CalendarClock, DoorOpen, History as HistoryIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ListToolbar, Page } from '../../../components/ui/page';
-import { PageHeader } from '../../../components/common';
-import { Field, SearchInput, SimpleSelect } from '../../../components/ui/form';
+import { ListToolbar } from '../../../components/layout/list-toolbar';
+import { Page } from '../../../components/layout/page';
+import { PageHeader } from '../../../components/patterns/page-header';
+import { Field } from '../../../components/ui/field';
+import { SearchInput } from '../../../components/ui/input';
+import { SimpleSelect } from '../../../components/ui/select';
 import { VisitorTable, VisitorDrawer } from '../../visitorsShared';
 import { useLive } from '../../../data/live';
 import type { Visitor, VisitorStatus } from '../../../data/types';

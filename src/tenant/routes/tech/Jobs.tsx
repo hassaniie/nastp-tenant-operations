@@ -14,12 +14,15 @@
 
 import { useMemo, useState } from 'react';
 import { AlarmClock, CheckCircle2, Wrench } from 'lucide-react';
-import { Page, StatGrid } from '../../components/ui/page';
+import { Page } from '../../components/layout/page';
+import { StatGrid } from '../../components/layout/content-grid';
 import { Card, CardBody, CardHeader } from '../../components/ui/card';
-import { StatCard, PageHeader } from '../../components/common';
-import { IconBox, StatusBadge } from '../../components/ui/primitives';
-import { EmptyState } from '../../components/ui/data';
-import { PriorityBadge, ServiceStatusBadge, CATEGORY_ICON } from '../../components/status';
+import { StatCard } from '../../components/patterns/stat-card';
+import { PageHeader } from '../../components/patterns/page-header';
+import { IconBox } from '../../components/ui/icon-box';
+import { StatusBadge } from '../../components/patterns/status-badge';
+import { EmptyState } from '../../components/patterns/feedback-state';
+import { PriorityBadge, ServiceStatusBadge, CATEGORY_ICON } from '../../components/patterns/status-badge';
 import { ServiceRequestDrawer } from '../serviceShared';
 import { useLive } from '../../data/live';
 import { useAuth } from '../../store/auth';

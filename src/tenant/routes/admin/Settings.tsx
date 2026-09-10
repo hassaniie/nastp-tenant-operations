@@ -6,12 +6,16 @@
  */
 
 import { Activity, Gauge, Moon, Palette, Sun } from 'lucide-react';
-import { Page } from '../../components/ui/page';
+import { Page } from '../../components/layout/page';
 import { Card, CardBody, CardHeader } from '../../components/ui/card';
-import { PageHeader } from '../../components/common';
-import { IconBox, StatusBadge, Button } from '../../components/ui/primitives';
-import { SettingRow, Switch, SimpleSelect } from '../../components/ui/form';
-import { Segmented } from '../../components/ui/tabs';
+import { PageHeader } from '../../components/patterns/page-header';
+import { IconBox } from '../../components/ui/icon-box';
+import { StatusBadge } from '../../components/patterns/status-badge';
+import { Button } from '../../components/ui/button';
+import { SettingRow } from '../../components/ui/field';
+import { Switch } from '../../components/ui/switch';
+import { SimpleSelect } from '../../components/ui/select';
+import { Segmented } from '../../components/ui/segmented-control';
 import { useSession } from '../../store/session';
 
 export default function Settings() {

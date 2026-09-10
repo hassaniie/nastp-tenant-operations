@@ -5,11 +5,12 @@
 
 import { Bell, Check } from 'lucide-react';
 import { Card, CardBody, CardHeader } from '../../../components/ui/card';
-import { StatGrid } from '../../../components/ui/page';
-import { StatCard } from '../../../components/common';
-import { Button, IconBox } from '../../../components/ui/primitives';
-import { EmptyState } from '../../../components/ui/data';
-import { AlertSeverityBadge } from '../../../components/status';
+import { StatGrid } from '../../../components/layout/content-grid';
+import { StatCard } from '../../../components/patterns/stat-card';
+import { Button } from '../../../components/ui/button';
+import { IconBox } from '../../../components/ui/icon-box';
+import { EmptyState } from '../../../components/patterns/feedback-state';
+import { AlertSeverityBadge } from '../../../components/patterns/status-badge';
 import { ALERT_KIND_LABEL } from '../../../lib/meta';
 import { useSession } from '../../../store/session';
 import { simulation, useLive } from '../../../data/live';

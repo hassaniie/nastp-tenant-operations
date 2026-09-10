@@ -8,16 +8,22 @@
 
 import { ArrowRight, CalendarPlus, DoorOpen, FilePlus2, Wrench, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Page, ContentGrid, SplitGrid } from '../../components/ui/page';
+import { Page } from '../../components/layout/page';
+import { ContentGrid, SplitGrid } from '../../components/layout/content-grid';
 import { Card, CardBody, CardHeader } from '../../components/ui/card';
-import { StatCard, PageHeader, Timeline, MetricValue } from '../../components/common';
-import { Button, IconBox, StatusBadge } from '../../components/ui/primitives';
-import { Sparkline } from '../../components/charts';
+import { StatCard } from '../../components/patterns/stat-card';
+import { PageHeader } from '../../components/patterns/page-header';
+import { Timeline } from '../../components/patterns/timeline';
+import { MetricValue } from '../../components/patterns/metric-value';
+import { Button } from '../../components/ui/button';
+import { IconBox } from '../../components/ui/icon-box';
+import { StatusBadge } from '../../components/patterns/status-badge';
+import { Sparkline } from '../../components/patterns/charts';
 import { useSession } from '../../store/session';
 import { useLive } from '../../data/live';
 import { tenantPortalSnapshot } from '../../data/selectors';
 import { ACTIVITY_ICON } from '../../lib/activityMeta';
-import { VisitorStatusBadge } from '../../components/status';
+import { VisitorStatusBadge } from '../../components/patterns/status-badge';
 import { ago, cn, currency, energy, fmtTime, num } from '../../lib/utils';
 
 export default function PortalHome() {

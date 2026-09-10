@@ -9,7 +9,7 @@ export const DrawerTrigger = DialogPrimitive.Trigger;
 export const DrawerClose = DialogPrimitive.Close;
 export const DrawerContent = forwardRef<ElementRef<typeof DialogPrimitive.Content>, ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { side?: 'right' | 'left'; width?: string }>(
   ({ className, children, side = 'right', width = '520px', ...props }, ref) => { const focus = useOverlayFocus(props); return <DialogPrimitive.Portal><DialogOverlay /><DialogPrimitive.Content ref={ref} style={{ width, maxWidth: '100vw' }} className={cn(
-    'fixed inset-y-0 z-[80] flex flex-col border-border bg-surface shadow-[var(--shadow-lg)]', side === 'right' ? 'right-0 border-l' : 'left-0 border-r',
+    'fixed inset-y-0 z-[var(--z-modal)] flex flex-col border-border bg-surface shadow-[var(--shadow-lg)]', side === 'right' ? 'right-0 border-l' : 'left-0 border-r',
     'data-[state=open]:animate-[slide-in_0.3s_cubic-bezier(0.22,1,0.36,1)]', className,
   )} {...props} {...focus}>{children}</DialogPrimitive.Content></DialogPrimitive.Portal>; },
 );

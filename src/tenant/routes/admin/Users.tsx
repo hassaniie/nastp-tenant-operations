@@ -5,11 +5,14 @@
  */
 
 import { ShieldCheck, UserRound } from 'lucide-react';
-import { Page, ContentGrid } from '../../components/ui/page';
+import { Page } from '../../components/layout/page';
+import { ContentGrid } from '../../components/layout/content-grid';
 import { Card, CardBody, CardHeader } from '../../components/ui/card';
-import { PageHeader } from '../../components/common';
-import { Avatar, IconBox, StatusBadge } from '../../components/ui/primitives';
-import { DataTable, type Column } from '../../components/ui/data';
+import { PageHeader } from '../../components/patterns/page-header';
+import { Avatar } from '../../components/ui/avatar';
+import { IconBox } from '../../components/ui/icon-box';
+import { StatusBadge } from '../../components/patterns/status-badge';
+import { DataTable, type Column } from '../../components/ui/data-table';
 import { ADMIN_ROLE, USER_ROLE } from '../../lib/meta';
 import { useLive } from '../../data/live';
 import { ago } from '../../lib/utils';

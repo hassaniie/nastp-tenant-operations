@@ -5,12 +5,14 @@
  */
 
 import { BarChart3, Clock, UserCog, Users, Wrench } from 'lucide-react';
-import { Page, StatGrid, ContentGrid, SplitGrid } from '../../../components/ui/page';
+import { Page } from '../../../components/layout/page';
+import { StatGrid, ContentGrid, SplitGrid } from '../../../components/layout/content-grid';
 import { Card, CardBody, CardHeader } from '../../../components/ui/card';
-import { PageHeader, StatCard } from '../../../components/common';
-import { IconBox } from '../../../components/ui/primitives';
-import { BarSeriesChart, DonutChart } from '../../../components/charts';
-import { DataTable, type Column } from '../../../components/ui/data';
+import { PageHeader } from '../../../components/patterns/page-header';
+import { StatCard } from '../../../components/patterns/stat-card';
+import { IconBox } from '../../../components/ui/icon-box';
+import { BarSeriesChart, DonutChart } from '../../../components/patterns/charts';
+import { DataTable, type Column } from '../../../components/ui/data-table';
 import { useLive } from '../../../data/live';
 import { NOW } from '../../../data/world';
 import { SERVICE_CATEGORY_LABEL } from '../../../data/catalog';

@@ -6,12 +6,14 @@
 
 import { Wallet } from 'lucide-react';
 import { useState } from 'react';
-import { StatGrid } from '../../../components/ui/page';
+import { StatGrid } from '../../../components/layout/content-grid';
 import { Card, CardBody, CardHeader } from '../../../components/ui/card';
-import { StatCard } from '../../../components/common';
-import { Button, IconBox } from '../../../components/ui/primitives';
-import { DataTable, type Column } from '../../../components/ui/data';
-import { PaymentBadge } from '../../../components/status';
+import { StatCard } from '../../../components/patterns/stat-card';
+import { Button } from '../../../components/ui/button';
+import { IconBox } from '../../../components/ui/icon-box';
+import { DataTable, type Column } from '../../../components/ui/data-table';
+import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '../../../components/ui/table';
+import { PaymentBadge } from '../../../components/patterns/status-badge';
 import { InvoiceDialog } from '../../energyShared';
 import { useSession } from '../../../store/session';
 import { useLive } from '../../../data/live';
@@ -49,28 +51,28 @@ export default function PortalEnergyBilling() {
           <CardHeader title="Current Period Breakdown" subtitle={latest.periodLabel} icon={<IconBox icon={Wallet} tone="energy" size="sm" />} actions={<Button variant="secondary" size="sm" onClick={() => setOpen(latest)}>View invoice</Button>} />
           <CardBody>
             <div className="overflow-hidden rounded-xl border border-border">
-              <table className="w-full text-left text-[13px]">
-                <thead className="bg-surface-inset"><tr>
-                  <th className="px-3.5 py-2.5 font-semibold uppercase tracking-[0.08em] text-subtle">Component</th>
-                  <th className="px-3.5 py-2.5 text-right font-semibold uppercase tracking-[0.08em] text-subtle">Units (kWh)</th>
-                  <th className="px-3.5 py-2.5 text-right font-semibold uppercase tracking-[0.08em] text-subtle">Rate</th>
-                  <th className="px-3.5 py-2.5 text-right font-semibold uppercase tracking-[0.08em] text-subtle">Amount</th>
-                </tr></thead>
-                <tbody>
+              <Table className="w-full text-left text-[13px]">
+                <TableHeader className="bg-surface-inset"><TableRow>
+                  <TableHead className="px-3.5 py-2.5 font-semibold uppercase tracking-[0.08em] text-subtle">Component</TableHead>
+                  <TableHead className="px-3.5 py-2.5 text-right font-semibold uppercase tracking-[0.08em] text-subtle">Units (kWh)</TableHead>
+                  <TableHead className="px-3.5 py-2.5 text-right font-semibold uppercase tracking-[0.08em] text-subtle">Rate</TableHead>
+                  <TableHead className="px-3.5 py-2.5 text-right font-semibold uppercase tracking-[0.08em] text-subtle">Amount</TableHead>
+                </TableRow></TableHeader>
+                <TableBody>
                   {latest.lines.map((l) => (
-                    <tr key={l.component} className="border-t border-border-subtle">
-                      <td className="px-3.5 py-2.5 capitalize text-foreground">{l.component.replace('_', '-')}</td>
-                      <td className="tnum px-3.5 py-2.5 text-right text-muted">{num(l.units)}</td>
-                      <td className="tnum px-3.5 py-2.5 text-right text-muted">{l.rate.toFixed(2)}</td>
-                      <td className="tnum px-3.5 py-2.5 text-right font-medium text-foreground">{currency(l.amount)}</td>
-                    </tr>
+                    <TableRow key={l.component} className="border-t border-border-subtle">
+                      <TableCell className="px-3.5 py-2.5 capitalize text-foreground">{l.component.replace('_', '-')}</TableCell>
+                      <TableCell className="tnum px-3.5 py-2.5 text-right text-muted">{num(l.units)}</TableCell>
+                      <TableCell className="tnum px-3.5 py-2.5 text-right text-muted">{l.rate.toFixed(2)}</TableCell>
+                      <TableCell className="tnum px-3.5 py-2.5 text-right font-medium text-foreground">{currency(l.amount)}</TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-                <tfoot><tr className="border-t border-border bg-surface-inset/50">
-                  <td className="px-3.5 py-2.5 font-semibold text-foreground" colSpan={3}>Total</td>
-                  <td className="tnum px-3.5 py-2.5 text-right text-[14px] font-semibold text-foreground">{currency(latest.total)}</td>
-                </tr></tfoot>
-              </table>
+                </TableBody>
+                <TableFooter><TableRow className="border-t border-border bg-surface-inset/50">
+                  <TableCell className="px-3.5 py-2.5 font-semibold text-foreground" colSpan={3}>Total</TableCell>
+                  <TableCell className="tnum px-3.5 py-2.5 text-right text-[14px] font-semibold text-foreground">{currency(latest.total)}</TableCell>
+                </TableRow></TableFooter>
+              </Table>
             </div>
           </CardBody>
         </Card>

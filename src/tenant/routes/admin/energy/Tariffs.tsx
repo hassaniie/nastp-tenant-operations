@@ -7,12 +7,16 @@
 
 import { BadgePercent, Clock, Info, TriangleAlert } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { Page, ContentGrid } from '../../../components/ui/page';
+import { Page } from '../../../components/layout/page';
+import { ContentGrid } from '../../../components/layout/content-grid';
 import { Card, CardBody, CardHeader } from '../../../components/ui/card';
-import { PageHeader } from '../../../components/common';
-import { Button, IconBox, StatusBadge } from '../../../components/ui/primitives';
-import { Field, Input } from '../../../components/ui/form';
-import { DataTable, type Column } from '../../../components/ui/data';
+import { PageHeader } from '../../../components/patterns/page-header';
+import { Button } from '../../../components/ui/button';
+import { IconBox } from '../../../components/ui/icon-box';
+import { StatusBadge } from '../../../components/patterns/status-badge';
+import { Field } from '../../../components/ui/field';
+import { Input } from '../../../components/ui/input';
+import { DataTable, type Column } from '../../../components/ui/data-table';
 import { useLive } from '../../../data/live';
 import { computeAdminKpis } from '../../../data/selectors';
 import { currency, fmtDateFull, num } from '../../../lib/utils';

@@ -10,7 +10,7 @@ Approved zero-change baseline: annotated tag `approved-ui-2026-09-10` → d1eb4a
 - [x] Token architecture and shared geometry normalization
 - [x] Primitive component-family file normalization
 - [x] Product patterns and layout organization
-- [ ] Consumer import migration and compatibility cleanup
+- [x] Consumer import migration and compatibility cleanup
 - [ ] Workbench/documentation update
 - [ ] Visual regression and final verification
 
@@ -19,14 +19,14 @@ Approved zero-change baseline: annotated tag `approved-ui-2026-09-10` → d1eb4a
 | Existing source | Normalization decision |
 | --- | --- |
 | `styles/theme.css` | Remains the single light/dark token source. Separate semantic colors, visualization colors, primitive scales, geometry, motion, elevation, and z-index without changing values. |
-| `ui/form.tsx` | Split into Input, Textarea, Select, Checkbox, Switch, Radio Group, and Field families. Keep a temporary re-export barrel. |
-| `ui/overlay.tsx` | Split into Dialog, Drawer, Tooltip, Popover, and Dropdown Menu families. Share focus-return behavior internally; keep a temporary re-export barrel. |
-| `ui/primitives.tsx` | Split Badge, Avatar, Separator, Skeleton, Spinner, Progress, Kbd, IconBox, and semantic tone recipes. Move product StatusBadge to patterns. Keep temporary re-exports. |
-| `ui/data.tsx` | Keep DataTable as the single data-table composition; move Pagination and feedback/product states to dedicated files. Keep temporary re-exports. |
+| `ui/form.tsx` | Split into Input, Textarea, Select, Checkbox, Switch, Radio Group, and Field families; remove the grouped file after consumer migration. |
+| `ui/overlay.tsx` | Split into Dialog, Drawer, Tooltip, Popover, and Dropdown Menu families; share focus-return behavior through the Dialog family. |
+| `ui/primitives.tsx` | Split Badge, Avatar, Separator, Skeleton, Spinner, Progress, Kbd, IconBox, and semantic tone recipes. Move product StatusBadge to patterns. |
+| `ui/data.tsx` | Keep DataTable as the single data-table composition; move Pagination and feedback/product states to dedicated files. |
 | `common.tsx` | Split product compositions into dedicated `patterns/` files; retain a compatibility barrel until consumers migrate. |
 | `status.tsx` + `lib/meta.ts` | Move badge renderers to `patterns/status-badge.tsx`; keep lifecycle labels/tones in `lib/meta.ts` as the business-state source of truth. |
 | `charts.tsx` | Move the existing chart family intact to `patterns/charts.tsx`; preserve a compatibility export and the independent viz palette. |
-| `ui/page.tsx` | Split structural components into `layout/`; retain a compatibility barrel during migration. |
+| `ui/page.tsx` | Split structural components into `layout/`; remove the grouped file after consumer migration. |
 | Workbench | Continue using real production exports; reorganize sections as Foundations, Components, Patterns, and Layout. |
 
 Token phase complete: semantic color values are unchanged; repeated typography, control, shell, gutter, density, icon, motion, elevation, and z-index decisions now have named tokens in `theme.css`. Shared page layouts and the shell consume the geometry tokens. Typecheck and production build pass.
@@ -35,7 +35,9 @@ Primitive phase complete: form controls, overlays, feedback primitives, badges, 
 
 Pattern/layout phase complete: metrics, stat cards, status families, charts, timelines, stepper, page/section headers, navigation tabs, feedback, confirmation, and definition lists now live in `components/patterns/`. Page, grid, toolbar, metric-band, section, split, detail, and action structures now live in `components/layout/`. Existing grouped files redirect to these owners. Typecheck, focused tests, and production build pass.
 
-Next: migrate application and workbench imports to canonical files, then remove compatibility barrels that no longer have consumers.
+Consumer migration complete: all application and workbench imports now point to the canonical family or composition owner. The obsolete grouped files and unused compatibility exports were removed after repository-wide reference checks. Three remaining raw data tables were migrated to the canonical Table family without changing their local geometry. Raw buttons that remain are composition-specific rows, tabs, navigation, file controls, or icon affordances whose styling is intentionally owned by their pattern.
+
+Next: reorganize the lightweight workbench around Foundations, Components, Patterns, and Layout, then consolidate the design-system documentation.
 
 - [x] Checkpoint and focused inventory
 - [x] Shared semantic foundations and conventions

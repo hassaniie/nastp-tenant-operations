@@ -6,7 +6,7 @@ export const DropdownMenu = DropdownPrimitive.Root;
 export const DropdownMenuTrigger = DropdownPrimitive.Trigger;
 export const DropdownMenuContent = forwardRef<ElementRef<typeof DropdownPrimitive.Content>, ComponentPropsWithoutRef<typeof DropdownPrimitive.Content>>(
   ({ className, align = 'end', sideOffset = 6, ...props }, ref) => <DropdownPrimitive.Portal><DropdownPrimitive.Content ref={ref} align={align} sideOffset={sideOffset} className={cn(
-    'z-[85] min-w-[210px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-[var(--radius-surface)] border border-border bg-surface-overlay p-1 shadow-[var(--shadow-lg)]',
+    'z-[var(--z-popover)] min-w-[210px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-[var(--radius-surface)] border border-border bg-surface-overlay p-1 shadow-[var(--shadow-lg)]',
     'data-[state=open]:animate-[fade-up_0.16s_cubic-bezier(0.22,1,0.36,1)]', className,
   )} {...props} /></DropdownPrimitive.Portal>,
 );

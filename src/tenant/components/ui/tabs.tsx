@@ -9,8 +9,3 @@ export const TabsTrigger = forwardRef<ElementRef<typeof TabsPrimitive.Trigger>, 
 TabsTrigger.displayName = 'TabsTrigger';
 export const TabsContent = forwardRef<ElementRef<typeof TabsPrimitive.Content>, ComponentPropsWithoutRef<typeof TabsPrimitive.Content>>(({ className, ...props }, ref) => <TabsPrimitive.Content ref={ref} className={cn('outline-none data-[state=active]:animate-[fade-up_0.28s_cubic-bezier(0.22,1,0.36,1)]', className)} {...props} />);
 TabsContent.displayName = 'TabsContent';
-
-/** @deprecated Product-level compatibility exports. */
-export { TabBar } from '../patterns/navigation-tabs';
-export { FilterChips } from '../patterns/filter-chips';
-export { Segmented } from './segmented-control';

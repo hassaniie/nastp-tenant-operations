@@ -5,12 +5,16 @@
  */
 
 import { Building2, Gauge, Mail, Phone, UserRound } from 'lucide-react';
-import { Page, ContentGrid } from '../../components/ui/page';
+import { Page } from '../../components/layout/page';
+import { ContentGrid } from '../../components/layout/content-grid';
 import { Card, CardBody, CardHeader } from '../../components/ui/card';
-import { PageHeader, KeyValue } from '../../components/common';
-import { Avatar, IconBox, StatusBadge, TenantMark } from '../../components/ui/primitives';
-import { DefList } from '../../components/ui/data';
-import { TenantStatusBadge, MeterStatusBadge } from '../../components/status';
+import { PageHeader } from '../../components/patterns/page-header';
+import { KeyValue } from '../../components/patterns/key-value';
+import { Avatar, TenantMark } from '../../components/ui/avatar';
+import { IconBox } from '../../components/ui/icon-box';
+import { StatusBadge } from '../../components/patterns/status-badge';
+import { DefList } from '../../components/patterns/definition-list';
+import { TenantStatusBadge, MeterStatusBadge } from '../../components/patterns/status-badge';
 import { USER_ROLE } from '../../lib/meta';
 import { ORG_TYPE_LABEL } from '../../data/catalog';
 import { useSession } from '../../store/session';

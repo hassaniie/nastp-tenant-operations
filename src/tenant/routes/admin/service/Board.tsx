@@ -5,9 +5,9 @@
  */
 
 import { useSearchParams } from 'react-router-dom';
-import { PageFull } from '../../../components/ui/page';
-import { PageHeader } from '../../../components/common';
-import { PriorityBadge, CATEGORY_ICON } from '../../../components/status';
+import { PageFull } from '../../../components/layout/page';
+import { PageHeader } from '../../../components/patterns/page-header';
+import { PriorityBadge, CATEGORY_ICON } from '../../../components/patterns/status-badge';
 import { ServiceRequestDrawer } from '../../serviceShared';
 import { SERVICE_BOARD, SERVICE_STATUS } from '../../../lib/meta';
 import { useLive } from '../../../data/live';

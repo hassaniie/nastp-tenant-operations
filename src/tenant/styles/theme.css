@@ -245,6 +245,13 @@
   --ease-standard: ease-out;
   --ease-enter: cubic-bezier(0.22, 1, 0.36, 1);
 
+  --brand-mark-end: #4338ca;
+  --brand-mark-foreground: #ffffff;
+  --brand-mark-shadow: 0 2px 10px rgba(99, 102, 241, 0.35);
+  --overlay-scrim: rgba(0, 0, 0, 0.6);
+  --shadow-control-selected: 0 1px 3px #0001;
+  --shadow-chart-tooltip: 0 4px 20px #0002;
+
   --z-sticky: 10;
   --z-overlay: 70;
   --z-modal: 80;

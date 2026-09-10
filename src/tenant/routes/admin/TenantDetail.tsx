@@ -12,17 +12,27 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Page, ContentGrid, SplitGrid } from '../../components/ui/page';
+import { Page } from '../../components/layout/page';
+import { ContentGrid, SplitGrid } from '../../components/layout/content-grid';
 import { Card, CardBody, CardHeader } from '../../components/ui/card';
-import { Breadcrumb, KeyValue, MetricValue, Timeline } from '../../components/common';
-import { Button, IconBox, ProgressBar, Separator, StatusBadge, TenantMark } from '../../components/ui/primitives';
-import { TabBar } from '../../components/ui/tabs';
-import { DataTable, DefList, LoadingState, ErrorState, type Column } from '../../components/ui/data';
-import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger, Dialog, DialogContent, DialogHeader, DialogBody } from '../../components/ui/overlay';
-import { TrendChart } from '../../components/charts';
-import {
-  TenantStatusBadge, MeterStatusBadge, PriorityBadge, ServiceStatusBadge, VisitorStatusBadge, AlertLevelBadge,
-} from '../../components/status';
+import { Breadcrumb } from '../../components/patterns/breadcrumb';
+import { KeyValue } from '../../components/patterns/key-value';
+import { MetricValue } from '../../components/patterns/metric-value';
+import { Timeline } from '../../components/patterns/timeline';
+import { Button } from '../../components/ui/button';
+import { IconBox } from '../../components/ui/icon-box';
+import { ProgressBar } from '../../components/ui/progress';
+import { Separator } from '../../components/ui/separator';
+import { StatusBadge } from '../../components/patterns/status-badge';
+import { TenantMark } from '../../components/ui/avatar';
+import { TabBar } from '../../components/patterns/navigation-tabs';
+import { DataTable, type Column } from '../../components/ui/data-table';
+import { DefList } from '../../components/patterns/definition-list';
+import { LoadingState, ErrorState } from '../../components/patterns/feedback-state';
+import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from '../../components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogHeader, DialogBody } from '../../components/ui/dialog';
+import { TrendChart } from '../../components/patterns/charts';
+import { TenantStatusBadge, MeterStatusBadge, PriorityBadge, ServiceStatusBadge, VisitorStatusBadge, AlertLevelBadge } from '../../components/patterns/status-badge';
 import { adminApi } from '../../data/api';
 import { createInvite } from '../../data/auth';
 import { simulation, useLive } from '../../data/live';

@@ -7,11 +7,13 @@
  */
 
 import { CalendarClock, Car, DoorClosed, DoorOpen, Mail, Phone, ShieldCheck, XCircle } from 'lucide-react';
-import { Button, IconBox } from '../components/ui/primitives';
-import { Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader } from '../components/ui/overlay';
-import { DataTable, DefList, type Column } from '../components/ui/data';
-import { Timeline, type TimelineItem } from '../components/common';
-import { VisitorStatusBadge } from '../components/status';
+import { Button } from '../components/ui/button';
+import { IconBox } from '../components/ui/icon-box';
+import { Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader } from '../components/ui/drawer';
+import { DataTable, type Column } from '../components/ui/data-table';
+import { DefList } from '../components/patterns/definition-list';
+import { Timeline, type TimelineItem } from '../components/patterns/timeline';
+import { VisitorStatusBadge } from '../components/patterns/status-badge';
 import { simulation } from '../data/live';
 import { useSession } from '../store/session';
 import { ago, fmtDate, fmtTime, num } from '../lib/utils';

@@ -8,7 +8,7 @@ import {
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ADMIN_NAV, matchNav } from "./nav";
-import { Tooltip } from "../components/ui/overlay";
+import { Tooltip } from '../components/ui/tooltip';
 import { cn } from "../lib/utils";
 
 type Badges = Record<

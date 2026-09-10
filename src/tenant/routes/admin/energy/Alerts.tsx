@@ -5,12 +5,14 @@
 
 import { Bell, Check, CheckCheck } from 'lucide-react';
 import { useState } from 'react';
-import { MetricBand, Page } from '../../../components/ui/page';
-import { PageHeader, StatCard } from '../../../components/common';
-import { Button } from '../../../components/ui/primitives';
-import { Segmented } from '../../../components/ui/tabs';
-import { EmptyState } from '../../../components/ui/data';
-import { AlertSeverityBadge } from '../../../components/status';
+import { MetricBand } from '../../../components/layout/metric-band';
+import { Page } from '../../../components/layout/page';
+import { PageHeader } from '../../../components/patterns/page-header';
+import { StatCard } from '../../../components/patterns/stat-card';
+import { Button } from '../../../components/ui/button';
+import { Segmented } from '../../../components/ui/segmented-control';
+import { EmptyState } from '../../../components/patterns/feedback-state';
+import { AlertSeverityBadge } from '../../../components/patterns/status-badge';
 import { ALERT_KIND_LABEL } from '../../../lib/meta';
 import { simulation, useLive } from '../../../data/live';
 import { ago, num } from '../../../lib/utils';

@@ -56,6 +56,3 @@ export function CardBody({ className, ...props }: HTMLAttributes<HTMLDivElement>
 export function CardFooter({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return <div className={cn('flex items-center justify-between gap-3 border-t border-border-subtle px-4 py-3', className)} {...props} />;
 }
-
-/** @deprecated Import SectionHeader from `components/patterns/section-header`. */
-export { SectionHeader } from '../patterns/section-header';

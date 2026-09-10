@@ -1,7 +1,7 @@
 import { CheckCircle2, Info, TriangleAlert, X, XCircle } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useSession, type Toast } from '../../store/session';
-import { Button } from './primitives';
+import { Button } from './button';
 
 const ICON = {
   default: Info,
@@ -22,7 +22,7 @@ const TONE: Record<Toast['variant'], string> = {
 export function Toaster() {
   const { toasts, dismissToast } = useSession();
   return (
-    <div className="pointer-events-none fixed bottom-4 right-4 z-[100] flex w-[360px] max-w-[calc(100vw-2rem)] flex-col gap-2.5">
+    <div className="pointer-events-none fixed bottom-4 right-4 z-[var(--z-toast)] flex w-[360px] max-w-[calc(100vw-2rem)] flex-col gap-2.5">
       {toasts.map((t) => {
         const Icon = ICON[t.variant];
         return (

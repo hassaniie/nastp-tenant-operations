@@ -4,11 +4,13 @@
  */
 
 import { useNavigate } from 'react-router-dom';
-import { Page, WorkspaceSection, WorkspaceSplit } from '../../../components/ui/page';
-import { PageHeader } from '../../../components/common';
-import { BarSeriesChart, MultiLineChart } from '../../../components/charts';
-import { DataTable, type Column } from '../../../components/ui/data';
-import { AlertLevelBadge } from '../../../components/status';
+import { Page } from '../../../components/layout/page';
+import { WorkspaceSection } from '../../../components/layout/workspace-section';
+import { WorkspaceSplit } from '../../../components/layout/workspace-split';
+import { PageHeader } from '../../../components/patterns/page-header';
+import { BarSeriesChart, MultiLineChart } from '../../../components/patterns/charts';
+import { DataTable, type Column } from '../../../components/ui/data-table';
+import { AlertLevelBadge } from '../../../components/patterns/status-badge';
 import { useLive } from '../../../data/live';
 import { alertLevelForTenant, tenantSummary } from '../../../data/selectors';
 import { currency, num } from '../../../lib/utils';

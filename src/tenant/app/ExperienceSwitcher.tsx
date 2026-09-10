@@ -2,8 +2,9 @@ import { ArrowLeftRight, Check, ChevronDown, LayoutGrid, Store } from 'lucide-re
 import { useNavigate } from 'react-router-dom';
 import { useLive } from '../data/live';
 import { useSession } from '../store/session';
-import { Button, TenantMark } from '../components/ui/primitives';
-import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator, MenuTrigger } from '../components/ui/overlay';
+import { Button } from '../components/ui/button';
+import { TenantMark } from '../components/ui/avatar';
+import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator, MenuTrigger } from '../components/ui/dropdown-menu';
 import { cn } from '../lib/utils';
 
 /**

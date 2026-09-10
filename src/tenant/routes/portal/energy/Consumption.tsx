@@ -5,11 +5,11 @@
 
 import { Zap } from 'lucide-react';
 import { useState } from 'react';
-import { StatGrid } from '../../../components/ui/page';
+import { StatGrid } from '../../../components/layout/content-grid';
 import { Card, CardBody, CardHeader } from '../../../components/ui/card';
-import { StatCard } from '../../../components/common';
-import { IconBox } from '../../../components/ui/primitives';
-import { TrendChart, BarSeriesChart } from '../../../components/charts';
+import { StatCard } from '../../../components/patterns/stat-card';
+import { IconBox } from '../../../components/ui/icon-box';
+import { TrendChart, BarSeriesChart } from '../../../components/patterns/charts';
 import { useSession } from '../../../store/session';
 import { useLive } from '../../../data/live';
 import { RangeControl, sliceReadings, sumField, type RangeKey } from '../../energyShared';

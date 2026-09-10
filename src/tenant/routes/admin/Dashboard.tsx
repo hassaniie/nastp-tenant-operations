@@ -30,7 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
-import { Tabs, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { useLive } from "../../data/live";
 import {
   computeAdminKpis,
@@ -39,9 +39,10 @@ import {
 } from "../../data/selectors";
 import { ago, compact, currency, energy, fmtTime, num } from "../../lib/utils";
 import { ACTIVITY_ICON } from "../../lib/activityMeta";
-import { CATEGORY_ICON, PriorityBadge, MeterStatusBadge, VisitorStatusBadge, AlertSeverityBadge, TenantStatusBadge } from "../../components/status";
-import { PageHeader, StatCard } from "../../components/common";
-import { SectionHeader } from "../../components/ui/card";
+import { CATEGORY_ICON, PriorityBadge, MeterStatusBadge, VisitorStatusBadge, AlertSeverityBadge, TenantStatusBadge } from '../../components/patterns/status-badge';
+import { PageHeader } from '../../components/patterns/page-header';
+import { StatCard } from '../../components/patterns/stat-card';
+import { SectionHeader } from '../../components/patterns/section-header';
 
 function TextLink({ to, children }: { to: string; children: ReactNode }) {
   return (

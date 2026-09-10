@@ -16,8 +16,10 @@ import { useLive } from '../data/live';
 import type { World } from '../data/world';
 import { useSession } from '../store/session';
 import { ADMIN_NAV, PORTAL_NAV, matchNav, type NavGroup } from './nav';
-import { Button, Kbd, TenantMark } from '../components/ui/primitives';
-import { Tooltip, TooltipProvider } from '../components/ui/overlay';
+import { Button } from '../components/ui/button';
+import { Kbd } from '../components/ui/kbd';
+import { TenantMark } from '../components/ui/avatar';
+import { Tooltip, TooltipProvider } from '../components/ui/tooltip';
 import { Toaster } from '../components/ui/toast';
 import { NotificationBell } from './NotificationBell';
 import { ExperienceSwitcher } from './ExperienceSwitcher';
@@ -65,10 +67,10 @@ function Brand({ collapsed }: { collapsed: boolean }) {
   }
   return (
     <div className={cn('flex items-center gap-2.5 px-3', collapsed && 'justify-center px-0')}>
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-gradient-to-br from-primary to-[#4338ca] shadow-[0_2px_10px_rgba(99,102,241,0.35)]">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-gradient-to-br from-primary to-[var(--brand-mark-end)] shadow-[var(--brand-mark-shadow)]">
         <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" aria-hidden>
-          <path d="M4 20V9l8-5 8 5v11" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M9 20v-6h6v6" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M4 20V9l8-5 8 5v11" stroke="var(--brand-mark-foreground)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M9 20v-6h6v6" stroke="var(--brand-mark-foreground)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </span>
       {!collapsed && (

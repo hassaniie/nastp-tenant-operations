@@ -9,8 +9,9 @@
 
 import { LogOut, UserRound } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Avatar, Button } from '../components/ui/primitives';
-import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator, MenuTrigger } from '../components/ui/overlay';
+import { Avatar } from '../components/ui/avatar';
+import { Button } from '../components/ui/button';
+import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator, MenuTrigger } from '../components/ui/dropdown-menu';
 import { useAuth } from '../store/auth';
 import { doorFor } from '../data/auth';
 

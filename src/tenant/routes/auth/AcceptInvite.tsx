@@ -10,8 +10,10 @@
 import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { CheckCircle2, KeyRound, MailWarning } from 'lucide-react';
-import { Button, IconBox } from '../../components/ui/primitives';
-import { Field, Input } from '../../components/ui/form';
+import { Button } from '../../components/ui/button';
+import { IconBox } from '../../components/ui/icon-box';
+import { Field } from '../../components/ui/field';
+import { Input } from '../../components/ui/input';
 import { Card } from '../../components/ui/card';
 import { useAuth } from '../../store/auth';
 import { acceptInvite, doorFor, homeFor, lookupToken } from '../../data/auth';

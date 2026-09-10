@@ -13,8 +13,10 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Building2, ShieldCheck, Wrench, type LucideIcon } from 'lucide-react';
-import { Button, IconBox } from '../../components/ui/primitives';
-import { Field, Input } from '../../components/ui/form';
+import { Button } from '../../components/ui/button';
+import { IconBox } from '../../components/ui/icon-box';
+import { Field } from '../../components/ui/field';
+import { Input } from '../../components/ui/input';
 import { Card } from '../../components/ui/card';
 import { useAuth } from '../../store/auth';
 import { DEMO_PASSWORD, SIGN_IN_MESSAGE, doorFor, lockoutRemainingMs } from '../../data/auth';

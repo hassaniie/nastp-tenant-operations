@@ -6,11 +6,14 @@
 import { AlarmClock, CalendarClock, DoorClosed, DoorOpen } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Page, StatGrid, ContentGrid } from '../../../components/ui/page';
+import { Page } from '../../../components/layout/page';
+import { StatGrid, ContentGrid } from '../../../components/layout/content-grid';
 import { Card, CardBody, CardHeader } from '../../../components/ui/card';
-import { PageHeader, StatCard } from '../../../components/common';
-import { Button, IconBox } from '../../../components/ui/primitives';
-import { VisitorStatusBadge } from '../../../components/status';
+import { PageHeader } from '../../../components/patterns/page-header';
+import { StatCard } from '../../../components/patterns/stat-card';
+import { Button } from '../../../components/ui/button';
+import { IconBox } from '../../../components/ui/icon-box';
+import { VisitorStatusBadge } from '../../../components/patterns/status-badge';
 import { VisitorDrawer } from '../../visitorsShared';
 import { useLive } from '../../../data/live';
 import { computeAdminKpis } from '../../../data/selectors';

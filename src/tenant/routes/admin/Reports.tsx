@@ -6,11 +6,15 @@
 
 import { Download, FileBarChart, Printer, Table2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { Page, SplitGrid } from '../../components/ui/page';
+import { Page } from '../../components/layout/page';
+import { SplitGrid } from '../../components/layout/content-grid';
 import { Card, CardBody, CardHeader } from '../../components/ui/card';
-import { PageHeader } from '../../components/common';
-import { Button, IconBox, StatusBadge } from '../../components/ui/primitives';
-import { EmptyState } from '../../components/ui/data';
+import { PageHeader } from '../../components/patterns/page-header';
+import { Button } from '../../components/ui/button';
+import { IconBox } from '../../components/ui/icon-box';
+import { StatusBadge } from '../../components/patterns/status-badge';
+import { EmptyState } from '../../components/patterns/feedback-state';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table';
 import { useLive } from '../../data/live';
 import type { World } from '../../data/world';
 import { tenantSummary } from '../../data/selectors';
@@ -86,24 +90,24 @@ export default function Reports() {
                 {rows.length === 0 ? (
                   <EmptyState title="No data" description="This report has no rows for the current ecosystem." />
                 ) : (
-                  <table className="w-full border-collapse text-left">
-                    <thead className="sticky top-0 z-10 bg-surface-inset">
-                      <tr>
+                  <Table className="w-full border-collapse text-left">
+                    <TableHeader className="sticky top-0 z-10 bg-surface-inset">
+                      <TableRow>
                         {Object.keys(rows[0]).map((k) => (
-                          <th key={k} className="whitespace-nowrap border-b border-border px-3.5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-subtle">{k}</th>
+                          <TableHead key={k} className="whitespace-nowrap border-b border-border px-3.5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-subtle">{k}</TableHead>
                         ))}
-                      </tr>
-                    </thead>
-                    <tbody>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
                       {rows.map((row, i) => (
-                        <tr key={i} className="border-b border-border-subtle">
+                        <TableRow key={i} className="border-b border-border-subtle">
                           {Object.keys(rows[0]).map((k) => (
-                            <td key={k} className="whitespace-nowrap px-3.5 py-2.5 text-[13px] text-muted">{String(row[k])}</td>
+                            <TableCell key={k} className="whitespace-nowrap px-3.5 py-2.5 text-[13px] text-muted">{String(row[k])}</TableCell>
                           ))}
-                        </tr>
+                        </TableRow>
                       ))}
-                    </tbody>
-                  </table>
+                    </TableBody>
+                  </Table>
                 )}
               </div>
             </>

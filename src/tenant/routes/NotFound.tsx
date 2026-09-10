@@ -8,7 +8,7 @@
 
 import { Link } from 'react-router-dom';
 import { Compass } from 'lucide-react';
-import { IconBox } from '../components/ui/primitives';
+import { IconBox } from '../components/ui/icon-box';
 import { Card } from '../components/ui/card';
 import { useAuth } from '../store/auth';
 import { doorFor, homeFor } from '../data/auth';

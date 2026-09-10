@@ -12,8 +12,10 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { CheckCircle2, KeyRound, Mail, MailWarning, ShieldCheck } from 'lucide-react';
-import { Button, IconBox } from '../../components/ui/primitives';
-import { Field, Input } from '../../components/ui/form';
+import { Button } from '../../components/ui/button';
+import { IconBox } from '../../components/ui/icon-box';
+import { Field } from '../../components/ui/field';
+import { Input } from '../../components/ui/input';
 import { Card } from '../../components/ui/card';
 import { completeReset, doorFor, lookupToken, requestPasswordReset } from '../../data/auth';
 import type { Experience } from '../../data/types';

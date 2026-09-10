@@ -8,9 +8,12 @@ import { CalendarPlus, Info } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardBody, CardHeader } from '../../../components/ui/card';
-import { IconBox } from '../../../components/ui/primitives';
-import { Button } from '../../../components/ui/primitives';
-import { Field, Input, Textarea, SimpleSelect } from '../../../components/ui/form';
+import { IconBox } from '../../../components/ui/icon-box';
+import { Button } from '../../../components/ui/button';
+import { Field } from '../../../components/ui/field';
+import { Input } from '../../../components/ui/input';
+import { Textarea } from '../../../components/ui/textarea';
+import { SimpleSelect } from '../../../components/ui/select';
 import { useSession } from '../../../store/session';
 import { simulation, useLive } from '../../../data/live';
 
