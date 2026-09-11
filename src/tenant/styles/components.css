@@ -1,5 +1,7 @@
 /* Canonical production compositions; no route-specific palette or mock styling. */
 .ds-workspace { min-height: 100%; min-width: 0; background: var(--surface); color: var(--foreground); }
+.ds-workspace-tabs { min-height:49px; padding-inline:var(--workspace-gutter-desktop); background:var(--surface); }
+.ds-workspace-controlbar { padding:18px var(--workspace-gutter-desktop); border-bottom:1px solid var(--border); background:var(--surface); }
 .ds-page-header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-6); padding: 28px var(--workspace-gutter-desktop); }
 .ds-page-header h1 { font-size: var(--text-page-title); font-weight: var(--weight-page-title); letter-spacing: var(--tracking-page-title); line-height: var(--line-heading); }
 .ds-page-header p { color: var(--foreground-subtle); font-size: var(--text-label); line-height: 1.6; margin-top: var(--space-2); }
@@ -82,6 +84,8 @@
   .ds-setup-aside { border-left:0; border-top:1px solid var(--border); }
 }
 @media(max-width:767px) {
+  .ds-workspace-tabs { padding-inline:var(--workspace-gutter-mobile); }
+  .ds-workspace-controlbar { padding:14px var(--workspace-gutter-mobile); }
   .ds-page-header { padding: var(--space-6) var(--workspace-gutter-mobile); align-items: flex-start; flex-wrap: wrap; gap: var(--space-4); }
   .ds-page-header h1 { font-size: var(--text-page-title-mobile); }
   .ds-metrics, .ds-metrics.is-five { grid-template-columns: repeat(2,minmax(0,1fr)); }

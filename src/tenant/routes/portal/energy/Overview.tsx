@@ -8,10 +8,10 @@
 import { Bell, Gauge, TrendingUp, Wallet, Zap } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { StatGrid, SplitGrid } from '../../../components/layout/content-grid';
-import { Card, CardBody, CardHeader } from '../../../components/ui/card';
+import { MetricBand } from '../../../components/layout/metric-band';
+import { WorkspaceSection } from '../../../components/layout/workspace-section';
+import { WorkspaceSplit } from '../../../components/layout/workspace-split';
 import { StatCard } from '../../../components/patterns/stat-card';
-import { IconBox } from '../../../components/ui/icon-box';
 import { TrendChart, DonutChart } from '../../../components/patterns/charts';
 import { useSession } from '../../../store/session';
 import { useLive } from '../../../data/live';
@@ -32,45 +32,29 @@ export default function PortalEnergyOverview() {
 
   return (
     <>
-      <StatGrid cols={4}>
-        <StatCard label="Current Load" value={energy(snap.currentLoadKw, 'kW').value} unit={energy(snap.currentLoadKw, 'kW').unit} icon={Zap} tone="energy" spark={bundle.daily.slice(-14).map((d) => d.kwh)} sparkColor="var(--module-energy)" />
-        <StatCard label="Current Demand" value={num(snap.currentDemandKw, 1)} unit="kW" icon={Gauge} tone="energy" caption={`Peak ${num(snap.peakDemandKw)} kW`} />
-        <StatCard label="Period Usage" value={energy(snap.periodKwh).value} unit={energy(snap.periodKwh).unit} icon={TrendingUp} tone="primary" caption="This billing period" />
-        <StatCard label="Period Charges" value={currency(snap.periodCharges, { compact: true })} icon={Wallet} tone="primary" onClick={() => navigate('/portal/energy/billing')} />
-      </StatGrid>
+      <MetricBand columns={4}>
+        <StatCard variant="inline" label="Current Load" value={energy(snap.currentLoadKw, 'kW').value} unit={energy(snap.currentLoadKw, 'kW').unit} icon={Zap} tone="energy" />
+        <StatCard variant="inline" label="Current Demand" value={num(snap.currentDemandKw, 1)} unit="kW" icon={Gauge} tone="energy" caption={`Peak ${num(snap.peakDemandKw)} kW`} />
+        <StatCard variant="inline" label="Period Usage" value={energy(snap.periodKwh).value} unit={energy(snap.periodKwh).unit} icon={TrendingUp} tone="primary" caption="This billing period" />
+        <StatCard variant="inline" label="Period Charges" value={currency(snap.periodCharges, { compact: true })} icon={Wallet} tone="primary" onClick={() => navigate('/portal/energy/billing')} />
+      </MetricBand>
 
-      <SplitGrid>
-        <Card>
-          <CardHeader
-            title="Consumption over time"
-            subtitle="Your metered usage"
-            icon={<IconBox icon={Zap} tone="energy" size="sm" />}
-            actions={<RangeControl value={range} onChange={setRange} />}
-          />
-          <CardBody>
+      <WorkspaceSplit ratio="balanced">
+        <WorkspaceSection title="Consumption over time" description="Your metered usage" actions={<RangeControl value={range} onChange={setRange} />}>
             <TrendChart data={data} series={[{ key: 'kwh', label: 'Consumption (kWh)' }]} height={240} unit="kWh" valueFormatter={(v) => `${num(v)} kWh`} />
-          </CardBody>
-        </Card>
-        <div className="flex flex-col gap-4">
-          <Card>
-            <CardHeader title="Peak vs Off-Peak" subtitle="For the selected range" icon={<IconBox icon={TrendingUp} tone="energy" size="sm" />} />
-            <CardBody>
+        </WorkspaceSection>
+        <WorkspaceSection title="Peak vs Off-Peak" description="For the selected range">
               <DonutChart height={180} centreValue={`${peak + off ? Math.round((peak / (peak + off)) * 100) : 0}%`} centreLabel="peak" data={[{ label: 'Peak', value: peak, color: 'var(--viz-2)' }, { label: 'Off-peak', value: off, color: 'var(--viz-1)' }]} />
-            </CardBody>
-          </Card>
-          <div className="grid grid-cols-2 gap-4">
-            <StatCard label="Active Meters" value={`${snap.activeMeters}/${snap.totalMeters}`} icon={Gauge} tone={snap.activeMeters < snap.totalMeters ? 'warning' : 'success'} />
-            <StatCard label="Alerts" value={num(snap.activeAlerts)} icon={Bell} tone={snap.activeAlerts ? 'warning' : 'success'} onClick={() => navigate('/portal/energy/alerts')} />
+          <div className="mt-5 grid grid-cols-2 border-t border-border">
+            <StatCard variant="inline" label="Active Meters" value={`${snap.activeMeters}/${snap.totalMeters}`} icon={Gauge} tone={snap.activeMeters < snap.totalMeters ? 'warning' : 'success'} />
+            <StatCard variant="inline" label="Alerts" value={num(snap.activeAlerts)} icon={Bell} tone={snap.activeAlerts ? 'warning' : 'success'} onClick={() => navigate('/portal/energy/alerts')} />
           </div>
-        </div>
-      </SplitGrid>
+        </WorkspaceSection>
+      </WorkspaceSplit>
 
-      <Card>
-        <CardHeader title="Demand over time" subtitle="Maximum demand per interval" icon={<IconBox icon={Gauge} tone="energy" size="sm" />} />
-        <CardBody>
+      <WorkspaceSection title="Demand over time" description="Maximum demand per interval">
           <TrendChart data={data} series={[{ key: 'demandKw', label: 'Demand (kW)' }]} height={200} unit="kW" fill={false} valueFormatter={(v) => `${num(v, 1)} kW`} />
-        </CardBody>
-      </Card>
+      </WorkspaceSection>
     </>
   );
 }

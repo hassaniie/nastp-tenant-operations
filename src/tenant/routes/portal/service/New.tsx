@@ -7,9 +7,9 @@
 import { FilePlus2, Paperclip, RotateCcw, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardBody, CardHeader } from '../../../components/ui/card';
-import { Button } from '../../../components/ui/button';
-import { IconBox } from '../../../components/ui/icon-box';
+import { WorkspaceSection } from '../../../components/layout/workspace-section';
+import { WorkspaceActions } from '../../../components/layout/workspace-actions';
+import { Button, IconButton } from '../../../components/ui/button';
 import { StatusBadge } from '../../../components/patterns/status-badge';
 import { Field } from '../../../components/ui/field';
 import { Input } from '../../../components/ui/input';
@@ -79,11 +79,9 @@ export default function NewRequest() {
   const CatIcon = CATEGORY_ICON[f.category];
 
   return (
-    <Card>
-      <CardHeader
+    <WorkspaceSection
         title="New Service Request"
-        subtitle="Raise a request with the NASTP service team"
-        icon={<IconBox icon={FilePlus2} tone="service" size="sm" />}
+        description="Raise a request with the NASTP service team"
         actions={
           hasDraft ? (
             <Button variant="ghost" size="xs" onClick={discard}>
@@ -92,8 +90,8 @@ export default function NewRequest() {
             </Button>
           ) : undefined
         }
-      />
-      <CardBody className="flex flex-col gap-5">
+    >
+      <div className="mx-auto flex max-w-[1040px] flex-col gap-5">
         <Field label="Title" required><Input value={f.title} onChange={(e) => set({ title: e.target.value })} placeholder="Brief summary of the issue" /></Field>
         <Field label="Description" required hint="Describe the issue, when it started, and where"><Textarea rows={4} value={f.description} onChange={(e) => set({ description: e.target.value })} placeholder="Provide as much detail as you can…" /></Field>
 
@@ -112,9 +110,9 @@ export default function NewRequest() {
         <Field label="Priority" required>
           <div className="flex flex-wrap gap-2">
             {PRIORITIES.map((p) => (
-              <button key={p.value} onClick={() => set({ priority: p.value })} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] font-medium transition-all ${f.priority === p.value ? 'border-primary/40 bg-primary-muted text-foreground' : 'border-border bg-surface-inset text-subtle hover:text-muted'}`}>
+              <Button key={p.value} type="button" variant={f.priority === p.value ? 'subtle' : 'outline'} size="sm" aria-pressed={f.priority === p.value} onClick={() => set({ priority: p.value })}>
                 <StatusBadge tone={p.tone} size="sm" dot>{p.label}</StatusBadge>
-              </button>
+              </Button>
             ))}
           </div>
         </Field>
@@ -128,7 +126,7 @@ export default function NewRequest() {
                 {attachments.map((a) => (
                   <span key={a.id} className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-inset px-2.5 py-1.5 text-[12px] text-muted">
                     <Paperclip className="h-3.5 w-3.5" />{a.name} <span className="text-subtle">· {a.sizeKb} KB</span>
-                    <button onClick={() => setAttachments((prev) => prev.filter((x) => x.id !== a.id))} className="text-subtle hover:text-critical"><X className="h-3 w-3" /></button>
+                    <IconButton label={`Remove ${a.name}`} size="sm" variant="ghost" onClick={() => setAttachments((prev) => prev.filter((x) => x.id !== a.id))} className="text-subtle hover:text-critical"><X className="h-3 w-3" /></IconButton>
                   </span>
                 ))}
               </div>
@@ -136,11 +134,11 @@ export default function NewRequest() {
           </div>
         </Field>
 
-        <div className="flex items-center justify-end gap-2">
+        <WorkspaceActions>
           <Button variant="ghost" size="md" onClick={() => navigate('/portal/service')}>Cancel</Button>
           <Button variant="primary" size="md" disabled={!valid} onClick={submit}><FilePlus2 className="h-4 w-4" />Submit Request</Button>
-        </div>
-      </CardBody>
-    </Card>
+        </WorkspaceActions>
+      </div>
+    </WorkspaceSection>
   );
 }

@@ -4,11 +4,10 @@
  */
 
 import { Bell, Check } from 'lucide-react';
-import { Card, CardBody, CardHeader } from '../../../components/ui/card';
-import { StatGrid } from '../../../components/layout/content-grid';
+import { MetricBand } from '../../../components/layout/metric-band';
+import { WorkspaceSection } from '../../../components/layout/workspace-section';
 import { StatCard } from '../../../components/patterns/stat-card';
 import { Button } from '../../../components/ui/button';
-import { IconBox } from '../../../components/ui/icon-box';
 import { EmptyState } from '../../../components/patterns/feedback-state';
 import { AlertSeverityBadge } from '../../../components/patterns/status-badge';
 import { ALERT_KIND_LABEL } from '../../../lib/meta';
@@ -23,21 +22,18 @@ export default function PortalEnergyAlerts() {
 
   return (
     <>
-      <StatGrid cols={3}>
-        <StatCard label="Active" value={num(active.length)} icon={Bell} tone={active.length ? 'warning' : 'success'} />
-        <StatCard label="Acknowledged" value={num(alerts.filter((a) => a.status === 'acknowledged').length)} icon={Bell} tone="neutral" />
-        <StatCard label="Critical" value={num(active.filter((a) => a.severity === 'critical').length)} icon={Bell} tone={active.some((a) => a.severity === 'critical') ? 'critical' : 'success'} />
-      </StatGrid>
+      <MetricBand columns={3}>
+        <StatCard variant="inline" label="Active" value={num(active.length)} icon={Bell} tone={active.length ? 'warning' : 'success'} />
+        <StatCard variant="inline" label="Acknowledged" value={num(alerts.filter((a) => a.status === 'acknowledged').length)} icon={Bell} tone="neutral" />
+        <StatCard variant="inline" label="Critical" value={num(active.filter((a) => a.severity === 'critical').length)} icon={Bell} tone={active.some((a) => a.severity === 'critical') ? 'critical' : 'success'} />
+      </MetricBand>
 
-      <Card>
-        <CardHeader title="Your Alerts" subtitle={`${alerts.length} total`} icon={<IconBox icon={Bell} tone="warning" size="sm" />} />
-        <CardBody className="flex flex-col gap-2">
+      <WorkspaceSection title="Your Alerts" description={`${alerts.length} total`} inset={false}>
           {alerts.length === 0 ? (
             <EmptyState title="No alerts" description="Your energy usage is within all configured thresholds." icon={<Bell className="h-5 w-5" />} />
           ) : (
             alerts.map((a) => (
-              <div key={a.id} className="flex items-start gap-3 rounded-xl border border-border-subtle bg-surface-inset/40 p-3.5">
-                <IconBox icon={Bell} tone={a.severity === 'critical' ? 'critical' : a.severity === 'warning' ? 'warning' : 'energy'} size="sm" />
+              <div key={a.id} className="ds-operational-row">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-[13px] font-medium text-foreground">{a.title}</p>
@@ -51,8 +47,7 @@ export default function PortalEnergyAlerts() {
               </div>
             ))
           )}
-        </CardBody>
-      </Card>
+      </WorkspaceSection>
     </>
   );
 }

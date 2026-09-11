@@ -6,17 +6,17 @@
  * no electrical metrics on the homepage; those live deeper in Energy.
  */
 
-import { ArrowRight, CalendarPlus, DoorOpen, FilePlus2, Wrench, Zap } from 'lucide-react';
+import { ArrowRight, CalendarPlus, FilePlus2, Wrench } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Page } from '../../components/layout/page';
-import { ContentGrid, SplitGrid } from '../../components/layout/content-grid';
-import { Card, CardBody, CardHeader } from '../../components/ui/card';
+import { MetricBand } from '../../components/layout/metric-band';
+import { WorkspaceSection } from '../../components/layout/workspace-section';
+import { WorkspaceSplit } from '../../components/layout/workspace-split';
 import { StatCard } from '../../components/patterns/stat-card';
 import { PageHeader } from '../../components/patterns/page-header';
 import { Timeline } from '../../components/patterns/timeline';
 import { MetricValue } from '../../components/patterns/metric-value';
 import { Button } from '../../components/ui/button';
-import { IconBox } from '../../components/ui/icon-box';
 import { StatusBadge } from '../../components/patterns/status-badge';
 import { Sparkline } from '../../components/patterns/charts';
 import { useSession } from '../../store/session';
@@ -41,7 +41,7 @@ export default function PortalHome() {
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
   return (
-    <Page>
+    <Page workspace archetype="analytics" className="ds-portal-workspace">
       <PageHeader
         title={`${greeting}, ${tenant.primaryContact.name.split(' ')[0]}`}
         description={`Here's what's happening across ${tenant.name} today.`}
@@ -54,10 +54,9 @@ export default function PortalHome() {
       />
 
       {/* Energy snapshot */}
-      <SplitGrid at="lg">
-        <Card>
-          <CardHeader title="Energy Snapshot" subtitle="Current billing period" icon={<IconBox icon={Zap} tone="energy" size="sm" />} actions={<Button variant="ghost" size="xs" onClick={() => navigate('/portal/energy')}>Open Energy<ArrowRight className="h-3.5 w-3.5" /></Button>} />
-          <CardBody className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
+      <WorkspaceSplit ratio="balanced">
+        <WorkspaceSection title="Energy Snapshot" description="Current billing period" actions={<Button variant="ghost" size="xs" onClick={() => navigate('/portal/energy')}>Open Energy<ArrowRight className="h-3.5 w-3.5" /></Button>}>
+          <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
             <SnapshotStat label="Current Load" value={energy(snap.currentLoadKw, 'kW').value} unit={energy(snap.currentLoadKw, 'kW').unit} />
             <SnapshotStat label="Period Usage" value={energy(snap.periodKwh).value} unit={energy(snap.periodKwh).unit} />
             <SnapshotStat label="Period Charges" value={currency(snap.periodCharges, { symbol: false, compact: true })} unit="PKR" />
@@ -66,12 +65,11 @@ export default function PortalHome() {
               <Sparkline data={spark} height={56} color="var(--module-energy)" />
               <p className="mt-1 text-[11px] text-subtle">Daily consumption, last 14 days · {snap.activeMeters}/{snap.totalMeters} meters online</p>
             </div>
-          </CardBody>
-        </Card>
+          </div>
+        </WorkspaceSection>
 
-        <Card>
-          <CardHeader title="Visitors" subtitle="Today" icon={<IconBox icon={DoorOpen} tone="visitor" size="sm" />} actions={<Button variant="ghost" size="xs" onClick={() => navigate('/portal/visitors')}>All</Button>} />
-          <CardBody className="flex flex-col gap-3">
+        <WorkspaceSection title="Visitors" description="Today" actions={<Button variant="ghost" size="xs" onClick={() => navigate('/portal/visitors')}>All</Button>}>
+          <div className="flex flex-col gap-3">
             <div className="grid grid-cols-3 gap-3">
               <MiniStat label="Scheduled" value={snap.visitorsScheduledToday} tone="info" />
               <MiniStat label="Inside" value={snap.visitorsInside} tone="success" />
@@ -96,20 +94,18 @@ export default function PortalHome() {
                 ))}
               </div>
             )}
-          </CardBody>
-        </Card>
-      </SplitGrid>
+          </div>
+        </WorkspaceSection>
+      </WorkspaceSplit>
 
       {/* Service + activity */}
-      <ContentGrid cols={3}>
-        <StatCard label="Open Requests" value={num(snap.openRequests)} icon={Wrench} tone="service" caption="Service Center" onClick={() => navigate('/portal/service')} />
-        <StatCard label="In Progress" value={num(snap.inProgressRequests)} icon={Wrench} tone="primary" caption="Being handled by NASTP" onClick={() => navigate('/portal/service')} />
-        <StatCard label="Waiting for You" value={num(snap.waitingRequests)} icon={Wrench} tone={snap.waitingRequests ? 'warning' : 'neutral'} caption={snap.waitingRequests ? 'Action needed' : 'Nothing pending'} onClick={() => navigate('/portal/service')} />
-      </ContentGrid>
+      <MetricBand columns={3}>
+        <StatCard variant="inline" label="Open Requests" value={num(snap.openRequests)} icon={Wrench} tone="service" caption="Service Center" onClick={() => navigate('/portal/service')} />
+        <StatCard variant="inline" label="In Progress" value={num(snap.inProgressRequests)} icon={Wrench} tone="primary" caption="Being handled by NASTP" onClick={() => navigate('/portal/service')} />
+        <StatCard variant="inline" label="Waiting for You" value={num(snap.waitingRequests)} icon={Wrench} tone={snap.waitingRequests ? 'warning' : 'neutral'} caption={snap.waitingRequests ? 'Action needed' : 'Nothing pending'} onClick={() => navigate('/portal/service')} />
+      </MetricBand>
 
-      <Card>
-        <CardHeader title="Recent Activity" subtitle="Your organization's timeline" />
-        <CardBody>
+      <WorkspaceSection title="Recent Activity" description="Your organization's timeline">
           {activity.length === 0 ? (
             <p className="py-6 text-center text-[12px] text-subtle">No recent activity.</p>
           ) : (
@@ -124,8 +120,7 @@ export default function PortalHome() {
               }))}
             />
           )}
-        </CardBody>
-      </Card>
+      </WorkspaceSection>
     </Page>
   );
 }

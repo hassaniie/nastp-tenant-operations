@@ -5,7 +5,7 @@
  */
 
 import { useState } from 'react';
-import { Card } from '../../../components/ui/card';
+import { WorkspaceSection } from '../../../components/layout/workspace-section';
 import { VisitorTable, VisitorDrawer } from '../../visitorsShared';
 import { useSession } from '../../../store/session';
 import { useLive } from '../../../data/live';
@@ -32,7 +32,7 @@ export function PortalVisitorList({ kind }: { kind: PortalVisitorKind }) {
 
   return (
     <>
-      <Card>
+      <WorkspaceSection inset={false} title={kind === 'upcoming' ? 'Upcoming visitors' : kind === 'inside' ? 'Visitors inside' : 'Visitor history'} description={`${visitors.length} visitor${visitors.length === 1 ? '' : 's'}`}>
         <VisitorTable
           visitors={visitors}
           onOpen={setOpen}
@@ -40,7 +40,7 @@ export function PortalVisitorList({ kind }: { kind: PortalVisitorKind }) {
           emptyTitle={EMPTY[kind].title}
           emptyDescription={EMPTY[kind].description}
         />
-      </Card>
+      </WorkspaceSection>
       <VisitorDrawer visitor={open} open={Boolean(open)} onOpenChange={(o) => !o && setOpen(null)} mode="tenant" />
     </>
   );

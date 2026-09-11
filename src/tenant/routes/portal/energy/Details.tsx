@@ -6,10 +6,9 @@
 
 import { Activity, Gauge, Layers, Table2, Zap } from 'lucide-react';
 import { useState } from 'react';
-import { Card, CardBody, CardHeader } from '../../../components/ui/card';
-import { StatGrid } from '../../../components/layout/content-grid';
+import { MetricBand } from '../../../components/layout/metric-band';
+import { WorkspaceSection } from '../../../components/layout/workspace-section';
 import { StatCard } from '../../../components/patterns/stat-card';
-import { IconBox } from '../../../components/ui/icon-box';
 import { Segmented } from '../../../components/ui/segmented-control';
 import { TrendChart } from '../../../components/patterns/charts';
 import { DefList } from '../../../components/patterns/definition-list';
@@ -32,7 +31,7 @@ export default function PortalEnergyDetails() {
 
   return (
     <>
-      <div className="overflow-x-auto">
+      <div className="ds-workspace-controlbar overflow-x-auto">
         <Segmented
           value={section}
           onChange={setSection}
@@ -47,32 +46,26 @@ export default function PortalEnergyDetails() {
       </div>
 
       {section === 'summary' && (
-        <StatGrid cols={4}>
-          <StatCard label="Current Load" value={energy(snap.currentLoadKw, 'kW').value} unit={energy(snap.currentLoadKw, 'kW').unit} icon={Zap} tone="energy" />
-          <StatCard label="Period Usage" value={energy(snap.periodKwh).value} unit={energy(snap.periodKwh).unit} icon={Zap} tone="primary" />
-          <StatCard label="Peak Demand" value={num(snap.peakDemandKw, 1)} unit="kW" icon={Gauge} tone="warning" />
-          <StatCard label="Meters" value={`${snap.activeMeters}/${snap.totalMeters}`} icon={Gauge} tone="success" />
-        </StatGrid>
+        <MetricBand columns={4}>
+          <StatCard variant="inline" label="Current Load" value={energy(snap.currentLoadKw, 'kW').value} unit={energy(snap.currentLoadKw, 'kW').unit} icon={Zap} tone="energy" />
+          <StatCard variant="inline" label="Period Usage" value={energy(snap.periodKwh).value} unit={energy(snap.periodKwh).unit} icon={Zap} tone="primary" />
+          <StatCard variant="inline" label="Peak Demand" value={num(snap.peakDemandKw, 1)} unit="kW" icon={Gauge} tone="warning" />
+          <StatCard variant="inline" label="Meters" value={`${snap.activeMeters}/${snap.totalMeters}`} icon={Gauge} tone="success" />
+        </MetricBand>
       )}
 
       {section === 'consumption' && (
-        <Card>
-          <CardHeader title="Consumption" subtitle="Last 30 days" icon={<IconBox icon={Zap} tone="energy" size="sm" />} />
-          <CardBody><TrendChart data={bundle.daily} series={[{ key: 'kwh', label: 'kWh' }]} height={280} unit="kWh" valueFormatter={(v) => `${num(v)} kWh`} /></CardBody>
-        </Card>
+        <WorkspaceSection title="Consumption" description="Last 30 days"><TrendChart data={bundle.daily} series={[{ key: 'kwh', label: 'kWh' }]} height={280} unit="kWh" valueFormatter={(v) => `${num(v)} kWh`} /></WorkspaceSection>
       )}
 
       {section === 'demand' && (
-        <Card>
-          <CardHeader title="Demand & Load" subtitle="Last 30 days" icon={<IconBox icon={Gauge} tone="energy" size="sm" />} />
-          <CardBody><TrendChart data={bundle.daily} series={[{ key: 'demandKw', label: 'Demand (kW)' }]} height={280} unit="kW" fill={false} valueFormatter={(v) => `${num(v, 1)} kW`} /></CardBody>
-        </Card>
+        <WorkspaceSection title="Demand & Load" description="Last 30 days"><TrendChart data={bundle.daily} series={[{ key: 'demandKw', label: 'Demand (kW)' }]} height={280} unit="kW" fill={false} valueFormatter={(v) => `${num(v, 1)} kW`} /></WorkspaceSection>
       )}
 
       {section === 'electrical' && (
         <div className="flex flex-col gap-4">
           {meters.length === 0 ? (
-            <Card><CardBody><p className="py-6 text-center text-[13px] text-subtle">No sub-meters configured.</p></CardBody></Card>
+            <WorkspaceSection><p className="py-6 text-center text-[13px] text-subtle">No sub-meters configured.</p></WorkspaceSection>
           ) : meters.map((m) => <ElectricalCard key={m.id} meter={m} />)}
         </div>
       )}
@@ -84,9 +77,7 @@ export default function PortalEnergyDetails() {
 
 function ElectricalCard({ meter: m }: { meter: Meter }) {
   return (
-    <Card>
-      <CardHeader title={m.name} subtitle={`Serial ${m.serial}`} icon={<IconBox icon={Activity} tone="energy" size="sm" />} actions={<MeterStatusBadge status={m.status} size="sm" />} />
-      <CardBody>
+    <WorkspaceSection title={m.name} description={`Serial ${m.serial}`} actions={<MeterStatusBadge status={m.status} size="sm" />}>
         <DefList columns={3} items={[
           { label: 'Active power', value: `${num(m.live.powerKw, 1)} kW` },
           { label: 'Apparent power', value: `${num(m.live.apparentKva, 1)} kVA` },
@@ -98,8 +89,7 @@ function ElectricalCard({ meter: m }: { meter: Meter }) {
           { label: 'Max demand', value: `${num(m.live.maxDemandKw, 1)} kW` },
           { label: 'Cumulative import', value: `${num(m.totalKwh)} kWh` },
         ]} />
-      </CardBody>
-    </Card>
+    </WorkspaceSection>
   );
 }
 
@@ -113,9 +103,8 @@ function Historical({ monthly }: { monthly: MeterReading[] }) {
     { key: 'pf', header: 'Avg PF', align: 'right', cell: (r) => <span className="tnum">{r.powerFactor.toFixed(2)}</span>, hideBelow: 'lg' },
   ];
   return (
-    <Card>
-      <CardHeader title="Historical Data" subtitle="Monthly, last 12 months" icon={<IconBox icon={Table2} tone="primary" size="sm" />} />
+    <WorkspaceSection title="Historical Data" description="Monthly, last 12 months" inset={false}>
       <DataTable rows={[...monthly].reverse()} columns={columns} rowKey={(r) => String(r.ts)} />
-    </Card>
+    </WorkspaceSection>
   );
 }

@@ -7,8 +7,8 @@
 import { CalendarPlus, Info } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardBody, CardHeader } from '../../../components/ui/card';
-import { IconBox } from '../../../components/ui/icon-box';
+import { WorkspaceSection } from '../../../components/layout/workspace-section';
+import { WorkspaceActions } from '../../../components/layout/workspace-actions';
 import { Button } from '../../../components/ui/button';
 import { Field } from '../../../components/ui/field';
 import { Input } from '../../../components/ui/input';
@@ -48,9 +48,8 @@ export default function ScheduleVisitor() {
   };
 
   return (
-    <Card>
-      <CardHeader title="Schedule a Visitor" subtitle="Register an individual visitor for reception" icon={<IconBox icon={CalendarPlus} tone="visitor" size="sm" />} />
-      <CardBody className="flex flex-col gap-5">
+    <WorkspaceSection title="Schedule a Visitor" description="Register an individual visitor for reception">
+      <div className="mx-auto flex max-w-[1040px] flex-col gap-5">
         <div className="flex items-start gap-2.5 rounded-xl border border-border-subtle bg-surface-inset/50 p-3 text-[12px] text-muted">
           <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-info" />
           <span>The visitor arrives at reception and presents ID — no QR code or digital pass is issued. Fields marked <span className="text-critical">*</span> are required.</span>
@@ -80,11 +79,11 @@ export default function ScheduleVisitor() {
           <Field label="Additional notes" optional className="sm:col-span-2"><Textarea rows={3} value={f.notes} onChange={(e) => set({ notes: e.target.value })} placeholder="Anything reception should know" /></Field>
         </div>
 
-        <div className="flex items-center justify-end gap-2">
+        <WorkspaceActions>
           <Button variant="ghost" size="md" onClick={() => navigate('/portal/visitors')}>Cancel</Button>
           <Button variant="primary" size="md" disabled={!valid} onClick={submit}><CalendarPlus className="h-4 w-4" />Schedule Visitor</Button>
-        </div>
-      </CardBody>
-    </Card>
+        </WorkspaceActions>
+      </div>
+    </WorkspaceSection>
   );
 }

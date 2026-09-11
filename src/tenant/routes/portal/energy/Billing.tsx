@@ -6,11 +6,10 @@
 
 import { Wallet } from 'lucide-react';
 import { useState } from 'react';
-import { StatGrid } from '../../../components/layout/content-grid';
-import { Card, CardBody, CardHeader } from '../../../components/ui/card';
+import { MetricBand } from '../../../components/layout/metric-band';
+import { WorkspaceSection } from '../../../components/layout/workspace-section';
 import { StatCard } from '../../../components/patterns/stat-card';
 import { Button } from '../../../components/ui/button';
-import { IconBox } from '../../../components/ui/icon-box';
 import { DataTable, type Column } from '../../../components/ui/data-table';
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '../../../components/ui/table';
 import { PaymentBadge } from '../../../components/patterns/status-badge';
@@ -40,17 +39,15 @@ export default function PortalEnergyBilling() {
 
   return (
     <>
-      <StatGrid cols={3}>
-        <StatCard label="Current Bill" value={latest ? currency(latest.total, { compact: true }) : '—'} icon={Wallet} tone="energy" caption={latest?.periodLabel} onClick={latest ? () => setOpen(latest) : undefined} />
-        <StatCard label="Outstanding" value={currency(outstanding, { compact: true })} icon={Wallet} tone={outstanding ? 'warning' : 'success'} />
-        <StatCard label="Overdue" value={num(overdue)} icon={Wallet} tone={overdue ? 'critical' : 'success'} />
-      </StatGrid>
+      <MetricBand columns={3}>
+        <StatCard variant="inline" label="Current Bill" value={latest ? currency(latest.total, { compact: true }) : '—'} icon={Wallet} tone="energy" caption={latest?.periodLabel} onClick={latest ? () => setOpen(latest) : undefined} />
+        <StatCard variant="inline" label="Outstanding" value={currency(outstanding, { compact: true })} icon={Wallet} tone={outstanding ? 'warning' : 'success'} />
+        <StatCard variant="inline" label="Overdue" value={num(overdue)} icon={Wallet} tone={overdue ? 'critical' : 'success'} />
+      </MetricBand>
 
       {latest && (
-        <Card>
-          <CardHeader title="Current Period Breakdown" subtitle={latest.periodLabel} icon={<IconBox icon={Wallet} tone="energy" size="sm" />} actions={<Button variant="secondary" size="sm" onClick={() => setOpen(latest)}>View invoice</Button>} />
-          <CardBody>
-            <div className="overflow-hidden rounded-xl border border-border">
+        <WorkspaceSection title="Current Period Breakdown" description={latest.periodLabel} actions={<Button variant="secondary" size="sm" onClick={() => setOpen(latest)}>View invoice</Button>}>
+            <div className="overflow-x-auto border border-border">
               <Table className="w-full text-left text-[13px]">
                 <TableHeader className="bg-surface-inset"><TableRow>
                   <TableHead className="px-3.5 py-2.5 font-semibold uppercase tracking-[0.08em] text-subtle">Component</TableHead>
@@ -74,14 +71,12 @@ export default function PortalEnergyBilling() {
                 </TableRow></TableFooter>
               </Table>
             </div>
-          </CardBody>
-        </Card>
+        </WorkspaceSection>
       )}
 
-      <Card>
-        <CardHeader title="Historical Bills" subtitle={`${invoices.length} invoices`} icon={<IconBox icon={Wallet} tone="primary" size="sm" />} />
+      <WorkspaceSection title="Historical Bills" description={`${invoices.length} invoices`} inset={false}>
         <DataTable rows={invoices} columns={columns} rowKey={(i) => i.id} onRowClick={(i) => setOpen(i)} emptyTitle="No invoices yet" emptyDescription="Invoices appear here once the first billing period closes." />
-      </Card>
+      </WorkspaceSection>
 
       <InvoiceDialog invoice={open} open={Boolean(open)} onOpenChange={(o) => !o && setOpen(null)} />
     </>

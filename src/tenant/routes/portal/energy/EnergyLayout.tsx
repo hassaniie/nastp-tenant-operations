@@ -15,11 +15,9 @@ export default function EnergyLayout() {
   const active = matchTab(PORTAL_ENERGY_TABS, loc.pathname);
 
   return (
-    <Page>
+    <Page workspace archetype="analytics" className="ds-portal-workspace">
       <PageHeader title="Energy" description="How much energy are we using, what are we being charged, and how does it compare?" />
-      <div className="overflow-x-auto">
-        <TabBar value={active} onChange={(id) => nav(PORTAL_ENERGY_TABS.find((t) => t.id === id)!.path)} tabs={PORTAL_ENERGY_TABS.map((t) => ({ value: t.id, label: t.label }))} />
-      </div>
+      <TabBar className="ds-workspace-tabs" value={active} onChange={(id) => nav(PORTAL_ENERGY_TABS.find((t) => t.id === id)!.path)} tabs={PORTAL_ENERGY_TABS.map((t) => ({ value: t.id, label: t.label }))} />
       <Outlet />
     </Page>
   );

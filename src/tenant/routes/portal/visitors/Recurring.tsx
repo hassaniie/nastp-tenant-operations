@@ -6,7 +6,7 @@
 
 import { Info, Pause, Play, Plus, Repeat, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { Card, CardBody, CardHeader } from '../../../components/ui/card';
+import { WorkspaceSection } from '../../../components/layout/workspace-section';
 import { EmptyState } from '../../../components/patterns/feedback-state';
 import { Button } from '../../../components/ui/button';
 import { IconBox } from '../../../components/ui/icon-box';
@@ -34,14 +34,12 @@ export default function RecurringVisitors() {
 
   return (
     <>
-      <Card>
-        <CardHeader
+      <WorkspaceSection
           title="Recurring Visitors"
-          subtitle={`${schedules.length} schedule${schedules.length === 1 ? '' : 's'}`}
-          icon={<IconBox icon={Repeat} tone="visitor" size="sm" />}
+          description={`${schedules.length} schedule${schedules.length === 1 ? '' : 's'}`}
           actions={<Button variant="primary" size="sm" onClick={() => setAdding(true)}><Plus className="h-4 w-4" />Add recurring</Button>}
-        />
-        <CardBody className="flex flex-col gap-2.5">
+      >
+        <div className="flex flex-col">
           <div className="flex items-start gap-2.5 rounded-xl border border-border-subtle bg-surface-inset/50 p-3 text-[12px] text-muted">
             <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-info" />
             <span>Each recurrence generates individual visit instances at reception. Pausing stops future instances; past visits are unaffected.</span>
@@ -50,7 +48,7 @@ export default function RecurringVisitors() {
             <EmptyState title="No recurring visitors" description="Set up a recurring schedule for vendors or contractors." icon={<Repeat className="h-5 w-5" />} />
           ) : (
             schedules.map((s) => (
-              <div key={s.id} className="flex items-center gap-3 rounded-xl border border-border-subtle bg-surface p-3.5">
+              <div key={s.id} className="ds-operational-row">
                 <IconBox icon={Repeat} tone={s.active ? 'visitor' : 'neutral'} size="sm" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
@@ -68,8 +66,8 @@ export default function RecurringVisitors() {
               </div>
             ))
           )}
-        </CardBody>
-      </Card>
+        </div>
+      </WorkspaceSection>
 
       <AddRecurringDialog open={adding} onOpenChange={setAdding} tenantId={tenantId} onAdded={(name) => toast({ title: 'Recurring visitor added', description: `${name} scheduled.`, variant: 'success' })} />
     </>

@@ -5,7 +5,7 @@
 
 import { Wrench } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
-import { Card } from '../../../components/ui/card';
+import { WorkspaceSection } from '../../../components/layout/workspace-section';
 import { DataTable, type Column } from '../../../components/ui/data-table';
 import { PriorityBadge, ServiceStatusBadge, CATEGORY_ICON } from '../../../components/patterns/status-badge';
 import { ServiceRequestDrawer } from '../../serviceShared';
@@ -32,7 +32,7 @@ export function PortalServiceList({ kind }: { kind: 'open' | 'history' }) {
 
   return (
     <>
-      <Card>
+      <WorkspaceSection inset={false} title={kind === 'open' ? 'Open requests' : 'Request history'} description={`${requests.length} request${requests.length === 1 ? '' : 's'}`}>
         <DataTable
           rows={requests}
           columns={columns}
@@ -44,7 +44,7 @@ export function PortalServiceList({ kind }: { kind: 'open' | 'history' }) {
           emptyIcon={<Wrench className="h-5 w-5" />}
           pageSize={12}
         />
-      </Card>
+      </WorkspaceSection>
       <ServiceRequestDrawer request={open} open={Boolean(open)} onOpenChange={(o) => !o && setParams({})} mode="tenant" />
     </>
   );

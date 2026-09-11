@@ -5,10 +5,9 @@
 
 import { Zap } from 'lucide-react';
 import { useState } from 'react';
-import { StatGrid } from '../../../components/layout/content-grid';
-import { Card, CardBody, CardHeader } from '../../../components/ui/card';
+import { MetricBand } from '../../../components/layout/metric-band';
+import { WorkspaceSection } from '../../../components/layout/workspace-section';
 import { StatCard } from '../../../components/patterns/stat-card';
-import { IconBox } from '../../../components/ui/icon-box';
 import { TrendChart, BarSeriesChart } from '../../../components/patterns/charts';
 import { useSession } from '../../../store/session';
 import { useLive } from '../../../data/live';
@@ -28,31 +27,20 @@ export default function PortalEnergyConsumption() {
 
   return (
     <>
-      <div className="flex items-center justify-between">
-        <p className="text-[13px] text-muted">Metered consumption, {granularity} granularity</p>
-        <RangeControl value={range} onChange={setRange} />
-      </div>
+      <MetricBand columns={4}>
+        <StatCard variant="inline" label="Total Consumption" value={num(total)} unit="kWh" icon={Zap} tone="energy" />
+        <StatCard variant="inline" label="Peak" value={num(peak)} unit="kWh" icon={Zap} tone="warning" caption={`${total ? Math.round((peak / total) * 100) : 0}% of total`} />
+        <StatCard variant="inline" label="Off-Peak" value={num(off)} unit="kWh" icon={Zap} tone="primary" caption={`${total ? Math.round((off / total) * 100) : 0}% of total`} />
+        <StatCard variant="inline" label={`Average / ${granularity}`} value={num(avg)} unit="kWh" icon={Zap} tone="neutral" />
+      </MetricBand>
 
-      <StatGrid cols={4}>
-        <StatCard label="Total Consumption" value={num(total)} unit="kWh" icon={Zap} tone="energy" />
-        <StatCard label="Peak" value={num(peak)} unit="kWh" icon={Zap} tone="warning" caption={`${total ? Math.round((peak / total) * 100) : 0}% of total`} />
-        <StatCard label="Off-Peak" value={num(off)} unit="kWh" icon={Zap} tone="primary" caption={`${total ? Math.round((off / total) * 100) : 0}% of total`} />
-        <StatCard label={`Average / ${granularity}`} value={num(avg)} unit="kWh" icon={Zap} tone="neutral" />
-      </StatGrid>
-
-      <Card>
-        <CardHeader title="Consumption breakdown" subtitle="Peak and off-peak, stacked" icon={<IconBox icon={Zap} tone="energy" size="sm" />} />
-        <CardBody>
+      <WorkspaceSection title="Consumption breakdown" description={`Peak and off-peak · ${granularity} granularity`} actions={<RangeControl value={range} onChange={setRange} />}>
           <TrendChart data={data} series={[{ key: 'peakKwh', label: 'Peak (kWh)', color: 'var(--viz-2)' }, { key: 'offPeakKwh', label: 'Off-peak (kWh)', color: 'var(--viz-1)' }]} stacked height={260} unit="kWh" valueFormatter={(v) => `${num(v)} kWh`} />
-        </CardBody>
-      </Card>
+      </WorkspaceSection>
 
-      <Card>
-        <CardHeader title="Usage per interval" subtitle="Total consumption" icon={<IconBox icon={Zap} tone="energy" size="sm" />} />
-        <CardBody>
+      <WorkspaceSection title="Usage per interval" description="Total consumption">
           <BarSeriesChart data={data} series={[{ key: 'kwh', label: 'kWh' }]} height={220} valueFormatter={(v) => `${num(v)} kWh`} />
-        </CardBody>
-      </Card>
+      </WorkspaceSection>
     </>
   );
 }

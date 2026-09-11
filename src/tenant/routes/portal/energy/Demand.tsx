@@ -5,10 +5,9 @@
 
 import { Gauge } from 'lucide-react';
 import { useState } from 'react';
-import { StatGrid } from '../../../components/layout/content-grid';
-import { Card, CardBody, CardHeader } from '../../../components/ui/card';
+import { MetricBand } from '../../../components/layout/metric-band';
+import { WorkspaceSection } from '../../../components/layout/workspace-section';
 import { StatCard } from '../../../components/patterns/stat-card';
-import { IconBox } from '../../../components/ui/icon-box';
 import { TrendChart } from '../../../components/patterns/charts';
 import { useSession } from '../../../store/session';
 import { useLive } from '../../../data/live';
@@ -26,30 +25,19 @@ export default function PortalEnergyDemand() {
 
   return (
     <>
-      <div className="flex items-center justify-between">
-        <p className="text-[13px] text-muted">Demand reflects the peak load sustained over each interval.</p>
-        <RangeControl value={range} onChange={setRange} />
-      </div>
+      <MetricBand columns={3}>
+        <StatCard variant="inline" label="Current Demand" value={num(snap.currentDemandKw, 1)} unit="kW" icon={Gauge} tone="energy" />
+        <StatCard variant="inline" label="Max in Range" value={num(maxInRange, 1)} unit="kW" icon={Gauge} tone="warning" />
+        <StatCard variant="inline" label="Peak Demand (all time)" value={num(snap.peakDemandKw, 1)} unit="kW" icon={Gauge} tone="critical" caption="Sanctioned load reference" />
+      </MetricBand>
 
-      <StatGrid cols={3}>
-        <StatCard label="Current Demand" value={num(snap.currentDemandKw, 1)} unit="kW" icon={Gauge} tone="energy" />
-        <StatCard label="Max in Range" value={num(maxInRange, 1)} unit="kW" icon={Gauge} tone="warning" />
-        <StatCard label="Peak Demand (all time)" value={num(snap.peakDemandKw, 1)} unit="kW" icon={Gauge} tone="critical" caption="Sanctioned load reference" />
-      </StatGrid>
-
-      <Card>
-        <CardHeader title="Demand over time" subtitle="Maximum demand per interval" icon={<IconBox icon={Gauge} tone="energy" size="sm" />} />
-        <CardBody>
+      <WorkspaceSection title="Demand over time" description="Maximum demand per interval" actions={<RangeControl value={range} onChange={setRange} />}>
           <TrendChart data={data} series={[{ key: 'demandKw', label: 'Demand (kW)' }]} height={260} unit="kW" valueFormatter={(v) => `${num(v, 1)} kW`} />
-        </CardBody>
-      </Card>
+      </WorkspaceSection>
 
-      <Card>
-        <CardHeader title="Load curve" subtitle="Consumption by hour, last 24 hours" icon={<IconBox icon={Gauge} tone="energy" size="sm" />} />
-        <CardBody>
+      <WorkspaceSection title="Load curve" description="Consumption by hour, last 24 hours">
           <TrendChart data={bundle.hourly} series={[{ key: 'kwh', label: 'Load (kW)' }]} height={220} unit="kW" valueFormatter={(v) => `${num(v, 1)} kW`} />
-        </CardBody>
-      </Card>
+      </WorkspaceSection>
     </>
   );
 }
