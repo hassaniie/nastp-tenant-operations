@@ -90,7 +90,7 @@ See `page-layout-system.md` for the reusable composition rules and `page-layout-
 - [x] Shared AppShell frame/topbar/main and Tenant sidebar foundation
 - [x] Auth Workspace and login/invite/reset migration
 - [x] Tenant Portal archetype migration
-- [ ] Technician operational workspace migration
+- [x] Technician operational workspace migration
 - [ ] Workbench/docs and cross-experience verification
 
 Focused comparison: Admin already composes canonical workspace layouts. Tenant uses canonical controls but retains contained Page/Card composition and a shell-local rail. Technician uses canonical controls but retains a shell-local topbar and card queue. Auth uses canonical controls but retains centred card pages. The migration will replace those compositions without changing selectors, permissions, mutations, uploads, validation or lifecycle rules.
@@ -100,3 +100,5 @@ Shell phase complete: Admin, Tenant and Technician now compose the shared AppShe
 Auth phase complete: Login, password reset (request, invalid, completion and success), and invitation acceptance now compose one responsive AuthWorkspace and AuthPanel. The workspace uses canonical controls, validation, loading/error states, tokens and theme switching while retaining all authentication behavior and seeded-account tooling.
 
 Tenant phase complete: Home, Organization, Energy, Service Center and Visitors now use the shared workspace page archetypes. Metric summaries use MetricBand, primary charts/forms/tables use WorkspaceSection and WorkspaceSplit, form actions use WorkspaceActions, and operational lists use flat divided rows. Existing tenant-scoped data, drafts, dialogs, drawers and mutations are unchanged. Typecheck and production build pass.
+
+Technician phase complete: the Jobs route now composes the shared Operational Workspace, MetricBand, WorkspaceSection and flat operational rows. The task-focused shell and shared ServiceRequestDrawer preserve assignment, start-work, notes, attachments, resolution and status-transition behavior. Typecheck and production build pass.

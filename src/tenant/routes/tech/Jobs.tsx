@@ -15,8 +15,8 @@
 import { useMemo, useState } from 'react';
 import { AlarmClock, CheckCircle2, Wrench } from 'lucide-react';
 import { Page } from '../../components/layout/page';
-import { StatGrid } from '../../components/layout/content-grid';
-import { Card, CardBody, CardHeader } from '../../components/ui/card';
+import { MetricBand } from '../../components/layout/metric-band';
+import { WorkspaceSection } from '../../components/layout/workspace-section';
 import { StatCard } from '../../components/patterns/stat-card';
 import { PageHeader } from '../../components/patterns/page-header';
 import { IconBox } from '../../components/ui/icon-box';
@@ -68,7 +68,7 @@ export default function TechJobs() {
   const overdue = queue.filter((r) => r.dueAt && r.dueAt < Date.now()).length;
 
   return (
-    <Page>
+    <Page workspace archetype="operational" className="ds-tech-workspace">
       <PageHeader
         title={`Your jobs`}
         description={
@@ -78,25 +78,21 @@ export default function TechJobs() {
         }
       />
 
-      <StatGrid cols={3}>
-        <StatCard label="Open jobs" value={num(queue.length)} icon={Wrench} tone="service" caption="Assigned to you" />
+      <MetricBand columns={3}>
+        <StatCard variant="inline" label="Open jobs" value={num(queue.length)} icon={Wrench} tone="service" caption="Assigned to you" />
         <StatCard
+          variant="inline"
           label="Overdue"
           value={num(overdue)}
           icon={AlarmClock}
           tone={overdue ? 'critical' : 'success'}
           caption={overdue ? 'Past the agreed time' : 'All within time'}
         />
-        <StatCard label="Completed" value={num(data.resolved.length)} icon={CheckCircle2} tone="success" caption="Resolved or closed" />
-      </StatGrid>
+        <StatCard variant="inline" label="Completed" value={num(data.resolved.length)} icon={CheckCircle2} tone="success" caption="Resolved or closed" />
+      </MetricBand>
 
-      <Card>
-        <CardHeader
-          title="Queue"
-          subtitle="Priority first, then due time"
-          icon={<IconBox icon={Wrench} tone="service" size="sm" />}
-        />
-        <CardBody className="flex flex-col gap-2">
+      <WorkspaceSection inset={false} title="Queue" description="Priority first, then due time">
+        <div className="ds-flat-list">
           {queue.length === 0 ? (
             <EmptyState
               title="Nothing assigned right now"
@@ -106,22 +102,17 @@ export default function TechJobs() {
           ) : (
             queue.map((r) => <JobRow key={r.id} request={r} tenantName={data.tenantName(r.tenantId)} onOpen={() => setOpenId(r.id)} />)
           )}
-        </CardBody>
-      </Card>
+        </div>
+      </WorkspaceSection>
 
       {recentlyCompleted.length > 0 && (
-        <Card>
-          <CardHeader
-            title="Recently completed"
-            subtitle="Your last few resolved jobs"
-            icon={<IconBox icon={CheckCircle2} tone="success" size="sm" />}
-          />
-          <CardBody className="flex flex-col gap-2">
+        <WorkspaceSection inset={false} title="Recently completed" description="Your last few resolved jobs">
+          <div className="ds-flat-list">
             {recentlyCompleted.map((r) => (
               <JobRow key={r.id} request={r} tenantName={data.tenantName(r.tenantId)} onOpen={() => setOpenId(r.id)} />
             ))}
-          </CardBody>
-        </Card>
+          </div>
+        </WorkspaceSection>
       )}
 
       <ServiceRequestDrawer
@@ -143,10 +134,11 @@ function JobRow({ request: r, tenantName, onOpen }: { request: ServiceRequest; t
     <button
       type="button"
       onClick={onOpen}
-      className="flex items-start gap-3 rounded-xl border border-border-subtle bg-surface-inset/50 p-3 text-left transition-colors hover:border-border-strong hover:bg-surface-inset"
+      className="ds-operational-row w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-inset"
     >
-      <IconBox icon={Icon} tone="service" size="sm" />
-      <div className="min-w-0 flex-1">
+      <div className="flex min-w-0 items-start gap-3">
+        <IconBox icon={Icon} tone="service" size="sm" />
+        <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="truncate text-[13px] font-medium text-foreground">{r.title}</p>
           <div className="flex shrink-0 items-center gap-1.5">
@@ -167,6 +159,7 @@ function JobRow({ request: r, tenantName, onOpen }: { request: ServiceRequest; t
             </span>
           )}
           {isOverdue && <StatusBadge tone="critical" size="sm" dot={false}>Overdue</StatusBadge>}
+        </div>
         </div>
       </div>
     </button>
