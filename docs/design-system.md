@@ -33,7 +33,7 @@ Components consume semantic variables. Raw color values belong only in `theme.cs
 
 ## Canonical primitives
 
-- `button.tsx`: Button variants `primary`, `secondary`/default, `outline`, `ghost`, `subtle`, `danger`, `success`; deliberate sizes; disabled/loading/asChild. IconButton requires an accessible label.
+- `button.tsx`: Button variants `primary`, `secondary`/default, `outline`, `ghost`, `subtle`, `danger`, `success`; deliberate sizes; disabled/loading/asChild. IconButton requires an accessible label and supports small/default size plus selected, disabled and loading states.
 - `input.tsx`, `textarea.tsx`, `select.tsx`, `checkbox.tsx`, `switch.tsx`, `radio-group.tsx`, `field.tsx`: associated labels, hints/errors, invalid and disabled semantics, native or Radix keyboard behavior.
 - `badge.tsx`, `avatar.tsx`, `separator.tsx`, `skeleton.tsx`, `spinner.tsx`, `progress.tsx`, `kbd.tsx`, `icon-box.tsx`: small presentation and feedback families with restrained APIs.
 - `dialog.tsx`, `drawer.tsx`, `popover.tsx`, `dropdown-menu.tsx`, `tooltip.tsx`: Radix focus trapping, Escape handling and focus restoration using NASTP geometry and surfaces.

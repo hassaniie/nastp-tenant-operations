@@ -53,3 +53,7 @@ Side-by-side review found equivalent page edges, typography, control geometry, s
 ## Remaining limits
 
 The application uses its existing simulated data, so backend integration was not exercised. The complete unchanged business workflow suite was not rerun; verification focused on component architecture, imports, visual regression, themes, focus, sorting, production exclusion and overflow. No blocker or known normalization defect remains.
+
+## Workbench review corrections
+
+Follow-up visual review added the setup progress gutter, composed the detail example through inset WorkspaceSections, and aligned ChartFrame's canonical IconButton to the far-right edge. IconButton now exposes selected, disabled and loading states; all variants are visible in Components. Browser measurement confirms 32px setup/detail insets, zero page overflow and zero gap between the chart control's right edge and ChartFrame. Evidence: `workbench-setup-fixed.jpg`, `workbench-chart-control-fixed.jpg` and `workbench-layout-comments-fixed.jpg`.

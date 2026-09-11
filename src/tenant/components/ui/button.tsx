@@ -44,8 +44,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     {asChild ? children : <>{loading && <Loader2 aria-hidden className="animate-spin" />}{children}</>}
   </Comp>;
 });
-export const IconButton = forwardRef<HTMLButtonElement, Omit<ButtonProps, 'size' | 'aria-label'> & { label: string; size?: 'sm' | 'md' }>(
-  function IconButton({ label, size = 'md', ...props }, ref) {
-    return <Button {...props} ref={ref} size={size === 'sm' ? 'icon-sm' : 'icon'} aria-label={label} />;
+export const IconButton = forwardRef<HTMLButtonElement, Omit<ButtonProps, 'size' | 'aria-label'> & { label: string; size?: 'sm' | 'md'; selected?: boolean }>(
+  function IconButton({ label, size = 'md', selected = false, loading, children, className, ...props }, ref) {
+    return <Button {...props} ref={ref} size={size === 'sm' ? 'icon-sm' : 'icon'} loading={loading}
+      aria-label={label} aria-pressed={selected || undefined}
+      className={cn(selected && 'bg-primary-muted text-primary', className)}>
+      {loading ? null : children}
+    </Button>;
   },
 );

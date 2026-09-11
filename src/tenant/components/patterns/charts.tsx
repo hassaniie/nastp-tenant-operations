@@ -19,7 +19,7 @@ import { Table2, TrendingUp } from 'lucide-react';
 import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
 import { cn, compact, num } from '../../lib/utils';
 import { useSession } from '../../store/session';
-import { Button } from '../ui/button';
+import { IconButton } from '../ui/button';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../ui/table';
 
 /* ------------------------------------------------------------- theme bridge */
@@ -143,12 +143,12 @@ export function ChartFrame({ children, data, categoryKey, series, height = 220, 
       {(series || toolbar || canTable) && (
         <div className="flex items-start justify-between gap-3">
           {series ? <LegendRow series={series} theme={theme} /> : <span />}
-          <div className="flex shrink-0 items-center gap-1">
+          <div className="ml-auto flex shrink-0 items-center gap-1">
             {toolbar}
             {canTable && (
-              <Button variant="ghost" size="icon-sm" onClick={() => setAsTable((v) => !v)} aria-label={asTable ? 'Show chart' : 'Show data table'} title={asTable ? 'Show chart' : 'Show data table'}>
+              <IconButton variant="ghost" size="sm" selected={asTable} onClick={() => setAsTable((v) => !v)} label={asTable ? 'Show chart' : 'Show data table'} title={asTable ? 'Show chart' : 'Show data table'}>
                 {asTable ? <TrendingUp className="h-3.5 w-3.5" /> : <Table2 className="h-3.5 w-3.5" />}
-              </Button>
+              </IconButton>
             )}
           </div>
         </div>
