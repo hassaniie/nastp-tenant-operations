@@ -88,7 +88,7 @@ See `page-layout-system.md` for the reusable composition rules and `page-layout-
 ## Cross-experience migration — 11 September 2026
 
 - [x] Shared AppShell frame/topbar/main and Tenant sidebar foundation
-- [ ] Auth Workspace and login/invite/reset migration
+- [x] Auth Workspace and login/invite/reset migration
 - [ ] Tenant Portal archetype migration
 - [ ] Technician operational workspace migration
 - [ ] Workbench/docs and cross-experience verification
@@ -96,3 +96,5 @@ See `page-layout-system.md` for the reusable composition rules and `page-layout-
 Focused comparison: Admin already composes canonical workspace layouts. Tenant uses canonical controls but retains contained Page/Card composition and a shell-local rail. Technician uses canonical controls but retains a shell-local topbar and card queue. Auth uses canonical controls but retains centred card pages. The migration will replace those compositions without changing selectors, permissions, mutations, uploads, validation or lifecycle rules.
 
 Shell phase complete: Admin, Tenant and Technician now compose the shared AppShell frame, topbar and scroll region. Tenant navigation moved to the canonical shallow WorkspaceSidebar; Admin retains its purpose-built canonical AdminSidebar. Technician retains a task-focused topbar through the same shell primitives.
+
+Auth phase complete: Login, password reset (request, invalid, completion and success), and invitation acceptance now compose one responsive AuthWorkspace and AuthPanel. The workspace uses canonical controls, validation, loading/error states, tokens and theme switching while retaining all authentication behavior and seeded-account tooling.

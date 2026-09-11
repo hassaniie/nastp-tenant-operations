@@ -14,17 +14,15 @@ import { useState, type FormEvent, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Building2, ShieldCheck, Wrench, type LucideIcon } from 'lucide-react';
 import { Button } from '../../components/ui/button';
-import { IconBox } from '../../components/ui/icon-box';
 import { Field } from '../../components/ui/field';
 import { Input } from '../../components/ui/input';
-import { Card } from '../../components/ui/card';
+import { AuthPanel, AuthWorkspace } from '../../components/layout/auth-workspace';
 import { useAuth } from '../../store/auth';
 import { DEMO_PASSWORD, SIGN_IN_MESSAGE, doorFor, lockoutRemainingMs } from '../../data/auth';
 import { technicianOpenLoad } from '../../data/catalog';
 import { useLive } from '../../data/live';
 import type { Experience } from '../../data/types';
 import type { Tone } from '../../lib/meta';
-import { cn } from '../../lib/utils';
 
 interface DoorConfig {
   experience: Experience;
@@ -137,24 +135,15 @@ function LoginScreen({ door }: { door: Experience }) {
   }
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-canvas p-5">
-      <div className="flex w-full max-w-[420px] flex-col gap-5">
-        <div className="flex flex-col items-center gap-3 text-center">
-          <IconBox icon={config.icon} tone={config.tone} size="lg" />
-          <div className="flex flex-col gap-1">
-            <p className="text-[11px] font-medium uppercase tracking-[0.13em] text-subtle">{config.eyebrow}</p>
-            <h1 className="text-[24px] font-semibold tracking-[-0.02em] text-foreground">{config.title}</h1>
-            <p className="mx-auto max-w-[34ch] text-[13px] text-muted">{config.blurb}</p>
-          </div>
-        </div>
-
+    <AuthWorkspace eyebrow={config.eyebrow} title={config.title} description={config.blurb} icon={config.icon} tone={config.tone}
+      footer={<p>Not the right door?{' '}{config.otherDoors.map((other, i) => <span key={other}>{i > 0 && ' · '}<Link to={doorFor(other)} className="text-muted underline underline-offset-2 hover:text-foreground">{DOOR_LABEL[other]}</Link></span>)}</p>}>
         {idleSignOut && (
           <p className="rounded-[10px] border border-info/25 bg-info-dim px-3 py-2 text-center text-[12px] text-info">
             You were signed out after a period of inactivity. Sign in again to continue.
           </p>
         )}
 
-        <Card className="p-5">
+        <AuthPanel>
           <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
             <Field label="Email">
               <Input
@@ -204,10 +193,10 @@ function LoginScreen({ door }: { door: Experience }) {
               Sign in
             </Button>
           </form>
-        </Card>
+        </AuthPanel>
 
         {demoAccounts.length > 0 && (
-          <Card className="flex flex-col gap-2.5 p-4">
+          <AuthPanel subtle className="flex flex-col gap-2.5">
             <div className="flex flex-col gap-0.5">
               <p className="text-[12px] font-medium text-foreground">Seeded accounts</p>
               <p className="text-[11px] text-subtle">
@@ -217,40 +206,26 @@ function LoginScreen({ door }: { door: Experience }) {
             </div>
             <div className="flex flex-col gap-1">
               {demoAccounts.map((a) => (
-                <button
+                <Button
                   key={a.email}
                   type="button"
+                  variant="ghost"
+                  size="sm"
                   onClick={() => {
                     setEmail(a.email);
                     setPassword(DEMO_PASSWORD);
                     setError(null);
                   }}
-                  className={cn(
-                    'flex items-center justify-between gap-3 rounded-lg px-2.5 py-1.5 text-left transition-colors',
-                    'hover:bg-surface-raised',
-                  )}
+                  className="h-auto w-full justify-between gap-3 px-2.5 py-1.5 text-left"
                 >
                   <span className="truncate font-mono text-[11.5px] text-muted">{a.email}</span>
                   <span className="shrink-0 text-[11px] text-subtle">{a.label}</span>
-                </button>
+                </Button>
               ))}
             </div>
-          </Card>
+          </AuthPanel>
         )}
-
-        <p className="text-center text-[11px] text-subtle">
-          Not the right door?{' '}
-          {config.otherDoors.map((other, i) => (
-            <span key={other}>
-              {i > 0 && ' · '}
-              <Link to={doorFor(other)} className="text-muted underline underline-offset-2 hover:text-foreground">
-                {DOOR_LABEL[other]}
-              </Link>
-            </span>
-          ))}
-        </p>
-      </div>
-    </div>
+    </AuthWorkspace>
   );
 }
 

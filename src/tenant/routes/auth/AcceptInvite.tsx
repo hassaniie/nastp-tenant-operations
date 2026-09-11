@@ -11,10 +11,9 @@ import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { CheckCircle2, KeyRound, MailWarning } from 'lucide-react';
 import { Button } from '../../components/ui/button';
-import { IconBox } from '../../components/ui/icon-box';
 import { Field } from '../../components/ui/field';
 import { Input } from '../../components/ui/input';
-import { Card } from '../../components/ui/card';
+import { AuthPanel, AuthWorkspace } from '../../components/layout/auth-workspace';
 import { useAuth } from '../../store/auth';
 import { acceptInvite, doorFor, homeFor, lookupToken } from '../../data/auth';
 
@@ -48,14 +47,8 @@ export default function AcceptInvite() {
   if (!found.ok) {
     const copy = REASON_COPY[found.reason === 'not_found' ? 'not_found' : found.reason];
     return (
-      <Shell>
-        <IconBox icon={MailWarning} tone="warning" size="lg" />
-        <h1 className="text-[20px] font-semibold text-foreground">{copy.title}</h1>
-        <p className="max-w-[34ch] text-[13px] text-muted">{copy.body}</p>
-        <Link to={doorFor('portal')} className="text-[13px] font-medium text-primary underline underline-offset-2">
-          Go to sign in
-        </Link>
-      </Shell>
+      <AuthWorkspace eyebrow="Account invitation" title={copy.title} description={copy.body} icon={MailWarning} tone="warning"
+        footer={<Link to={doorFor('portal')} className="font-medium text-primary underline underline-offset-2">Go to sign in</Link>} />
     );
   }
 
@@ -80,14 +73,11 @@ export default function AcceptInvite() {
   }
 
   return (
-    <Shell>
-      <IconBox icon={KeyRound} tone="primary" size="lg" />
-      <h1 className="text-[20px] font-semibold text-foreground">Set your password</h1>
-      <p className="max-w-[34ch] text-[13px] text-muted">
+    <AuthWorkspace eyebrow="Account invitation" title="Set your password" icon={KeyRound} description={
+      <p>
         For <span className="font-medium text-foreground">{t.email}</span>. This activates your account.
-      </p>
-
-      <Card className="w-full max-w-[380px] p-5">
+      </p>}>
+      <AuthPanel>
         <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
           <Field label="Password" hint="At least 8 characters.">
             <Input type="password" autoFocus autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} />
@@ -101,15 +91,7 @@ export default function AcceptInvite() {
             Activate account
           </Button>
         </form>
-      </Card>
-    </Shell>
-  );
-}
-
-function Shell({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex min-h-screen w-full flex-col items-center justify-center gap-3 bg-canvas p-5 text-center">
-      {children}
-    </div>
+      </AuthPanel>
+    </AuthWorkspace>
   );
 }
