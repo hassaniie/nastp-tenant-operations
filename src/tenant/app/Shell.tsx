@@ -26,7 +26,8 @@ import { ExperienceSwitcher } from './ExperienceSwitcher';
 import { UserMenu } from './UserMenu';
 import { CommandPalette } from './CommandPalette';
 import { IdleMonitor } from './IdleMonitor';
-import { AdminNavigation } from './AdminNavigation';
+import { AdminSidebar } from '../components/patterns/admin-sidebar';
+import { Breadcrumb } from '../components/patterns/breadcrumb';
 import '../styles/admin-workspace.css';
 
 type Badges = { alerts: number; overstaying: number; openRequests: number; notifications: number };
@@ -154,6 +155,17 @@ function TopBar({ onOpenMobileNav }: { onOpenMobileNav: () => void }) {
   // the page, so surface the module instead — the page's own header carries
   // the specific title.
   const title = match ? (match.nested && match.group.label ? match.group.label : match.leaf.label) : undefined;
+  const adminBreadcrumb = (() => {
+    if (location.pathname === '/admin/design-system') return [{ label: 'Workspace', to: '/admin' }, { label: 'Design system' }];
+    if (!match) return [{ label: 'Workspace', to: '/admin' }, { label: 'NASTP Admin' }];
+    if (match.group.id === 'overview') return [{ label: 'Workspace', to: '/admin' }, { label: 'Dashboard' }];
+    if (match.nested) return [{ label: 'Workspace', to: '/admin' }, { label: match.group.label ?? match.leaf.label }];
+    return [
+      { label: 'Workspace', to: '/admin' },
+      { label: match.group.label ?? match.leaf.label, to: match.group.items[0].path },
+      { label: match.leaf.label },
+    ];
+  })();
 
   return (
     <header className="ops-topbar flex h-[var(--topbar-height)] shrink-0 items-center gap-3 border-b border-border bg-background px-3 lg:px-5">
@@ -165,7 +177,7 @@ function TopBar({ onOpenMobileNav }: { onOpenMobileNav: () => void }) {
         {experience === 'admin' ? (
           <div className="truncate text-[15px] font-semibold tracking-[-0.015em] text-foreground">
             <span className="ops-mobile-title">NASTP</span>
-            <span className="ops-header-title"><span className="ops-breadcrumb">Workspace <span>/</span> </span>{title ?? 'NASTP Admin'}</span>
+            <Breadcrumb className="ops-header-title ops-topbar-breadcrumb" items={adminBreadcrumb} />
           </div>
         ) : <h1 className="truncate text-[15px] font-semibold tracking-[-0.015em] text-foreground">{title ?? 'Tenant Portal'}</h1>}
       </div>
@@ -224,7 +236,7 @@ export function Shell({ experience }: { experience: 'admin' | 'portal' }) {
     <TooltipProvider delayDuration={220} skipDelayDuration={400}>
       <div className={cn('flex h-full w-full overflow-hidden bg-canvas', experience === 'admin' && 'ops-shell')}>
         <div className="hidden lg:block">
-          {experience === 'admin' ? <AdminNavigation badges={badges} collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} /> : <Rail groups={groups} badges={badges} activeId={activeId} collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />}
+          {experience === 'admin' ? <AdminSidebar badges={badges} collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} /> : <Rail groups={groups} badges={badges} activeId={activeId} collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />}
         </div>
 
         {experience === 'admin' && (
@@ -240,7 +252,7 @@ export function Shell({ experience }: { experience: 'admin' | 'portal' }) {
                 className="ops-shell fixed inset-y-0 left-0 z-[71] outline-none lg:hidden"
               >
                 <DialogPrimitive.Title className="sr-only">Navigation</DialogPrimitive.Title>
-                <AdminNavigation badges={badges} collapsed={false} onToggle={() => setMobileNav(false)} onNavigate={() => setMobileNav(false)} mobile />
+                <AdminSidebar badges={badges} collapsed={false} onToggle={() => setMobileNav(false)} onNavigate={() => setMobileNav(false)} mobile />
                 <DialogPrimitive.Close className="absolute right-2 top-2 rounded-md p-2 text-[var(--ops-muted)]" aria-label="Close navigation">
                   <X className="h-4 w-4" />
                 </DialogPrimitive.Close>

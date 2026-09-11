@@ -45,7 +45,7 @@ Keep component APIs finite. A one-screen color or geometry adjustment belongs in
 
 ## Product patterns
 
-`patterns/` owns MetricValue/Delta, StatCard, StatusBadge and all domain badge renderers, PageHeader, SectionHeader, Breadcrumb, Timeline, Stepper, navigation tabs, filter chips, confirmation, Empty/Error/NoPermission states, definition/key-value lists and theme-aware charts. These patterns consume primitives and tokens while expressing NASTP product language.
+`patterns/` owns MetricValue/Delta, StatCard, StatusBadge and all domain badge renderers, PageHeader, SectionHeader, Breadcrumb, AdminSidebar, Timeline, Stepper, navigation tabs, filter chips, confirmation, Empty/Error/NoPermission states, definition/key-value lists and theme-aware charts. These patterns consume primitives and tokens while expressing NASTP product language.
 
 Status labels, tones and icons come from `lib/meta.ts`. Status is never communicated by color alone. Charts use the visualization palette and always expose units, periods, legends where needed and exact values through ChartFrame.
 
@@ -72,6 +72,8 @@ Page, WorkspaceSection, WorkspaceSplit, MetricBand, ListToolbar, DetailSection, 
 - Reduced-motion removes animation and numeric tweening while retaining state visibility.
 
 Use pages for navigable workspaces, drawers for contextual detail, dialogs for focused decisions/edits and popovers for short pickers. Primary page actions sit at the header edge; save is last/right in form actions.
+
+AdminSidebar consumes the single route tree in `app/nav.ts`. The rail and each labelled group have independent collapsed/expanded state; active modules and active leaf pages use separate visual states and ARIA. Breadcrumb renders linked ancestors and a non-interactive `aria-current="page"` leaf. Topbar breadcrumbs derive from the same route match, so navigation labels and destinations cannot drift.
 
 ## Imports and compatibility
 

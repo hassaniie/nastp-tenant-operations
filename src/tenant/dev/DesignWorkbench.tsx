@@ -42,6 +42,8 @@ import { SectionHeader } from '../components/patterns/section-header';
 import { PageHeader } from '../components/patterns/page-header';
 import { StatCard } from '../components/patterns/stat-card';
 import { Stepper } from '../components/patterns/stepper';
+import { AdminSidebar } from '../components/patterns/admin-sidebar';
+import { Breadcrumb } from '../components/patterns/breadcrumb';
 import { ServiceStatusBadge, PriorityBadge, TenantStatusBadge, VisitorStatusBadge, MeterStatusBadge } from '../components/patterns/status-badge';
 import { SERVICE_STATUS, SERVICE_PRIORITY, TENANT_STATUS, VISITOR_STATUS } from '../lib/meta';
 import type { ServiceStatus, ServicePriority, TenantStatus, VisitorStatus } from '../data/types';
@@ -69,6 +71,7 @@ export default function DesignWorkbench() {
   const [name, setName] = useState(''), [note, setNote] = useState(''), [attempted, setAttempted] = useState(false);
   const [formSaved, setFormSaved] = useState(false), [dialog, setDialog] = useState(false), [drawer, setDrawer] = useState(false);
   const [confirm, setConfirm] = useState(false), [failConfirm, setFailConfirm] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [detail, setDetail] = useState(FIXTURES[0]);
   const [records, setRecords] = useState(FIXTURES), [search, setSearch] = useState('');
   const [selected, setSelected] = useState(new Set<string>()), [state, setState] = useState('ready');
@@ -101,6 +104,8 @@ export default function DesignWorkbench() {
         </div></Example>
       </TabsContent>
       <TabsContent value="patterns" className="wb-content">
+        <Example title="Application navigation" description="The shell and each navigation group collapse independently. Active modules and pages have distinct states."><div className="wb-sidebar-preview"><AdminSidebar badges={{alerts:4,overstaying:3,openRequests:78,notifications:11}} collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(value => !value)} pathname="/admin/energy/billing" /></div></Example>
+        <Example title="Breadcrumb navigation" description="Ancestors are links; the current page is announced and remains non-interactive."><Breadcrumb items={[{label:'Workspace',to:'/admin'},{label:'Energy',to:'/admin/energy'},{label:'Charges & Billing'}]} /></Example>
         <Example title="List workspace" description="Keyboard sorting, pagination, selection, filtering, empty/loading/error states."><Segmented value={state} onChange={setState} options={['ready','loading','error','empty'].map(value => ({value,label:value}))} /><ListToolbar summary={`${rows.length} sample records`} onReset={search ? () => setSearch('') : undefined}><SearchInput value={search} onChange={setSearch} placeholder="Search sample records…" /></ListToolbar><DataTable rows={state === 'empty' ? [] : rows} loading={state === 'loading'} error={state === 'error' ? 'Example connection interrupted.' : undefined} onRetry={() => setState('ready')} rowKey={row => row.id} rowLabel={row => row.id} label="Sample service requests" pageSize={3} resetKey={search} selection={selected} onSelectionChange={setSelected} onRowClick={row => { setDetail(row); setDrawer(true); }} bulkActions={<Button size="xs" variant="danger" onClick={() => setConfirm(true)}>Remove selected samples</Button>} emptyTitle="No sample records match" emptyDescription="Try a different search or restore the examples." emptyAction={<Button onClick={() => {setSearch('');setState('ready');setRecords(FIXTURES);}}>Restore examples</Button>} columns={[{key:'title',header:'Request',cell:row=><div><strong className="font-medium text-foreground">{row.title}</strong><p className="text-xs text-subtle">{row.tenant}</p></div>,sortValue:row=>row.title},{key:'priority',header:'Priority',cell:row=><PriorityBadge priority={row.priority} />,sortValue:row=>row.count},{key:'status',header:'Status',cell:row=><ServiceStatusBadge status={row.status} />}]} /></Example>
         <Example title="Operational metrics"><div className="ds-metrics"><StatCard variant="inline" label="Active tenants" value="15" unit="/ 22" caption="4 pending · 1 suspended" /><StatCard variant="inline" label="Current load" value="594" unit="kW" caption="Fixture, not live data" /><StatCard variant="inline" label="Open requests" value="72" caption="7 critical" /><StatCard variant="inline" label="Waiting" value="12" caption="On tenant response" /></div></Example>
         <div className="wb-grid"><Card><CardBody><EmptyState title="No requests yet" description="Start with a clear next action." action={<Button onClick={() => toast({title:'Example action',variant:'info'})}><Plus />Example action</Button>} /></CardBody></Card><ErrorState message="Example connection unavailable." onRetry={() => toast({title:'Retry requested',variant:'info'})} /><NoPermissionState /><DetailSection title="Metadata"><DefList items={[{label:'Organization',value:'Sample Aero Labs'},{label:'Service status',value:<ServiceStatusBadge status="waiting_tenant" />},{label:'Priority',value:<PriorityBadge priority="high" />},{label:'Assignee',value:'Sample technician'}]} /></DetailSection></div>
