@@ -8,14 +8,14 @@
  */
 
 import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { ChevronsLeft, ChevronsRight, Menu, Moon, Search, Sun, X } from 'lucide-react';
+import { Menu, Moon, Search, Sun, X } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useLive } from '../data/live';
 import type { World } from '../data/world';
 import { useSession } from '../store/session';
-import { ADMIN_NAV, PORTAL_NAV, matchNav, type NavGroup } from './nav';
+import { ADMIN_NAV, PORTAL_NAV, matchNav } from './nav';
 import { Button } from '../components/ui/button';
 import { Kbd } from '../components/ui/kbd';
 import { TenantMark } from '../components/ui/avatar';
@@ -28,6 +28,8 @@ import { CommandPalette } from './CommandPalette';
 import { IdleMonitor } from './IdleMonitor';
 import { AdminSidebar } from '../components/patterns/admin-sidebar';
 import { Breadcrumb } from '../components/patterns/breadcrumb';
+import { WorkspaceSidebar } from '../components/patterns/workspace-sidebar';
+import { AppMain, AppShellColumn, AppShellFrame, AppTopbar } from '../components/layout/app-shell';
 import '../styles/admin-workspace.css';
 
 type Badges = { alerts: number; overstaying: number; openRequests: number; notifications: number };
@@ -84,68 +86,6 @@ function Brand({ collapsed }: { collapsed: boolean }) {
   );
 }
 
-function Rail({ groups, badges, activeId, collapsed, onToggle, onNavigate, mobile }: { groups: NavGroup[]; badges: Badges; activeId?: string; collapsed: boolean; onToggle: () => void; onNavigate?: () => void; mobile?: boolean }) {
-  return (
-    <nav className={cn('flex h-full flex-col border-r border-border bg-background transition-[width] duration-200 ease-out', collapsed ? 'w-[var(--sidebar-width-collapsed)]' : 'w-[var(--sidebar-width)]')} aria-label="Primary">
-      <div className="flex h-[var(--topbar-height)] shrink-0 items-center justify-between border-b border-border">
-        <Brand collapsed={collapsed} />
-        {!mobile && !collapsed && (
-          <button onClick={onToggle} className="mr-2 rounded-md p-1.5 text-subtle transition-colors hover:bg-surface-raised hover:text-foreground" aria-label="Collapse navigation">
-            <ChevronsLeft className="h-4 w-4" />
-          </button>
-        )}
-      </div>
-
-      <div className="min-h-0 flex-1 overflow-y-auto px-2.5 py-3">
-        {groups.map((group) => (
-          <div key={group.id} className="mb-4 last:mb-0">
-            {!collapsed && group.label && <p className="px-2 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-subtle">{group.label}</p>}
-            <ul className="flex flex-col gap-0.5">
-              {group.items.map((item) => {
-                const badge = item.badge ? badges[item.badge] : 0;
-                // Active state comes from the centralized matcher, not from each
-                // link's own `end` rule — that is what keeps nested/detail routes
-                // (e.g. /admin/tenants/:id) lit under their parent module.
-                const active = item.id === activeId;
-                const link = (
-                  <Link
-                    to={item.path}
-                    onClick={onNavigate}
-                    aria-current={active ? 'page' : undefined}
-                    className={cn(
-                      'group relative flex items-center gap-2.5 rounded-[10px] px-2.5 py-2 text-[13px] font-medium transition-all duration-150',
-                      collapsed && 'justify-center px-0',
-                      active ? 'bg-primary-muted text-foreground' : 'text-muted hover:bg-surface-raised hover:text-foreground',
-                    )}
-                  >
-                    {active && <span className="absolute inset-y-1.5 left-0 w-[2.5px] rounded-full bg-primary" aria-hidden />}
-                    <item.icon className={cn('h-4.5 w-4.5 shrink-0', active && 'text-primary')} />
-                    {!collapsed && <span className="truncate">{item.label}</span>}
-                    {badge > 0 && (
-                      <span className={cn('tnum ml-auto flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[11px] font-semibold', item.badge === 'alerts' || item.badge === 'overstaying' ? 'bg-critical text-white' : 'bg-surface-inset text-muted', collapsed && 'absolute right-1 top-1 ml-0 h-[17px] min-w-[17px] text-[11px]')}>
-                        {badge}
-                      </span>
-                    )}
-                  </Link>
-                );
-                return <li key={item.id}>{collapsed ? <Tooltip side="right" content={item.label}>{link}</Tooltip> : link}</li>;
-              })}
-            </ul>
-          </div>
-        ))}
-      </div>
-
-      {collapsed && !mobile && (
-        <div className="shrink-0 border-t border-border p-2.5">
-          <button onClick={onToggle} className="flex w-full items-center justify-center rounded-lg py-2 text-subtle transition-colors hover:bg-surface-raised hover:text-foreground" aria-label="Expand navigation">
-            <ChevronsRight className="h-4 w-4" />
-          </button>
-        </div>
-      )}
-    </nav>
-  );
-}
-
 function TopBar({ onOpenMobileNav }: { onOpenMobileNav: () => void }) {
   const { experience, tenantId, prefs, setPrefs, setPaletteOpen } = useSession();
   const location = useLocation();
@@ -168,7 +108,7 @@ function TopBar({ onOpenMobileNav }: { onOpenMobileNav: () => void }) {
   })();
 
   return (
-    <header className="ops-topbar flex h-[var(--topbar-height)] shrink-0 items-center gap-3 border-b border-border bg-background px-3 lg:px-5">
+    <AppTopbar className="ops-topbar">
       <button onClick={onOpenMobileNav} className="rounded-md p-1.5 text-muted transition-colors hover:bg-surface-raised hover:text-foreground lg:hidden" aria-label="Open navigation">
         <Menu className="h-5 w-5" />
       </button>
@@ -207,7 +147,7 @@ function TopBar({ onOpenMobileNav }: { onOpenMobileNav: () => void }) {
           <UserMenu />
         </div>
       </div>
-    </header>
+    </AppTopbar>
   );
 }
 
@@ -234,9 +174,9 @@ export function Shell({ experience }: { experience: 'admin' | 'portal' }) {
 
   return (
     <TooltipProvider delayDuration={220} skipDelayDuration={400}>
-      <div className={cn('flex h-full w-full overflow-hidden bg-canvas', experience === 'admin' && 'ops-shell')}>
+      <AppShellFrame className={cn(experience === 'admin' && 'ops-shell')}>
         <div className="hidden lg:block">
-          {experience === 'admin' ? <AdminSidebar badges={badges} collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} /> : <Rail groups={groups} badges={badges} activeId={activeId} collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />}
+          {experience === 'admin' ? <AdminSidebar badges={badges} collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} /> : <WorkspaceSidebar groups={groups} badges={badges} activeId={activeId} collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} header={<Brand collapsed={collapsed} />} />}
         </div>
 
         {experience === 'admin' && (
@@ -264,7 +204,7 @@ export function Shell({ experience }: { experience: 'admin' | 'portal' }) {
           <div className="fixed inset-0 z-[70] lg:hidden">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] animate-[fade-in_0.16s_ease-out]" onClick={() => setMobileNav(false)} />
             <div className="absolute inset-y-0 left-0 animate-[slide-in_0.24s_cubic-bezier(0.22,1,0.36,1)]">
-              <Rail groups={groups} badges={badges} activeId={activeId} collapsed={false} onToggle={() => setMobileNav(false)} onNavigate={() => setMobileNav(false)} mobile />
+              <WorkspaceSidebar groups={groups} badges={badges} activeId={activeId} collapsed={false} onToggle={() => setMobileNav(false)} onNavigate={() => setMobileNav(false)} mobile header={<Brand collapsed={false} />} />
             </div>
             <button onClick={() => setMobileNav(false)} className="absolute right-3 top-3 rounded-lg bg-surface-raised p-2 text-muted" aria-label="Close navigation">
               <X className="h-4 w-4" />
@@ -272,17 +212,15 @@ export function Shell({ experience }: { experience: 'admin' | 'portal' }) {
           </div>
         )}
 
-        <div className="flex min-w-0 flex-1 flex-col">
+        <AppShellColumn>
           <TopBar onOpenMobileNav={() => setMobileNav(true)} />
-          <main id="main-scroll" className="min-h-0 flex-1 overflow-y-auto">
-            <Outlet />
-          </main>
-        </div>
+          <AppMain><Outlet /></AppMain>
+        </AppShellColumn>
 
         <CommandPalette />
         <Toaster />
         <IdleMonitor />
-      </div>
+      </AppShellFrame>
     </TooltipProvider>
   );
 }

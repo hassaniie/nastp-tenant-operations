@@ -8,21 +8,24 @@
 
 import { Outlet } from 'react-router-dom';
 import { Moon, Sun, Wrench } from 'lucide-react';
-import { Button } from '../components/ui/button';
+import { IconButton } from '../components/ui/button';
 import { IconBox } from '../components/ui/icon-box';
 import { Tooltip, TooltipProvider } from '../components/ui/tooltip';
 import { Toaster } from '../components/ui/toast';
 import { useSession } from '../store/session';
 import { UserMenu } from './UserMenu';
 import { IdleMonitor } from './IdleMonitor';
+import { AppMain, AppShellColumn, AppShellFrame, AppTopbar } from '../components/layout/app-shell';
+import { Breadcrumb } from '../components/patterns/breadcrumb';
 
 export function TechShell() {
   const { prefs, setPrefs } = useSession();
 
   return (
     <TooltipProvider>
-      <div className="flex h-screen w-full flex-col bg-canvas text-foreground">
-        <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background px-4 lg:px-6">
+      <AppShellFrame viewport>
+        <AppShellColumn>
+        <AppTopbar>
           <div className="flex items-center gap-2.5">
             <IconBox icon={Wrench} tone="service" size="sm" />
             <div className="leading-tight">
@@ -31,29 +34,29 @@ export function TechShell() {
             </div>
           </div>
 
-          <div className="flex-1" />
+          <Breadcrumb className="hidden flex-1 sm:block" items={[{ label: 'Service workspace' }, { label: 'My jobs' }]} />
+          <div className="flex-1 sm:hidden" />
 
           <Tooltip content={`Switch to ${prefs.theme === 'dark' ? 'light' : 'dark'} theme`}>
-            <Button
+            <IconButton
               variant="ghost"
-              size="icon-sm"
+              size="sm"
               onClick={() => setPrefs({ theme: prefs.theme === 'dark' ? 'light' : 'dark' })}
-              aria-label="Toggle theme"
+              label="Toggle theme"
             >
               {prefs.theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </Button>
+            </IconButton>
           </Tooltip>
 
           <UserMenu />
-        </header>
+        </AppTopbar>
 
-        <main id="main-scroll" className="min-h-0 flex-1 overflow-y-auto">
-          <Outlet />
-        </main>
+        <AppMain><Outlet /></AppMain>
 
         <Toaster />
         <IdleMonitor />
-      </div>
+        </AppShellColumn>
+      </AppShellFrame>
     </TooltipProvider>
   );
 }
