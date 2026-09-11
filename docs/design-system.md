@@ -12,7 +12,7 @@ The dependency direction is tokens → primitives → product patterns → layou
 | Shared styling | `src/tenant/styles/components.css` | Canonical component and layout recipes. `admin-workspace.css` retains the approved shell and Overview composition. |
 | Primitives | `src/tenant/components/ui/` | Reusable controls, overlays, feedback primitives, surfaces and table families. A primitive does not know a NASTP lifecycle. |
 | Product patterns | `src/tenant/components/patterns/` | NASTP metrics, headers, statuses, timelines, steps, feedback compositions and charts. |
-| Layout | `src/tenant/components/layout/` | Page, metric band, workspace section/split, toolbar, detail and action structures. |
+| Layout | `src/tenant/components/layout/` | App shell, auth workspace, Page, metric band, workspace section/split, toolbar, detail and action structures. |
 | Business meaning | `src/tenant/lib/meta.ts` | Lifecycle labels and semantic tones. Routes do not redefine status colors or labels. |
 | Screens | `src/tenant/routes/` | Compose canonical pieces while retaining data, permissions, navigation and mutations. |
 
@@ -58,8 +58,15 @@ The detailed composition contract is in `docs/page-layout-system.md`.
 - Operational Workspace: optional status strip, integrated filters and flat separated triage rows.
 - Setup Workspace: progress, structured content/context columns and predictable WorkspaceActions.
 - Detail Workspace: entity header, status/metadata, tabs or structured DetailSections and contextual actions.
+- Auth Workspace: a product-context rail and focused form column shared by login, invitation acceptance and password reset.
 
 Page, WorkspaceSection, WorkspaceSplit, MetricBand, ListToolbar, DetailSection, FormActions and WorkspaceActions own shared spatial decisions. Primary sections use aligned edges and dividers; radius is reserved for controls, overlays and purposeful secondary panels.
+
+## Shared shells and experience composition
+
+`AppShellFrame`, `AppShellColumn`, `AppTopbar` and `AppMain` own the common shell geometry, surfaces, scroll behavior and responsive foundation. Admin composes the deeper `AdminSidebar`; Tenant composes the shallower `WorkspaceSidebar`; Technician keeps a task-focused topbar. These are deliberate navigation differences on the same shell foundation. All three use the same tokens, focus states, profile/theme controls and content archetypes.
+
+Tenant Home and Energy use the Analytics Workspace; Tenant lists use the Data Workspace; service and visitor forms use the Setup Workspace; Organization uses the Detail Workspace. Technician Jobs uses the Operational Workspace and the same shared request drawer used by Admin and Tenant. Authentication routes compose `AuthWorkspace` and `AuthPanel` with canonical fields, buttons and feedback.
 
 ## State and accessibility conventions
 

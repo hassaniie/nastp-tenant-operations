@@ -96,7 +96,7 @@ function TopBar({ onOpenMobileNav }: { onOpenMobileNav: () => void }) {
   // the specific title.
   const title = match ? (match.nested && match.group.label ? match.group.label : match.leaf.label) : undefined;
   const adminBreadcrumb = (() => {
-    if (location.pathname === '/admin/design-system') return [{ label: 'Workspace', to: '/admin' }, { label: 'Design system' }];
+    if (import.meta.env.DEV && location.pathname === '/admin/design-system') return [{ label: 'Workspace', to: '/admin' }, { label: 'Design system' }];
     if (!match) return [{ label: 'Workspace', to: '/admin' }, { label: 'NASTP Admin' }];
     if (match.group.id === 'overview') return [{ label: 'Workspace', to: '/admin' }, { label: 'Dashboard' }];
     if (match.nested) return [{ label: 'Workspace', to: '/admin' }, { label: match.group.label ?? match.leaf.label }];

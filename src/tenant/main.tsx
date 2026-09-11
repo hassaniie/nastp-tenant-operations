@@ -65,8 +65,8 @@ const AdminUsers = lazy(() => import('./routes/admin/Users'));
 const AdminSecurity = lazy(() => import('./routes/admin/Security'));
 const Organization = lazy(() => import('./routes/portal/Organization'));
 const TechJobs = lazy(() => import('./routes/tech/Jobs'));
-// Vite eliminates the import and route from production builds. AdminLayout still authenticates development access.
-const DesignWorkbench = import.meta.env.DEV ? lazy(() => import('./dev/DesignWorkbench')) : null;
+// Vite eliminates this complete route module from production builds. AdminLayout still authenticates development access.
+const DevelopmentRoutes = import.meta.env.DEV ? lazy(() => import('./dev/DevelopmentRoutes')) : null;
 const NotFound = lazy(() => import('./routes/NotFound'));
 
 const L = ({ children }: { children: ReactNode }) => <Suspense fallback={<LoadingState label="Loading…" />}>{children}</Suspense>;
@@ -120,7 +120,7 @@ createRoot(document.getElementById('root')!).render(
           {/* -------------------------------------------------- Admin */}
           <Route element={<AdminLayout />}>
             <Route path="/admin" element={<L><AdminDashboard /></L>} />
-            {DesignWorkbench && <Route path="/admin/design-system" element={<L><DesignWorkbench /></L>} />}
+            {DevelopmentRoutes && <Route path="*" element={<L><DevelopmentRoutes /></L>} />}
 
             <Route path="/admin/tenants" element={<L><Tenants /></L>} />
             <Route path="/admin/tenants/new" element={<L><TenantOnboarding /></L>} />

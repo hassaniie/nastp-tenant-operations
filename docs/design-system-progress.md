@@ -91,7 +91,8 @@ See `page-layout-system.md` for the reusable composition rules and `page-layout-
 - [x] Auth Workspace and login/invite/reset migration
 - [x] Tenant Portal archetype migration
 - [x] Technician operational workspace migration
-- [ ] Workbench/docs and cross-experience verification
+- [x] Workbench/docs update
+- [x] Cross-experience verification
 
 Focused comparison: Admin already composes canonical workspace layouts. Tenant uses canonical controls but retains contained Page/Card composition and a shell-local rail. Technician uses canonical controls but retains a shell-local topbar and card queue. Auth uses canonical controls but retains centred card pages. The migration will replace those compositions without changing selectors, permissions, mutations, uploads, validation or lifecycle rules.
 
@@ -102,3 +103,5 @@ Auth phase complete: Login, password reset (request, invalid, completion and suc
 Tenant phase complete: Home, Organization, Energy, Service Center and Visitors now use the shared workspace page archetypes. Metric summaries use MetricBand, primary charts/forms/tables use WorkspaceSection and WorkspaceSplit, form actions use WorkspaceActions, and operational lists use flat divided rows. Existing tenant-scoped data, drafts, dialogs, drawers and mutations are unchanged. Typecheck and production build pass.
 
 Technician phase complete: the Jobs route now composes the shared Operational Workspace, MetricBand, WorkspaceSection and flat operational rows. The task-focused shell and shared ServiceRequestDrawer preserve assignment, start-work, notes, attachments, resolution and status-transition behavior. Typecheck and production build pass.
+
+Cross-experience verification complete: the shared Notifications route also moved to the Operational Workspace; the workbench includes the Auth pattern; production routing isolates the workbench module completely. Typecheck, production build, tests and the production-boundary check pass. Browser evidence for Admin, Tenant, Technician and Auth is recorded in `cross-experience-verification.md` and `artifacts/cross-experience/`.

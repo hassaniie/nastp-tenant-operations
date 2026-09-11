@@ -5,12 +5,12 @@
  * tenant-isolated.
  */
 
-import { Bell, CheckCheck, Filter } from 'lucide-react';
+import { Bell, CheckCheck } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Page } from '../components/layout/page';
-import { StatGrid } from '../components/layout/content-grid';
-import { Card, CardBody, CardHeader } from '../components/ui/card';
+import { MetricBand } from '../components/layout/metric-band';
+import { WorkspaceSection } from '../components/layout/workspace-section';
 import { PageHeader } from '../components/patterns/page-header';
 import { StatCard } from '../components/patterns/stat-card';
 import { Button } from '../components/ui/button';
@@ -35,28 +35,26 @@ export function NotificationsPage({ scope }: { scope: 'admin' | 'tenant' }) {
   const byDomain = (d: NotificationDomain) => all.filter((n) => n.domain === d).length;
 
   return (
-    <Page>
+    <Page workspace archetype="operational" className={scope === 'tenant' ? 'ds-portal-workspace' : 'ops-dashboard'}>
       <PageHeader
         title="Notifications"
         description={scope === 'tenant' ? 'Updates for your organization across energy, visitors and service.' : 'Ecosystem notifications across every tenant.'}
         actions={unread > 0 ? <Button variant="secondary" size="sm" onClick={() => simulation.markAllNotificationsRead(scope === 'tenant' ? tenantId : undefined)}><CheckCheck className="h-4 w-4" />Mark all read</Button> : undefined}
       />
 
-      <StatGrid cols={4}>
-        <StatCard label="Unread" value={num(unread)} icon={Bell} tone={unread ? 'primary' : 'success'} />
-        <StatCard label="Energy" value={num(byDomain('energy'))} icon={MODULE_ICON.energy} tone="energy" />
-        <StatCard label="Visitors" value={num(byDomain('visitor'))} icon={MODULE_ICON.visitor} tone="visitor" />
-        <StatCard label="Service" value={num(byDomain('service'))} icon={MODULE_ICON.service} tone="service" />
-      </StatGrid>
+      <MetricBand columns={4}>
+        <StatCard variant="inline" label="Unread" value={num(unread)} icon={Bell} tone={unread ? 'primary' : 'success'} />
+        <StatCard variant="inline" label="Energy" value={num(byDomain('energy'))} icon={MODULE_ICON.energy} tone="energy" />
+        <StatCard variant="inline" label="Visitors" value={num(byDomain('visitor'))} icon={MODULE_ICON.visitor} tone="visitor" />
+        <StatCard variant="inline" label="Service" value={num(byDomain('service'))} icon={MODULE_ICON.service} tone="service" />
+      </MetricBand>
 
-      <Card>
-        <CardHeader
+      <WorkspaceSection inset={false}
           title="All Notifications"
-          subtitle={`${shown.length} shown`}
-          icon={<IconBox icon={Filter} tone="primary" size="sm" />}
+          description={`${shown.length} shown`}
           actions={<Segmented value={domain} onChange={setDomain} options={[{ value: 'all', label: 'All' }, { value: 'energy', label: 'Energy' }, { value: 'visitor', label: 'Visitors' }, { value: 'service', label: 'Service' }]} size="sm" />}
-        />
-        <CardBody className="flex flex-col gap-1.5">
+      >
+        <div className="ds-flat-list">
           {shown.length === 0 ? (
             <EmptyState title="You're all caught up" description="No notifications for this filter." icon={<Bell className="h-5 w-5" />} />
           ) : (
@@ -64,7 +62,7 @@ export function NotificationsPage({ scope }: { scope: 'admin' | 'tenant' }) {
               <button
                 key={n.id}
                 onClick={() => { simulation.markNotificationRead(n.id); if (n.href) navigate(n.href.replace('/admin', scope === 'tenant' ? '/portal' : '/admin').replace('/portal/energy/alerts', '/portal/energy/alerts')); }}
-                className={cn('flex items-start gap-3 rounded-xl border p-3.5 text-left transition-colors', n.read ? 'border-border-subtle bg-surface hover:border-border-strong' : 'border-primary/20 bg-primary-muted/20 hover:border-primary/40')}
+                className={cn('ds-operational-row w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-inset', !n.read && 'bg-primary-muted/20')}
               >
                 <IconBox icon={MODULE_ICON[n.domain]} tone={MODULE_TONE[n.domain]} size="sm" />
                 <div className="min-w-0 flex-1">
@@ -78,10 +76,10 @@ export function NotificationsPage({ scope }: { scope: 'admin' | 'tenant' }) {
               </button>
             ))
           )}
-        </CardBody>
-      </Card>
+        </div>
+      </WorkspaceSection>
 
-      <p className="text-center text-[11px] text-subtle">In-app notifications today. Email, SMS and push channels are architecturally supported and can be enabled per category.</p>
+      <p className="ds-workspace-note">In-app notifications today. Email, SMS and push channels are architecturally supported and can be enabled per category.</p>
     </Page>
   );
 }
